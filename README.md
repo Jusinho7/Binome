@@ -1,111 +1,116 @@
-# 📋 Push_swap — Plan d'implémentation
+*This project has been created as part of the 42 curriculum by srasolov.*
 
 ---
 
-## 🗺️ Flux général
+# ft_printf
 
-```
-argc, argv
-    │
-    ▼
-ft_atol(argv[i])        → convertir string en long
-    │
-    ├── overflow ?       → Error + exit
-    │
-    ▼
-check_doublon(nums, i)  → vérifier les doublons
-    │
-    ├── doublon ?        → Error + exit
-    │
-    ▼
-ft_new_node(value)      → créer un noeud
-    │
-    ▼
-add_back(&stack_a, node) → ajouter dans la pile A
-    │
-    ▼
-sort / affichage        → trier et afficher les moves
-```
+## Description
+
+`ft_printf` is a partial re-implementation of the standard C `printf` function.
+The goal of this project is to understand how variadic functions work in C, and to practice parsing a format string to produce formatted output — without relying on any standard output functions other than `write`.
+
+The function mimics the behavior of `printf` for a defined set of conversion specifiers, and returns the total number of characters written, just like the original.
 
 ---
 
-## ✅ Déjà implémenté
+## Instructions
 
-### 1. Lecture des arguments
-```c
-// argc = nombre d'arguments
-// argv = tableau de strings
-// argv[0] = "./push_swap"  → on skip
-// argv[1..n] = les nombres → on traite
+### Compilation
+
+To build the library:
+
+```bash
+make
 ```
 
-### 2. Conversion string → nombre (`ft_atol`)
-```c
-// argv[i] = "42"  (string)
-//              ↓
-// ft_atol  →  42  (long)
-// Pourquoi long ? Pour détecter l'overflow avant de caster en int
+This produces `libftprintf.a`.
+
+To compile your project with it:
+
+```bash
+cc -Wall -Wextra -Werror main.c libftprintf.a -o my_program
 ```
 
-### 3. Vérification des doublons (`check_doublon`)
+### Usage
+
+Include the header in your source file:
+
 ```c
-// argv = ["3", "1", "3"]
-//                    ↑
-//              doublon détecté → Error
-//
-// Attention : on convertit D'ABORD en int
-// car "1" et "01" sont des doublons mais pas en string !
+#include "ft_printf.h"
+```
+
+Then call `ft_printf` just like the standard `printf`:
+
+```c
+ft_printf("Hello, %s! You are %d years old.\n", "srasolov", 21);
+ft_printf("Pointer: %p | Hex: %x\n", (void *)ptr, 255);
+ft_printf("Percent sign: %%\n");
 ```
 
 ---
 
-## 🔧 À faire
+## Supported Conversions
 
-### 4. Création d'un noeud (`ft_new_node`)
-```c
-// Pour chaque nombre valide → créer un noeud
-// node → [ 42 | NULL ]
-```
+| Specifier | Description                              |
+|-----------|------------------------------------------|
+| `%c`      | Single character                         |
+| `%s`      | String                                   |
+| `%p`      | Pointer address (hexadecimal)            |
+| `%d`      | Decimal integer                          |
+| `%i`      | Integer (base 10)                        |
+| `%u`      | Unsigned decimal integer                 |
+| `%x`      | Hexadecimal integer (lowercase)          |
+| `%X`      | Hexadecimal integer (uppercase)          |
+| `%%`      | Literal percent sign                     |
 
-### 5. Ajout dans la pile A (`add_back`)
-```c
-// Ajouter chaque noeud à la FIN de la pile A
-// pour conserver l'ordre des arguments
-//
-// argv = [3, 1, 4, 2]
-//              ↓
-// A → [3] → [1] → [4] → [2] ✅
-```
-
-### 6. Tri (`sort`)
-```c
-// ≤ 3 éléments  → sort_small (cas hardcodés)
-// ≤ 5 éléments  → sort_five  (pb pb → sort3 → pa pa)
-// > 5 éléments  → sort_big   (algorithme de coût)
-```
-
-### 7. Affichage des moves
-```c
-// Chaque opération affiche son nom sur stdout
-// ex: "pb\n", "ra\n", "sa\n"...
-//
-// $ ./push_swap 3 1 4 2
-// pb
-// ra
-// pa
-// sa
-```
+ Flags (`-`, `0`, `.`, `*`, `#`, `+`, space) are not supported in this version.
 
 ---
 
-## 📊 Résumé
+## Resources
 
-| Étape | Fonction | Status |
-|-------|----------|--------|
-| Lire les arguments | `argc, argv` | ✅ |
-| Convertir en nombre | `ft_atol` | ✅ |
-| Vérifier doublons | `check_doublon` | ✅ |
-| Créer un noeud | `ft_new_node` | 🔧 À faire |
-| Remplir la pile A | `add_back` | 🔧 À faire |
-| Trier | `sort_small / sort_big` | 🔧 À faire |
-| Afficher les moves | `write` dans chaque op | 🔧 À faire |
+- Linux man page — printf(3)
+- cppreference — printf : https://en.cppreference.com/w/c/io/fprintf
+- cppreference — va_list / stdarg.h : https://en.cppreference.com/w/c/variadic.html
+- codequoi — file : https://www.codequoi.com/manipuler-un-fichier-a-laide-de-son-descripteur-en-c
+
+---
+
+## Algorithm
+
+`ft_printf` works in two steps.
+
+**1. Parsing the format string — `ft_printf`**
+
+The function iterates over the format string character by character. When it encounters a `%` followed by another character, it moves to the next character and passes it to `set_format` for dispatch. Otherwise, it prints the character as-is using `ft_putchar`. A running `count` accumulates the number of characters written and is returned at the end.
+
+**2. Dispatching the specifier — `set_format`**
+
+`set_format` receives the character immediately after `%` and a `va_list` to retrieve the corresponding argument. It maps each specifier to a dedicated output function:
+
+| Specifier | Function called | Notes |
+|-----------|----------------|-------|
+| `%c` | `ft_putchar` | Argument cast to `int` (C variadic promotion) |
+| `%s` | `ft_putstr` | | 
+| `%p` | `ft_putptr` | Receives a `void *` |
+| `%d`, `%i` | `ft_putnbr` | Signed integer |
+| `%u` | `ft_putunsigned` | Unsigned integer |
+| `%x` | `ft_puthex` | Lowercase base 16 charset passed as argument |
+| `%X` | `ft_puthex` | Uppercase base 16 charset passed as argument |
+| `%%` | `write` | Directly writes a literal `%` |
+
+If the character after `%` does not match any specifier, `set_format` returns `0` and nothing is printed.
+
+---
+
+### AI Usage
+
+AI (Claude) was used during this project for the following purposes:
+
+- **Debugging & error correction** — understanding compiler errors (e.g., implicit function declarations, type mismatches) and identifying the root cause of unexpected behavior.
+
+- **Concept comprehension** — clarifying how variadic functions work (`va_list`, `va_start`, `va_arg`, `va_end`), and understanding the relationship between format string parsing and output formatting.
+
+---
+
+No AI was used to generate the actual implementation of the project.

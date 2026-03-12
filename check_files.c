@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 10:39:09 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/06 11:19:25 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/12 09:18:23 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ long	ft_atol(const char *nptr)
 	i = 0;
 	sign = 1;
 	result = 0;
-    if (!nptr)
-        return (0);
+	if (!nptr)
+		return (0);
 	while (nptr[i] == 32 || (nptr[i] >= 9 && nptr[i] <= 13))
 		i++;
 	if (nptr[i] == '-' || nptr[i] == '+')
@@ -44,20 +44,59 @@ long	ft_atol(const char *nptr)
 int check_doublon(int *num, int len)
 {
     int i;
-    int j;
 
     i = 0;
     while (i < len)
     {
-        j = i + 1;
-        while (j < len)
-        {
-            if (num[i] == num[j])
-                return (1);
-            j++;
-        }
+        if (num[i] == num[len])
+            return (0);
         i++;
     }
-    return (0);
+    return (1);
 }
 
+
+void    ft_print(t_list *stack, char *name)
+{
+    int i;
+
+    i = 0;
+    ft_printf("Stack %s: ", name);
+    while (stack)
+    {
+        ft_printf("[%d]", stack->value);
+        stack = stack->next;
+        i++;
+    }
+    ft_printf("\n");
+}
+
+int	count_arg(char **args)
+{
+	int	len;
+
+	len = 0;
+	while (args[len])
+		len++;
+	return (len);
+}
+
+int	ft_isnumber(char *str)
+{
+	int	i;
+
+	i = 0;	
+	while (str[i] == 32 || (str[i] >= 9 && str[i] <= 13))
+		i++;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	if (!str[i])
+		return (0);
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}

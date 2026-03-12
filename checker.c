@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/08 03:59:29 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/08 16:08:24 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/12 09:00:42 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static void	ft_check(t_list **stack_a, char **argv, int *num, int i)
 	long	val;
 	t_list	*node;
 
-	if (!ft_isdigit(argv[i]))
+	if (!ft_isnumber(argv[i]))
 		ft_error(stack_a);
 	val = ft_atol(argv[i]);
 	if (val > INT_MAX || val < INT_MIN)
@@ -35,15 +35,19 @@ void    ft_parse(t_list **stack_a, char **argv)
 {
     int i;
     int size;
+    int *num;
 
     size = count_arg(argv);
-    int num[size];
+    num = malloc(sizeof(int) * size);
+    if (!num)
+        ft_error(stack_a);
     i = 0;
     while (argv[i])
     {
         ft_check(stack_a, argv, num, i);
         i++; 
     }
+    free(num);
 }
 
 static int is_space(char c)
@@ -57,12 +61,12 @@ int is_blank(char *str)
 {
     int i;
 
-    if (!str || str[0])
+    if (!str || str[0] == '\0')
         return (1);
     i =  0;
     while (str[i])
     {
-        if (is_space(str[i]))
+        if (!is_space(str[i]))
             return (0);
         i++;
     }

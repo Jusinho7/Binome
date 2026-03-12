@@ -1,26 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putstr.c                                        :+:      :+:    :+:   */
+/*   ft_printf.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/14 16:23:10 by srasolov          #+#    #+#             */
-/*   Updated: 2026/02/14 16:26:59 by srasolov         ###   ########.fr       */
+/*   Created: 2026/02/14 16:13:32 by srasolov          #+#    #+#             */
+/*   Updated: 2026/02/18 23:35:28 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#ifndef FT_PRINTF_H
+# define FT_PRINTF_H
 
-int ft_putstr(char *str)
-{
-    int i;
+# include <stdarg.h>
+# include <unistd.h>
 
-    i = 0;
-    while (str[i])
-    {
-        ft_putchar(str[i]);
-        i++;
-    }
-    return (i);
-}
+int	ft_printf(const char *format, ...);
+int	ft_putchar(int c);
+int	ft_putstr(char *str);
+int	ft_putptr(void *ptr);
+int	ft_putnbr(int num);
+int	ft_putunsigned(unsigned int num);
+int	ft_puthex(unsigned int num, char *base);
+
+#endif

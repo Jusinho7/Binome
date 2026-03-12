@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 04:22:05 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/06 10:49:46 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/12 09:08:40 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,5 +48,21 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 	last->next = new;
 }
 
+void    ft_error(t_list **stack)
+{
+    ft_free(stack);
+    write(2, "Error\n", 6);
+    exit (1);
+}
 
+void    ft_free(t_list **stack)
+{
+    t_list *tmp;
 
+    while (*stack)
+    {
+        tmp = (*stack)->next;
+        free(*stack);
+        *stack = tmp;
+    }    
+}

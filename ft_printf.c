@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   set_format.c                                       :+:      :+:    :+:   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/14 16:19:09 by srasolov          #+#    #+#             */
-/*   Updated: 2026/02/14 16:19:39 by srasolov         ###   ########.fr       */
+/*   Created: 2026/02/14 15:33:36 by srasolov          #+#    #+#             */
+/*   Updated: 2026/03/10 20:10:04 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-int	set_format(char set_type, va_list args)
+static int	set_format(char set_type, va_list args)
 {
 	if (set_type == 'c')
 		return (ft_putchar(va_arg(args, int)));
@@ -31,4 +31,28 @@ int	set_format(char set_type, va_list args)
 	else if (set_type == '%')
 		return (write(1, "%", 1));
 	return (0);
+}
+
+int	ft_printf(const char *format, ...)
+{
+	va_list	args;
+	int		count;
+	int		i;
+
+	i = 0;
+	count = 0;
+	va_start(args, format);
+	while (format[i])
+	{
+		if (format[i] == '%' && format[i + 1])
+		{
+			i++;
+			count += set_format(format[i], args);
+		}
+		else if (format[i] != '%')
+			count += ft_putchar(format[i]);
+		i++;
+	}
+	va_end(args);
+	return (count);
 }
