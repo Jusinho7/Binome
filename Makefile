@@ -6,7 +6,7 @@
 #    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/12 09:24:52 by srasolov          #+#    #+#              #
-#    Updated: 2026/03/12 09:24:55 by srasolov         ###   ########.fr        #
+#    Updated: 2026/03/16 11:06:24 by srasolov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,9 @@ SRCS =  main.c \
         ft_putnbr.c \
         ft_puthex.c \
         ft_putptr.c \
-        ft_putunsigned.c
+        ft_putunsigned.c\
+        ft_strcmp.c \
+        check_flags.c
 
 OBJS = $(SRCS:.c=.o)
 

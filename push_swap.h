@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/12 09:16:56 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/16 11:05:21 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <limits.h>
+# include <stddef.h>
 # include "ft_printf.h"
 
 typedef struct  s_list
@@ -23,6 +24,14 @@ typedef struct  s_list
     int value;
     struct s_list  *next;
 }   t_list;
+
+typedef enum    s_algo
+{
+    ADAPTIVE,
+    SIMPLE,
+    MEDIUM,
+    COMPLEX
+} t_algo;
 
 t_list *ft_lst_last(t_list *lst);
 void    reverse_a(t_list **stack_a);
@@ -52,5 +61,7 @@ void    ft_error(t_list **stack);
 void    ft_free(t_list **stack);
 
 void    ft_print(t_list *stack, char *name);
+int ft_strcmp(const char *s1, const char *s2);
+t_algo  check_flag(char *arg);
 
 #endif
