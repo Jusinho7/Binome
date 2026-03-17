@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/17 10:26:35 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/17 13:44:05 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,5 @@ t_algo  detect_algo(t_list *stack);
 
 void sort(t_list **stack_a, t_algo algo);
 void    sort_simple(t_list **stack_a, t_list **stack_b);
-
 
 #endif
