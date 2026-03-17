@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 07:02:27 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/16 12:22:35 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/17 10:17:08 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     else
         args = argv + 1;
     ft_parse(&stack_a, args);
-    //sort(&stack_a, algo);
+    sort(&stack_a, algo);
     ft_free(&stack_a);
     if (split)
         ft_free_split(args);

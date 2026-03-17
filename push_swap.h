@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/16 11:05:21 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/17 10:26:35 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,14 @@ void    ft_free(t_list **stack);
 
 void    ft_print(t_list *stack, char *name);
 int ft_strcmp(const char *s1, const char *s2);
+
 t_algo  check_flag(char *arg);
+int	ft_lstsize(t_list *lst);
+int check_disorder(t_list *stack);
+t_algo  detect_algo(t_list *stack);
+
+void sort(t_list **stack_a, t_algo algo);
+void    sort_simple(t_list **stack_a, t_list **stack_b);
+
 
 #endif
