@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/21 18:46:21 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/19 15:25:52 by srasolov         ###   ########.fr       */
+/*   Created: 2026/03/19 15:41:25 by srasolov          #+#    #+#             */
+/*   Updated: 2026/03/19 16:15:32 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*red_line(int fd, char *content)
 {
@@ -65,17 +65,17 @@ char	*set_line(char *content)
 	return (line);
 }
 
-char	*get_next_line(int fd)
+char	*get_next_line_bonus(int fd)
 {
 	char		*line;
-	static char	*content;
+	static char	*content[1024];
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (0);
-	content = red_line(fd, content);
-	if (!content)
+	content[fd] = red_line(fd, content[fd]);
+	if (!content[fd])
 		return (0);
-	line = set_line(content);
-	content = ft_new_line(content);
+	line = set_line(content[fd]);
+	content[fd] = ft_new_line(content[fd]);
 	return (line);
 }
