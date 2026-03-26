@@ -69,7 +69,7 @@ t_algo  detect_algo(t_list *stack)
     n = ft_lstsize(stack);
     inv = check_disorder(stack);
     max = (n * (n - 1)) / 2;  
-    if (inv < max * 0.1)       
+    if (inv < max * 0.2)       
         return (SIMPLE);
     else if (inv < max * 0.5)  
         return (MEDIUM);

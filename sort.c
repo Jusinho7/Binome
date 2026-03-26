@@ -21,8 +21,8 @@ void    sort(t_list **stack_a, t_algo algo)
         algo = detect_algo(*stack_a);
     if (algo == SIMPLE)
         sort_simple(stack_a, &stack_b);
-    else if (algo == MEDIUM)
-        sort_medium(stack_a, &stack_b);
-    else if (algo == COMPLEX)
-        sort_complex(stack_a, &stack_b);
+    // else if (algo == MEDIUM)
+    //     sort_medium(stack_a, &stack_b);
+    // else if (algo == COMPLEX)
+    //     sort_complex(stack_a, &stack_b);
 }
