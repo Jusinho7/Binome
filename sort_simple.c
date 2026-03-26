@@ -29,40 +29,31 @@ static int  check_pos(t_list *stack_b, int val)
     return (pos);
 }
 
-static void to_b(t_list **stack_b, int pos)
+static void to_b(t_list **stack_b, t_list **stack_a)
 {
-    int size;
+    int pos;
+    int i;
 
-    size = ft_lstsize(*stack_b);
-    if (pos <= size / 2)
-        while (pos > 0)
-        {
-            rotate_b(stack_b);
-            pos--;
-        }
-    else
+    pos = check_pos(*stack_b, (*stack_a)->value);
+    i = pos;
+    while (i > 0)
     {
-        pos = size - pos;
-        while (pos > 0)
-        {
-            reverse_b(stack_b);
-            pos--;
-        }   
+        rotate_b(stack_b);
+        i--;
+    }
+    push_b(stack_a, stack_b);
+    i = pos;
+    while (i > 0)
+    {
+        reverse_b(stack_b);
+        i--;
     }
 }
 
 void    sort_simple(t_list **stack_a, t_list **stack_b)
 {
-    int pos;
-
-    while (ft_lstsize(*stack_a) > 2)
-    {
-        pos = check_pos(*stack_b, (*stack_a)->value);
-        to_b(stack_b, pos);
-        push_b(stack_a, stack_b);
-    }
-    if ((*stack_a)->value > (*stack_a)->next->value)
-        swap_a(stack_a);
+    while (*stack_a)
+        to_b(stack_b, stack_a);
     while (*stack_b)
         push_a(stack_b, stack_a);
 }
