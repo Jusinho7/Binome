@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 10:39:09 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/12 09:18:23 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:45:22 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int check_doublon(int *num, int len)
     }
     return (1);
 }
-
 
 void    ft_print(t_list *stack, char *name)
 {

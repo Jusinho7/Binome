@@ -6,7 +6,7 @@
 #    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/12 09:24:52 by srasolov          #+#    #+#              #
-#    Updated: 2026/03/17 10:26:49 by srasolov         ###   ########.fr        #
+#    Updated: 2026/03/27 19:12:26 by srasolov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ SRCS =  main.c \
         ft_putunsigned.c\
         ft_strcmp.c \
         check_flag.c \
+        search_flag.c \
         sort.c \
         sort_simple.c 
 

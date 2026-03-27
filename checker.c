@@ -6,16 +6,16 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/08 03:59:29 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/16 12:25:46 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:35:41 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static void	ft_check(t_list **stack_a, char **argv, int *num, int i)
+static void ft_check(t_list **stack_a, char **argv, int *num, int i)
 {
-	long	val;
-	t_list	*node;
+	long    val;
+	t_list  *node;
 
 	if (!ft_isnumber(argv[i]))
 		ft_error(stack_a);
