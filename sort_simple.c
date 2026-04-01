@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sort_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/17 13:48:46 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/01 14:54:41 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

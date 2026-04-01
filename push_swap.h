@@ -72,5 +72,8 @@ t_algo  search_flag(int *argc, char **argv);
 
 void sort(t_list **stack_a, t_algo algo);
 void    sort_simple(t_list **stack_a, t_list **stack_b);
+void    sort_medium(t_list **stack_a, t_list **stack_b);
+int	get_max_pos(t_list *stack_b);
+void	max_to_top_b(t_list **stack_b);
 
 #endif

@@ -35,7 +35,9 @@ SRCS =  main.c \
         check_flag.c \
         search_flag.c \
         sort.c \
-        sort_simple.c 
+        sort_simple.c \
+        sort_medium.c \
+		sort_utils.c
 
 OBJS = $(SRCS:.c=.o)
 
