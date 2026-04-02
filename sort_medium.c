@@ -68,29 +68,29 @@ static void	rotate_ranks(int *ranks, int size_a)
 	ranks[size_a - 1] = tmp;
 }
 
-static void	to_b(t_list **stack_a, t_list **stack_b, t_chunk chunk)
+static void to_b(t_list **stack_a, t_list **stack_b, t_chunk *chunk)
 {
-	int rotated;
-	int size_a;
+    int rotated;
+    int size_a;
 
-	rotated = 0;
-	size_a = ft_lstsize(*stack_a);
-	while (*stack_a && rotated < size_a)
-	{
-		if (chunk.ranks[0] >= chunk.min && chunk.ranks[0] < chunk.max)
-		{
-			push_b(stack_a, stack_b);
-			chunk.ranks++;
-			size_a--;
-			rotated = 0;
-		}
-		else
-		{
-			rotate_a(stack_a);
-			rotate_ranks(chunk.ranks, size_a);
-			rotated++;
-		}
-	}
+    rotated = 0;
+    size_a = ft_lstsize(*stack_a);
+    while (*stack_a && rotated < size_a)
+    {
+        if (chunk->ranks[0] >= chunk->min && chunk->ranks[0] < chunk->max)
+        {
+            push_b(stack_a, stack_b);
+            chunk->ranks++;
+            size_a--;
+            rotated = 0;
+        }
+        else
+        {
+            rotate_a(stack_a);
+            rotate_ranks(chunk->ranks, size_a);
+            rotated++;
+        }
+    }
 }
 
 void	sort_medium(t_list **stack_a, t_list **stack_b)
@@ -108,7 +108,7 @@ void	sort_medium(t_list **stack_a, t_list **stack_b)
 	chunk.max = chunk.min + chunk_size;
 	while (chunk.min < size_a)
 	{
-		to_b(stack_a, stack_b, chunk);
+		to_b(stack_a, stack_b, &chunk);
 		chunk.min += chunk_size;
 		chunk.max = chunk.min + chunk_size;
 	}
