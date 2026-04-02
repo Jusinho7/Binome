@@ -37,6 +37,7 @@ SRCS =  main.c \
         sort.c \
         sort_simple.c \
         sort_medium.c \
+        sort_complex.c \
 		sort_utils.c
 
 OBJS = $(SRCS:.c=.o)

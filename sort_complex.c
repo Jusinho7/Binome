@@ -12,116 +12,61 @@
 
 #include "push_swap.h"
 
-#include "push_swap.h"
-
-static int	get_max_bits(t_list *stack)
+static int	get_max_bits(int max)
 {
-	int		max;
-	int		bits;
+	int	bits;
 
-	max = stack->value;
-	while (stack)
-	{
-		if (stack->value > max)
-			max = stack->value;
-		stack = stack->next;
-	}
 	bits = 0;
-	while (max >> bits)
+	while ((max >> bits) != 0)
 		bits++;
 	return (bits);
 }
 
-static void	radix_pass(t_list **a, t_list **b, int bit)
+static void	radix_pass(t_list **stack_a, t_list **stack_b, int bit, int size)
 {
-	int		size;
-	int		i;
+	int	i;
 
-	size = ft_lstsize(*a);
 	i = 0;
 	while (i < size)
 	{
-		if ((((*a)->value >> bit) & 1) == 0)
-			push_b(a, b);
+		if ((((*stack_a)->value >> bit) & 1) == 0)
+			push_b(stack_a, stack_b);
 		else
-			rotate_a(a);
+			rotate_a(stack_a);
 		i++;
 	}
-	while (*b)
-		push_a(b, a);
 }
 
-static void	normalize_stack(t_list **stack)
+static void	radix_sort(t_list **stack_a, t_list **stack_b, int bits, int size)
 {
-	int		size;
-	int		*vals;
-	int		i;
-	int		j;
-	int		tmp;
+	int	bit;
 
-	size = ft_lstsize(*stack);
-	vals = malloc(size * sizeof(int));
-	if (!vals)
-		return ;
-	i = 0;
-	while (i < size)
-	{
-		vals[i] = (*stack)->value;
-		*stack = (*stack)->next;
-		i++;
-	}
-	i = 0;
-	while (i < size - 1)
-	{
-		j = 0;
-		while (j < size - i - 1)
-		{
-			if (vals[j] > vals[j + 1])
-			{
-				tmp = vals[j];
-				vals[j] = vals[j + 1];
-				vals[j + 1] = tmp;
-			}
-			j++;
-		}
-		i++;
-	}
-	i = 0;
-	while (i < size)
-	{
-		reverse_a(stack);
-		i++;
-	}
-	i = 0;
-	while (i < size)
-	{
-		j = 0;
-		while (j < size)
-		{
-			if ((*stack)->value == vals[j])
-			{
-				(*stack)->value = j;
-				break ;
-			}
-			j++;
-		}
-		*stack = (*stack)->next;
-		i++;
-	}
-	free(vals);
-}
-
-void	sort_complex(t_list **a, t_list **b)
-{
-	int		bits;
-	int		bit;
-
-	normalize_stack(a);
-	bits = get_max_bits(*a);
 	bit = 0;
 	while (bit < bits)
 	{
-		radix_pass(a, b, bit);
+		radix_pass(stack_a, stack_b, bit, size);
+		while (*stack_b)
+			push_a(stack_b, stack_a);
 		bit++;
 	}
+}
+
+void	sort_complex(t_list **stack_a, t_list **stack_b)
+{
+	int	size;
+	int	min;
+	int	max;
+	int	bits;
+
+	size = ft_lstsize(*stack_a);
+	if (size <= 1)
+		return ;
+	min = get_min_value(*stack_a);
+	if (min < 0)
+		shift_values(*stack_a, -min);
+	max = get_max_value(*stack_a);
+	bits = get_max_bits(max);
+	radix_sort(stack_a, stack_b, bits, size);
+	if (min < 0)
+		shift_values(*stack_a, min);
 }

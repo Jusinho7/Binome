@@ -23,7 +23,7 @@ static void ft_check(t_list **stack_a, char **argv, int *num, int i)
 	if (val > INT_MAX || val < INT_MIN)
 		ft_error(stack_a);
 	num[i] = (int)val;
-	if (!check_doublon(num, i))
+	if (check_doublon(num, i))
 		ft_error(stack_a);
 	node = ft_new_node((int)val);
 	if (!node)

@@ -49,10 +49,10 @@ int check_doublon(int *num, int len)
     while (i < len)
     {
         if (num[i] == num[len])
-            return (0);
+            return (1);
         i++;
     }
-    return (1);
+    return (0);
 }
 
 void    ft_print(t_list *stack, char *name)

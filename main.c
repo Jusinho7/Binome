@@ -15,7 +15,6 @@
 int	main(int argc, char **argv)
 {
 	t_list	*stack_a;
-	t_list	*tmp;
 	char	**args;
 	int		split;
 	t_algo	algo;
@@ -36,14 +35,6 @@ int	main(int argc, char **argv)
 		args = argv + 1;
 	ft_parse(&stack_a, args);
 	sort(&stack_a, algo);
-	tmp = stack_a;
-	ft_printf("Stack a: ");
-	while (tmp)
-	{
-		ft_printf("[%d]", tmp->value);
-		tmp = tmp->next;
-	}
-	ft_printf("\n");
 	ft_free(&stack_a);
 	if (split)
 		ft_free_split(args);

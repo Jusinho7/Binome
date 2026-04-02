@@ -51,3 +51,47 @@ void	max_to_top_b(t_list **stack_b)
 			reverse_b(stack_b);
 	}
 }
+
+int	get_max_value(t_list *stack)
+{
+	int		max;
+	t_list	*current;
+
+	max = stack->value;
+	current = stack;
+	while (current)
+	{
+		if (current->value > max)
+			max = current->value;
+		current = current->next;
+	}
+	return (max);
+}
+
+int	get_min_value(t_list *stack)
+{
+	int		min;
+	t_list	*current;
+
+	min = stack->value;
+	current = stack;
+	while (current)
+	{
+		if (current->value < min)
+			min = current->value;
+		current = current->next;
+	}
+	return (min);
+}
+
+void	shift_values(t_list *stack, int offset)
+{
+	t_list	*current;
+
+	current = stack;
+	while (current)
+	{
+		current->value = current->value + offset;
+		current = current->next;
+	}
+}

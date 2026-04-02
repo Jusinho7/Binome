@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_flag.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/16 11:04:53 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/17 10:07:55 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/02 16:20:57 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
