@@ -34,6 +34,13 @@ typedef enum    s_algo
     COMPLEX
 } t_algo;
 
+typedef struct s_chunk
+{
+    int *ranks;
+    int min;
+    int max;
+}   t_chunk;
+
 t_list *ft_lst_last(t_list *lst);
 void    reverse_a(t_list **stack_a);
 void    reverse_b(t_list **stack_b);
