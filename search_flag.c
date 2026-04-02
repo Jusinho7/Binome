@@ -23,7 +23,7 @@ t_algo  search_flag(int *argc, char **argv)
     while (i < *argc)
     {
         result = check_flag(argv[i]);
-        if (result != ADAPTIVE || result == ADAPTIVE)
+        if (result != ADAPTIVE || ft_strcmp(argv[i], "--adaptive") == 0)
         {
             algo = result;
             while (i < *argc - 1)

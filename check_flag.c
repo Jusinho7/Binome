@@ -6,7 +6,7 @@
 /*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/16 11:04:53 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/02 16:20:57 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/02 21:25:20 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,20 @@ t_algo  detect_algo(t_list *stack)
         return (MEDIUM);
     else
         return (COMPLEX);
+}
+
+int	is_sorted(t_list *stack)
+{
+	t_list	*current;
+
+	if (!stack || !stack->next)
+		return (1);
+	current = stack;
+	while (current->next)
+	{
+		if (current->value > current->next->value)
+			return (0);
+		current = current->next;
+	}
+	return (1);
 }

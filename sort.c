@@ -6,17 +6,19 @@
 /*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:15:21 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/02 16:23:45 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/02 21:26:14 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void    sort(t_list **stack_a, t_algo algo)
+void sort(t_list **stack_a, t_algo algo)
 {
     t_list  *stack_b;
 
     stack_b = NULL;
+    if (is_sorted(*stack_a))
+        return ;
     if (algo == ADAPTIVE)
         algo = detect_algo(*stack_a);
     if (algo == SIMPLE)

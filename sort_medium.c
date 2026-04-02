@@ -82,7 +82,6 @@ static void to_b(t_list **stack_a, t_list **stack_b, t_chunk *chunk)
             push_b(stack_a, stack_b);
             chunk->ranks++;
             size_a--;
-            rotated = 0;
         }
         else
         {

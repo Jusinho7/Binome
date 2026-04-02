@@ -75,6 +75,7 @@ t_algo  check_flag(char *arg);
 int	ft_lstsize(t_list *lst);
 int check_disorder(t_list *stack);
 t_algo  detect_algo(t_list *stack);
+int	is_sorted(t_list *stack);
 t_algo  search_flag(int *argc, char **argv);
 
 void sort(t_list **stack_a, t_algo algo);
