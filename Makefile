@@ -31,6 +31,7 @@ SRCS =  main.c \
         ft_puthex.c \
         ft_putptr.c \
         ft_putunsigned.c\
+        bench.c \
         ft_strcmp.c \
         check_flag.c \
         search_flag.c \

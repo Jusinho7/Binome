@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "push_swap.h"
 
 static int	word_count(const char *s, char c)
@@ -85,24 +84,24 @@ char	**ft_split(char const *s, char c)
 	str = malloc((word_count(s, c) + 1) * sizeof(char *));
 	if (!str)
 		return (0);
-    i = 0;
+	i = 0;
 	ft_fill(str, s, c, i);
 	return (str);
 }
 
-void    ft_free_split(char **args)
+void	ft_free_split(char **args)
 {
-    int i;
+	int	i;
 
-    if (!args)
-        return ;
-    i = 0;
-    while (args[i])
-    {
-        free(args[i]);
-        args[i] = NULL;
-        i++;
-    }
-    free(args);
-    args = NULL;
+	if (!args)
+		return ;
+	i = 0;
+	while (args[i])
+	{
+		free(args[i]);
+		args[i] = NULL;
+		i++;
+	}
+	free(args);
+	args = NULL;
 }

@@ -15,8 +15,8 @@
 long	ft_atol(const char *nptr)
 {
 	long	result;
-	int	sign;
-	int	i;
+	int		sign;
+	int		i;
 
 	i = 0;
 	sign = 1;
@@ -34,40 +34,40 @@ long	ft_atol(const char *nptr)
 	while (nptr[i] >= '0' && nptr[i] <= '9')
 	{
 		result = (result * 10) + (nptr[i] - '0');
-        if (result * sign > (long)INT_MAX || result * sign < (long)INT_MIN)
-            return (result * sign);
+		if (result * sign > (long)INT_MAX || result * sign < (long)INT_MIN)
+			return (result * sign);
 		i++;
 	}
 	return (result * sign);
 }
 
-int check_doublon(int *num, int len)
+int	check_doublon(int *num, int len)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (i < len)
-    {
-        if (num[i] == num[len])
-            return (1);
-        i++;
-    }
-    return (0);
+	i = 0;
+	while (i < len)
+	{
+		if (num[i] == num[len])
+			return (1);
+		i++;
+	}
+	return (0);
 }
 
-void    ft_print(t_list *stack, char *name)
+void	ft_print(t_list *stack, char *name)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    ft_printf("Stack %s: ", name);
-    while (stack)
-    {
-        ft_printf("[%d]", stack->value);
-        stack = stack->next;
-        i++;
-    }
-    ft_printf("\n");
+	i = 0;
+	ft_printf("Stack %s: ", name);
+	while (stack)
+	{
+		ft_printf("[%d]", stack->value);
+		stack = stack->next;
+		i++;
+	}
+	ft_printf("\n");
 }
 
 int	count_arg(char **args)
@@ -84,7 +84,7 @@ int	ft_isnumber(char *str)
 {
 	int	i;
 
-	i = 0;	
+	i = 0;
 	while (str[i] == 32 || (str[i] >= 9 && str[i] <= 13))
 		i++;
 	if (str[i] == '-' || str[i] == '+')

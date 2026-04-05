@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sort_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/01 14:54:09 by frazanak          #+#    #+#             */
-/*   Updated: 2026/04/01 14:54:09 by frazanak         ###   ########.fr       */
+/*   Created: 2026/03/30 14:19:45 by frazanak          #+#    #+#             */
+/*   Updated: 2026/04/05 11:30:52 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 int	get_max_pos(t_list *stack_b)
 {
-	int		pos;
-	int		max_pos;
-	int		max_val;
+	int	pos;
+	int	max_pos;
+	int	max_val;
 
 	pos = 0;
 	max_pos = 0;
@@ -34,21 +34,21 @@ int	get_max_pos(t_list *stack_b)
 	return (max_pos);
 }
 
-void	max_to_top_b(t_list **stack_b)
+void	max_to_top_b(t_list **stack_b, t_options *opts)
 {
-	int		max_pos;
-	int		size;
+	int	max_pos;
+	int	size;
 
 	max_pos = get_max_pos(*stack_b);
 	size = ft_lstsize(*stack_b);
 	if (max_pos <= size / 2)
 		while (max_pos--)
-			rotate_b(stack_b);
+			rotate_b(stack_b, opts->bench_mode, &opts->counters);
 	else
 	{
 		max_pos = size - max_pos;
 		while (max_pos--)
-			reverse_b(stack_b);
+			reverse_b(stack_b, opts->bench_mode, &opts->counters);
 	}
 }
 

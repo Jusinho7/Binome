@@ -12,10 +12,10 @@
 
 #include "push_swap.h"
 
-static void ft_check(t_list **stack_a, char **argv, int *num, int i)
+static void	ft_check(t_list **stack_a, char **argv, int *num, int i)
 {
-	long    val;
-	t_list  *node;
+	long	val;
+	t_list	*node;
 
 	if (!ft_isnumber(argv[i]))
 		ft_error(stack_a);
@@ -31,44 +31,44 @@ static void ft_check(t_list **stack_a, char **argv, int *num, int i)
 	ft_lstadd_back(stack_a, node);
 }
 
-void    ft_parse(t_list **stack_a, char **argv)
+void	ft_parse(t_list **stack_a, char **argv)
 {
-    int i;
-    int size;
-    int *num;
+	int	i;
+	int	size;
+	int	*num;
 
-    size = count_arg(argv);
-    num = malloc(sizeof(int) * size);
-    if (!num)
-        ft_error(stack_a);
-    i = 0;
-    while (argv[i])
-    {
-        ft_check(stack_a, argv, num, i);
-        i++; 
-    }
-    free(num);
+	size = count_arg(argv);
+	num = malloc(sizeof(int) * size);
+	if (!num)
+		ft_error(stack_a);
+	i = 0;
+	while (argv[i])
+	{
+		ft_check(stack_a, argv, num, i);
+		i++;
+	}
+	free(num);
 }
 
-static int is_space(char c)
+static int	is_space(char c)
 {
-    if (c == 32 || (c >= 9 && c <= 13))
-        return (1);
-    return (0);
+	if (c == 32 || (c >= 9 && c <= 13))
+		return (1);
+	return (0);
 }
 
-int is_blank(char *str)
+int	is_blank(char *str)
 {
-    int i;
+	int	i;
 
-    if (!str || str[0] == '\0')
-        return (1);
-    i =  0;
-    while (str[i])
-    {
-        if (!is_space(str[i]))
-            return (0);
-        i++;
-    }
-    return (1);
+	if (!str || str[0] == '\0')
+		return (1);
+	i = 0;
+	while (str[i])
+	{
+		if (!is_space(str[i]))
+			return (0);
+		i++;
+	}
+	return (1);
 }

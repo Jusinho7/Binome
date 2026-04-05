@@ -6,36 +6,55 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 18:56:10 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:52:43 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/05 12:23:00 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-t_algo  search_flag(int *argc, char **argv)
+static void	shift_argv(int *argc, char **argv, int start)
 {
-    t_algo  algo;
-    t_algo  result;
-    int i;
+	while (start < *argc - 1)
+	{
+		argv[start] = argv[start + 1];
+		start++;
+	}
+	argv[*argc - 1] = NULL;
+	(*argc)--;
+}
 
-    algo = ADAPTIVE;
-    i = 1;
-    while (i < *argc)
-    {
-        result = check_flag(argv[i]);
-        if (result != ADAPTIVE || ft_strcmp(argv[i], "--adaptive") == 0)
-        {
-            algo = result;
-            while (i < *argc - 1)
-            {
-                argv[i] = argv[i + 1];
-                i++;
-            }
-            argv[*argc - 1] = NULL;
-            (*argc)--;
-            break;
-        }
-        i++;
-    }   
-    return (algo);
+static t_algo	handle_algo_flag(int *argc, char **argv, int i)
+{
+	t_algo	result;
+
+	result = check_flag(argv[i]);
+	if (result != ADAPTIVE || ft_strcmp(argv[i], "--adaptive") == 0)
+	{
+		shift_argv(argc, argv, i);
+		return (result);
+	}
+	return (ADAPTIVE);
+}
+
+t_algo	search_flag(int *argc, char **argv, int *bench_mode)
+{
+	t_algo	algo;
+	int		i;
+
+	algo = ADAPTIVE;
+	i = 1;
+	while (i < *argc)
+	{
+		if (ft_strcmp(argv[i], "--bench") == 0)
+		{
+			*bench_mode = 1;
+			shift_argv(argc, argv, i);
+			continue ;
+		}
+		algo = handle_algo_flag(argc, argv, i);
+		if (algo != ADAPTIVE)
+			break ;
+		i++;
+	}
+	return (algo);
 }

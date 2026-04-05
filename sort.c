@@ -3,28 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   sort.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:15:21 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/02 21:26:14 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/03 10:45:15 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void sort(t_list **stack_a, t_algo algo)
+void	sort(t_list **stack_a, t_algo algo, t_algo *used_algo, t_options *opts)
 {
-    t_list  *stack_b;
+	t_list	*stack_b;
 
-    stack_b = NULL;
-    if (is_sorted(*stack_a))
-        return ;
-    if (algo == ADAPTIVE)
-        algo = detect_algo(*stack_a);
-    if (algo == SIMPLE)
-        sort_simple(stack_a, &stack_b);
-    else if (algo == MEDIUM)
-        sort_medium(stack_a, &stack_b);
-    else if (algo == COMPLEX)
-        sort_complex(stack_a, &stack_b);
+	stack_b = NULL;
+	if (is_sorted(*stack_a))
+		return ;
+	*used_algo = algo;
+	if (algo == ADAPTIVE)
+		*used_algo = detect_algo(*stack_a);
+	if (*used_algo == SIMPLE)
+		sort_simple(stack_a, &stack_b, opts);
+	else if (*used_algo == MEDIUM)
+		sort_medium(stack_a, &stack_b, opts);
+	else if (*used_algo == COMPLEX)
+		sort_complex(stack_a, &stack_b, opts);
 }

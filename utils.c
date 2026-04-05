@@ -12,25 +12,25 @@
 
 #include "push_swap.h"
 
-t_list  *ft_new_node(int value)
+t_list	*ft_new_node(int value)
 {
-    t_list  *new_node;
+	t_list	*new_node;
 
-    new_node = (t_list *)malloc(sizeof(t_list));
-    if (!new_node)
-        return (0);
-    new_node->value = value;
-    new_node->next = NULL;
-    return (new_node);
+	new_node = (t_list *)malloc(sizeof(t_list));
+	if (!new_node)
+		return (0);
+	new_node->value = value;
+	new_node->next = NULL;
+	return (new_node);
 }
 
-t_list *ft_lst_last(t_list *lst)
+t_list	*ft_lst_last(t_list *lst)
 {
-    if (!lst)
-        return (0);
-    while (lst->next)
-        lst = lst->next;
-    return (lst);
+	if (!lst)
+		return (0);
+	while (lst->next)
+		lst = lst->next;
+	return (lst);
 }
 
 void	ft_lstadd_back(t_list **lst, t_list *new)
@@ -48,21 +48,21 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 	last->next = new;
 }
 
-void    ft_error(t_list **stack)
+void	ft_error(t_list **stack)
 {
-    ft_free(stack);
-    write(2, "Error\n", 6);
-    exit (1);
+	ft_free(stack);
+	write(2, "Error\n", 6);
+	exit(1);
 }
 
-void    ft_free(t_list **stack)
+void	ft_free(t_list **stack)
 {
-    t_list *tmp;
+	t_list	*tmp;
 
-    while (*stack)
-    {
-        tmp = (*stack)->next;
-        free(*stack);
-        *stack = tmp;
-    }    
+	while (*stack)
+	{
+		tmp = (*stack)->next;
+		free(*stack);
+		*stack = tmp;
+	}
 }
