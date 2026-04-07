@@ -3,57 +3,70 @@
 /*                                                        :::      ::::::::   */
 /*   sort_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/03 10:46:00 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/04 20:21:09 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static int	check_pos(t_list *stack_b, int val)
+static int	find_min(t_list *stack)
 {
-	int		pos;
-	t_list	*current;
+	int		min;
+	t_list	*curr;
 
-	pos = 0;
-	current = stack_b;
-	while (current)
+	min = stack->value;
+	curr = stack;
+	while (curr)
 	{
-		if (val > current->value)
-			return (pos);
-		pos++;
-		current = current->next;
+		if (curr->value < min)
+			min = curr->value;
+		curr = curr->next;
 	}
-	return (pos);
+	return (min);
 }
 
-static void	to_b(t_list **stack_b, t_list **stack_a, t_options *opts)
+static void	move_min_to_b(t_list **a, t_list **b)
 {
+	int	min;
 	int	pos;
+	int	size;
 	int	i;
+	t_list	*curr;
 
-	pos = check_pos(*stack_b, (*stack_a)->value);
-	i = pos;
-	while (i > 0)
+	min = find_min(*a);
+	pos = 0;
+	i = 0;
+	curr = *a;
+	while (curr)
 	{
-		rotate_b(stack_b, opts->bench_mode, &opts->counters);
-		i--;
+		if (curr->value == min)
+			pos = i;
+		i++;
+		curr = curr->next;
 	}
-	push_b(stack_a, stack_b, opts->bench_mode, &opts->counters);
-	i = pos;
-	while (i > 0)
-	{
-		reverse_b(stack_b, opts->bench_mode, &opts->counters);
-		i--;
-	}
+	size = ft_lstsize(*a);
+	if (pos <= size / 2)
+		while (pos-- > 0)
+			rotate_a(a);
+	else
+		while (pos++ < size)
+			reverse_a(a);
+	push_b(a, b);
 }
 
-void	sort_simple(t_list **stack_a, t_list **stack_b, t_options *opts)
+void	sort_simple(t_list **a, t_list **b)
 {
-	while (*stack_a)
-		to_b(stack_b, stack_a, opts);
-	while (*stack_b)
-		push_a(stack_b, stack_a, opts->bench_mode, &opts->counters);
+	int	size;
+
+	size = ft_lstsize(*a);
+	while (size > 1)
+	{
+		move_min_to_b(a, b);
+		size--;
+	}
+	while (*b)
+		push_a(b, a);
 }
