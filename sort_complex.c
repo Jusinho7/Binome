@@ -3,69 +3,81 @@
 /*                                                        :::      ::::::::   */
 /*   sort_complex.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/01 19:57:26 by frazanak          #+#    #+#             */
-/*   Updated: 2026/04/03 12:37:31 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/01 19:57:26 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static int	get_max_bits(int max)
+static int	get_max_bits(int max_rank)
 {
 	int	bits;
 
 	bits = 0;
-	while ((max >> bits) != 0)
+	while ((max_rank >> bits) != 0)
 		bits++;
 	return (bits);
 }
 
-static void	radix_pass(t_list **stack_a, t_list **stack_b, t_radix *radix,
-		t_options *opts)
+static void	replace_with_ranks(t_list *stack_a, int *ranks)
+{
+	int		i;
+	t_list	*current;
+
+	i = 0;
+	current = stack_a;
+	while (current)
+	{
+		current->value = ranks[i++];
+		current = current->next;
+	}
+}
+
+static void	process_one_bit(t_list **a, t_list **b, int bit, int size_a)
 {
 	int	i;
 
 	i = 0;
-	while (i < radix->size)
+	while (i < size_a)
 	{
-		if ((((*stack_a)->value >> radix->bit) & 1) == 0)
-			push_b(stack_a, stack_b, opts->bench_mode, &opts->counters);
+		if ((((*a)->value >> bit) & 1) == 0)
+			push_b(a, b);
 		else
-			rotate_a(stack_a, opts->bench_mode, &opts->counters);
+			rotate_a(a);
 		i++;
 	}
 }
 
-static void	radix_sort(t_list **stack_a, t_list **stack_b, t_radix *radix,
-		t_options *opts)
+static void	sort_by_bits(t_list **a, t_list **b, int bits, int size_a)
 {
-	while (radix->bit < radix->bits)
+	int	bit;
+
+	bit = 0;
+	while (bit < bits)
 	{
-		radix_pass(stack_a, stack_b, radix, opts);
-		while (*stack_b)
-			push_a(stack_b, stack_a, opts->bench_mode, &opts->counters);
-		radix->bit++;
+		process_one_bit(a, b, bit, size_a);
+		while (*b)
+			push_a(b, a);
+		bit++;
 	}
 }
 
-void	sort_complex(t_list **stack_a, t_list **stack_b, t_options *opts)
+void	sort_complex(t_list **stack_a, t_list **stack_b)
 {
-	t_radix	radix;
-	int		min;
-	int		max;
+	int		size_a;
+	int		*originals;
+	int		bits;
 
-	radix.size = ft_lstsize(*stack_a);
-	if (radix.size <= 1)
+	size_a = ft_lstsize(*stack_a);
+	originals = save_originals(*stack_a, size_a);
+	if (!originals)
 		return ;
-	min = get_min_value(*stack_a);
-	if (min < 0)
-		shift_values(*stack_a, -min);
-	max = get_max_value(*stack_a);
-	radix.bits = get_max_bits(max);
-	radix.bit = 0;
-	radix_sort(stack_a, stack_b, &radix, opts);
-	if (min < 0)
-		shift_values(*stack_a, min);
+	replace_with_ranks(*stack_a, get_ranks(*stack_a, size_a));
+	bits = get_max_bits(get_max_value(*stack_a));
+	sort_by_bits(stack_a, stack_b, bits, size_a);
+	restore_values(*stack_a, originals);
+	free(originals);
 }
