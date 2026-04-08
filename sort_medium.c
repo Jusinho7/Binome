@@ -6,7 +6,7 @@
 /*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/30 14:19:45 by frazanak          #+#    #+#             */
-/*   Updated: 2026/04/08 12:23:37 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/08 12:46:25 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,18 +66,16 @@ static void	to_b(t_list **stack_a, t_list **stack_b, t_chunk *chunk,
 
 void	sort_medium(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
-	int		size_a;
 	int		*ranks;
 	t_chunk	chunk;
 
-	size_a = ft_lstsize(*stack_a);
+	chunk.size = ft_lstsize(*stack_a);
 	chunk.chunk_size = get_chunk_size(*stack_a);
-	ranks = get_ranks(*stack_a, size_a);
+	ranks = get_ranks(*stack_a, chunk.size);
 	chunk.ranks = ranks;
 	chunk.min = 0;
 	chunk.max = chunk.min + chunk.chunk_size;
-	chunk.size = size_a;
-	while (chunk.min < size_a)
+	while (chunk.min < chunk.size)
 	{
 		to_b(stack_a, stack_b, &chunk, opts);
 		chunk.min += chunk.chunk_size;
