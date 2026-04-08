@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   push_swap.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/05 12:03:40 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/08 12:25:31 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,9 @@ void				sort_complex(t_list **stack_a, t_list **stack_b,
 						t_options *opts);
 int					get_max_pos(t_list *stack_b);
 void				max_to_top_b(t_list **stack_b, t_options *opts);
+int					*get_ranks(t_list *stack_a, int size_a);
 int					get_max_value(t_list *stack);
-int					get_min_value(t_list *stack);
-void				shift_values(t_list *stack, int offset);
+int					*save_originals(t_list *stack, int size);
+void				restore_values(t_list *stack, int *originals);
 
 #endif

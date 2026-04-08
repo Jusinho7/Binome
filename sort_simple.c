@@ -3,70 +3,76 @@
 /*                                                        :::      ::::::::   */
 /*   sort_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/04 20:21:09 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/08 12:19:42 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static int	find_min(t_list *stack)
+static int	find_min(t_list *stack_a)
 {
 	int		min;
-	t_list	*curr;
+	t_list	*current;
 
-	min = stack->value;
-	curr = stack;
-	while (curr)
+	min = stack_a->value;
+	current = stack_a;
+	while (current)
 	{
-		if (curr->value < min)
-			min = curr->value;
-		curr = curr->next;
+		if (current->value < min)
+			min = current->value;
+		current = current->next;
 	}
 	return (min);
 }
 
-static void	move_min_to_b(t_list **a, t_list **b)
+static int	get_min_pos (t_list **stack_a, int min)
+{
+	t_list	*current;
+	int		i;
+
+	i = 0;
+	current = *stack_a;
+	while (current)
+	{
+		if (current->value == min)
+			return (i);
+		i++;
+		current = current->next;
+	}
+	return (i);
+}
+
+static void	move_min_to_b(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
 	int	min;
 	int	pos;
 	int	size;
-	int	i;
-	t_list	*curr;
 
-	min = find_min(*a);
-	pos = 0;
-	i = 0;
-	curr = *a;
-	while (curr)
-	{
-		if (curr->value == min)
-			pos = i;
-		i++;
-		curr = curr->next;
-	}
-	size = ft_lstsize(*a);
+	min = find_min(*stack_a);
+	pos = get_min_pos(stack_a, min);
+	size = ft_lstsize(*stack_a);
 	if (pos <= size / 2)
 		while (pos-- > 0)
-			rotate_a(a);
+			rotate_a(stack_a, opts->bench_mode, &opts->counters);
 	else
 		while (pos++ < size)
-			reverse_a(a);
-	push_b(a, b);
+			reverse_a(stack_a, opts->bench_mode, &opts->counters);
+	push_b(stack_a, stack_b, opts->bench_mode, &opts->counters);
 }
 
-void	sort_simple(t_list **a, t_list **b)
+void	sort_simple(t_list **stack_a, t_list **stack_, t_options *opts)
 {
 	int	size;
 
-	size = ft_lstsize(*a);
+	size = ft_lstsize(*stack_a);
 	while (size > 1)
 	{
-		move_min_to_b(a, b);
+		move_min_to_b(stack_a, stack_, opts);
 		size--;
 	}
-	while (*b)
-		push_a(b, a);
+	while (*stack_)
+		push_a(stack_, stack_a, opts->bench_mode, &opts->counters);
 }
