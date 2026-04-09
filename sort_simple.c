@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sort_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/08 12:19:42 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:30:05 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static int	find_min(t_list *stack_a)
 	return (min);
 }
 
-static int	get_min_pos (t_list **stack_a, int min)
+static int	get_min_pos(t_list **stack_a, int min)
 {
 	t_list	*current;
 	int		i;

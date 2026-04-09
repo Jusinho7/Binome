@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   push_swap.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/08 12:25:31 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/09 15:27:47 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,6 @@ void				ft_free(t_list **stack);
 void				print_bench(int disorder, int n, t_algo used_algo,
 						t_counters *counters);
 
-void				ft_print(t_list *stack, char *name);
 int					ft_strcmp(const char *s1, const char *s2);
 
 t_algo				check_flag(char *arg);

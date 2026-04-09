@@ -6,17 +6,11 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 16:20:08 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/03 11:52:05 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/09 14:58:52 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-int	ft_putchar(int c)
-{
-	write(1, &c, 1);
-	return (1);
-}
 
 int	ft_putchar_fd(int c, int fd)
 {

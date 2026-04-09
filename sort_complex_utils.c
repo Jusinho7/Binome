@@ -52,6 +52,7 @@ void	restore_values(t_list *stack, int *originals)
 		curr = curr->next;
 	}
 }
+
 int	get_max_value(t_list *stack)
 {
 	int		max;
