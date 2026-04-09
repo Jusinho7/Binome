@@ -68,15 +68,18 @@ void	sort_complex(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
 	t_radix	radix;
 	int		*originals;
+	int		*ranks;
 	int		max;
 
 	radix.size = ft_lstsize(*stack_a);
 	originals = save_originals(*stack_a, radix.size);
-	replace_with_ranks(*stack_a, get_ranks(*stack_a, radix.size));
+	ranks = get_ranks(*stack_a, radix.size);
+	replace_with_ranks(*stack_a, ranks);
 	max = get_max_value(*stack_a);
 	radix.bits = get_max_bits(max);
 	radix.bit = 0;
 	radix_sort(stack_a, stack_b, &radix, opts);
+	free(ranks);
 	restore_values(*stack_a, originals);
 	free(originals);
 }
