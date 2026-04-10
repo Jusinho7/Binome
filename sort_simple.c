@@ -6,7 +6,7 @@
 /*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/10 05:50:22 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/10 06:05:34 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,7 @@ static void	sort_three(t_list **stack_a, t_options *opts)
 	a = (*stack_a)->value;
 	b = (*stack_a)->next->value;
 	c = (*stack_a)->next->next->value;
-	if (a < b && b < c)
-		return ;
-	else if (a < c && c < b)
+	if (a < c && c < b)
 	{
 		swap_a(stack_a, opts->bench_mode, &opts->counters);
 		rotate_a(stack_a, opts->bench_mode, &opts->counters);
@@ -85,7 +83,7 @@ static void	sort_three(t_list **stack_a, t_options *opts)
 		rotate_a(stack_a, opts->bench_mode, &opts->counters);
 	else if (c < a && a < b)
 		reverse_a(stack_a, opts->bench_mode, &opts->counters);
-	else if (a < b && b < a)
+	else if (c < b && b < a)
 	{
 		rotate_a(stack_a, opts->bench_mode, &opts->counters);
 		swap_a(stack_a, opts->bench_mode, &opts->counters);
