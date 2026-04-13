@@ -3,29 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   bench.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/03 12:10:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/05 12:27:06 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/12 09:20:24 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static void	set_bench_strategy(t_algo used_algo, char **strategy,
+static void	set_bench_strategy(t_algo algo, char **strategy,
 		char **complexity)
 {
-	if (used_algo == SIMPLE)
+	if (algo == SIMPLE)
 	{
 		*strategy = "Simple";
 		*complexity = "O(n²)";
 	}
-	else if (used_algo == MEDIUM)
+	else if (algo == MEDIUM)
 	{
 		*strategy = "Medium";
 		*complexity = "O(n√n)";
 	}
-	else if (used_algo == COMPLEX)
+	else if (algo == COMPLEX)
 	{
 		*strategy = "Complex";
 		*complexity = "O(n log n)";
@@ -37,7 +37,7 @@ static void	set_bench_strategy(t_algo used_algo, char **strategy,
 	}
 }
 
-void	print_bench(int disorder, int n, t_algo used_algo, t_counters *counters)
+void	print_bench(int disorder, int n, t_algo algo, t_counters *counters)
 {
 	double	perc;
 	char	*strategy;
@@ -49,7 +49,7 @@ void	print_bench(int disorder, int n, t_algo used_algo, t_counters *counters)
 	total_ops += counters->pa + counters->pb + counters->ra;
 	total_ops += counters->rb + counters->rr + counters->rra;
 	total_ops += counters->rrb + counters->rrr;
-	set_bench_strategy(used_algo, &strategy, &complexity);
+	set_bench_strategy(algo, &strategy, &complexity);
 	ft_printf_fd(2, "[bench] disorder:   %f%%\n", perc);
 	ft_printf_fd(2, "[bench] strategy:   %s / %s\n", strategy, complexity);
 	ft_printf_fd(2, "[bench] total_ops:  %d\n", total_ops);

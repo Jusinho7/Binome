@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sort_medium.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/30 14:19:45 by frazanak          #+#    #+#             */
-/*   Updated: 2026/04/08 12:46:25 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/06 16:10:20 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,16 +66,18 @@ static void	to_b(t_list **stack_a, t_list **stack_b, t_chunk *chunk,
 
 void	sort_medium(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
+	int		size_a;
 	int		*ranks;
 	t_chunk	chunk;
 
-	chunk.size = ft_lstsize(*stack_a);
+	size_a = ft_lstsize(*stack_a);
 	chunk.chunk_size = get_chunk_size(*stack_a);
-	ranks = get_ranks(*stack_a, chunk.size);
+	ranks = get_ranks(*stack_a, size_a);
 	chunk.ranks = ranks;
 	chunk.min = 0;
 	chunk.max = chunk.min + chunk.chunk_size;
-	while (chunk.min < chunk.size)
+	chunk.size = size_a;
+	while (chunk.min < size_a)
 	{
 		to_b(stack_a, stack_b, &chunk, opts);
 		chunk.min += chunk.chunk_size;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   checker.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/08 03:59:29 by srasolov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:35:41 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/11 20:03:59 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,16 @@ static void	ft_check(t_list **stack_a, char **argv, int *num, int i)
 	t_list	*node;
 
 	if (!ft_isnumber(argv[i]))
-		ft_error(stack_a);
+		return (free(num), ft_error(stack_a));
 	val = ft_atol(argv[i]);
 	if (val > INT_MAX || val < INT_MIN)
-		ft_error(stack_a);
+		return (free(num), ft_error(stack_a));
 	num[i] = (int)val;
 	if (check_doublon(num, i))
-		ft_error(stack_a);
+		return (free(num), ft_error(stack_a));
 	node = ft_new_node((int)val);
 	if (!node)
-		ft_error(stack_a);
+		return (free(num), ft_error(stack_a));
 	ft_lstadd_back(stack_a, node);
 }
 

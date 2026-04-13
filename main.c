@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:43:17 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/03 11:34:02 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/12 09:22:17 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void	handle_bench(t_ctx *ctx)
 static void	print_bench_if_needed(t_ctx *ctx)
 {
 	if (ctx->opts.bench_mode)
-		print_bench(ctx->disorder, ctx->n, ctx->used_algo, &ctx->opts.counters);
+		print_bench(ctx->disorder, ctx->n, ctx->algo, &ctx->opts.counters);
 }
 
 int	main(int argc, char **argv)

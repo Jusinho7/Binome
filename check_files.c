@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 10:39:09 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/09 15:27:43 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:45:22 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,21 @@ int	check_doublon(int *num, int len)
 		i++;
 	}
 	return (0);
+}
+
+void	ft_print(t_list *stack, char *name)
+{
+	int	i;
+
+	i = 0;
+	ft_printf("Stack %s: ", name);
+	while (stack)
+	{
+		ft_printf("[%d]", stack->value);
+		stack = stack->next;
+		i++;
+	}
+	ft_printf("\n");
 }
 
 int	count_arg(char **args)

@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   sort_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42.fr>          +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/17 10:25:18 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/10 06:05:34 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/13 05:16:24 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "push_swap.h"
 
 #include "push_swap.h"
 

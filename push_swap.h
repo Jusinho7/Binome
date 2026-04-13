@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   push_swap.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/09 15:27:47 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/12 09:21:52 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,9 +121,10 @@ int					is_blank(char *str);
 void				ft_error(t_list **stack);
 void				ft_free(t_list **stack);
 
-void				print_bench(int disorder, int n, t_algo used_algo,
+void				print_bench(int disorder, int n, t_algo algo,
 						t_counters *counters);
 
+void				ft_print(t_list *stack, char *name);
 int					ft_strcmp(const char *s1, const char *s2);
 
 t_algo				check_flag(char *arg);
@@ -143,8 +144,8 @@ void				sort_complex(t_list **stack_a, t_list **stack_b,
 						t_options *opts);
 int					get_max_pos(t_list *stack_b);
 void				max_to_top_b(t_list **stack_b, t_options *opts);
-int					*get_ranks(t_list *stack_a, int size_a);
 int					get_max_value(t_list *stack);
+int					*get_ranks(t_list *stack_a, int size_a);
 int					*save_originals(t_list *stack, int size);
 void				restore_values(t_list *stack, int *originals);
 

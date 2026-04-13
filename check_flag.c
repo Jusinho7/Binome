@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_flag.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/16 11:04:53 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/03 13:10:13 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/11 20:00:55 by frazanak         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,18 +62,23 @@ int	check_disorder(t_list *stack)
 
 t_algo	detect_algo(t_list *stack)
 {
-	int	n;
-	int	inv;
-	int	max;
+	int		n;
+	int		inv;
+	int		max;
+	double	disorder;
 
 	n = ft_lstsize(stack);
+	if (n <= 3)
+		return (SIMPLE);
 	inv = check_disorder(stack);
 	max = (n * (n - 1)) / 2;
-	if (inv < max * 0.2)
+	disorder = (double)inv / (double)max;
+	if (disorder < 0.2)
 		return (SIMPLE);
-	else if (n <= 500)
+	else if (disorder < 0.5)
 		return (MEDIUM);
-	return (COMPLEX);
+	else
+		return (COMPLEX);
 }
 
 int	is_sorted(t_list *stack)
