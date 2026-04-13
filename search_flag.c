@@ -39,6 +39,7 @@ static t_algo	handle_algo_flag(int *argc, char **argv, int i)
 t_algo	search_flag(int *argc, char **argv, int *bench_mode)
 {
 	t_algo	algo;
+	t_algo	found_algo;
 	int		i;
 
 	algo = ADAPTIVE;
@@ -51,9 +52,12 @@ t_algo	search_flag(int *argc, char **argv, int *bench_mode)
 			shift_argv(argc, argv, i);
 			continue ;
 		}
-		algo = handle_algo_flag(argc, argv, i);
-		if (algo != ADAPTIVE)
-			break ;
+		found_algo = handle_algo_flag(argc, argv, i);
+		if (found_algo != ADAPTIVE)
+		{
+			algo = found_algo;
+			continue ;
+		}
 		i++;
 	}
 	return (algo);
