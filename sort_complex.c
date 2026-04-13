@@ -72,6 +72,11 @@ void	sort_complex(t_list **stack_a, t_list **stack_b, t_options *opts)
 	int		max;
 
 	radix.size = ft_lstsize(*stack_a);
+	if (radix.size <= 5)
+	{
+		sort_simple(stack_a, stack_b, opts);
+		return ;
+	}
 	originals = save_originals(*stack_a, radix.size);
 	ranks = get_ranks(*stack_a, radix.size);
 	replace_with_ranks(*stack_a, ranks);

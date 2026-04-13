@@ -68,7 +68,7 @@ t_algo	detect_algo(t_list *stack)
 	double	disorder;
 
 	n = ft_lstsize(stack);
-	if (n <= 3)
+	if (n <= 5)
 		return (SIMPLE);
 	inv = check_disorder(stack);
 	max = (n * (n - 1)) / 2;

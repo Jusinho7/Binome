@@ -64,6 +64,15 @@ static void	to_b(t_list **stack_a, t_list **stack_b, t_chunk *chunk,
 	}
 }
 
+static void	push_back_all(t_list **stack_a, t_list **stack_b, t_options *opts)
+{
+	while (*stack_b)
+	{
+		max_to_top_b(stack_b, opts);
+		push_a(stack_b, stack_a, opts->bench_mode, &opts->counters);
+	}
+}
+
 void	sort_medium(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
 	int		size_a;
@@ -71,6 +80,11 @@ void	sort_medium(t_list **stack_a, t_list **stack_b, t_options *opts)
 	t_chunk	chunk;
 
 	size_a = ft_lstsize(*stack_a);
+	if (size_a <= 5)
+	{
+		sort_simple(stack_a, stack_b, opts);
+		return ;
+	}
 	chunk.chunk_size = get_chunk_size(*stack_a);
 	ranks = get_ranks(*stack_a, size_a);
 	chunk.ranks = ranks;
@@ -84,9 +98,5 @@ void	sort_medium(t_list **stack_a, t_list **stack_b, t_options *opts)
 		chunk.max = chunk.min + chunk.chunk_size;
 	}
 	free(ranks);
-	while (*stack_b)
-	{
-		max_to_top_b(stack_b, opts);
-		push_a(stack_b, stack_a, opts->bench_mode, &opts->counters);
-	}
+	push_back_all(stack_a, stack_b, opts);
 }
