@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   push_swap.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/03 19:29:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/12 09:21:52 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/13 14:32:07 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,14 @@ typedef struct s_ctx
 	t_algo			algo;
 	t_algo			used_algo;
 }					t_ctx;
+
+typedef struct s_bench
+{
+	double			disorder;
+	double			perc;
+	int				n;
+	t_algo			algo;
+}					t_bench;
 
 t_list				*ft_lst_last(t_list *lst);
 void				reverse_a(t_list **stack_a, int bench_mode,

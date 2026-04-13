@@ -3,54 +3,65 @@
 /*                                                        :::      ::::::::   */
 /*   bench.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/03 12:10:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/12 09:20:24 by frazanak         ###   ########.fr       */
+/*   Updated: 2026/04/13 14:48:12 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static void	set_bench_strategy(t_algo algo, char **strategy,
+static void	set_bench_strategy(t_bench *bench, char **strategy,
 		char **complexity)
 {
-	if (algo == SIMPLE)
+	if (bench->algo == ADAPTIVE)
+	{
+		*strategy = "Adaptive";
+		if (bench->n <= 3 || bench->perc < 20)
+			*complexity = "O(n²)";
+		else if (bench->perc < 50)
+			*complexity = "O(n√n)";
+		else
+			*complexity = "O(n log n)";
+	}
+	else if (bench->algo == SIMPLE)
 	{
 		*strategy = "Simple";
 		*complexity = "O(n²)";
 	}
-	else if (algo == MEDIUM)
+	else if (bench->algo == MEDIUM)
 	{
 		*strategy = "Medium";
 		*complexity = "O(n√n)";
 	}
-	else if (algo == COMPLEX)
+	else if (bench->algo == COMPLEX)
 	{
 		*strategy = "Complex";
-		*complexity = "O(n log n)";
-	}
-	else
-	{
-		*strategy = "Adaptive";
 		*complexity = "O(n log n)";
 	}
 }
 
 void	print_bench(int disorder, int n, t_algo algo, t_counters *counters)
 {
-	double	perc;
+	t_bench	bench;
 	char	*strategy;
 	char	*complexity;
 	int		total_ops;
 
-	perc = (double)disorder / ((double)n * (n - 1) / 2) * 100;
+	bench.disorder = disorder;
+	bench.n = n;
+	bench.algo = algo;
+	if (n > 1)
+		bench.perc = (double)disorder / ((double)n * (n - 1) / 2) * 100;
+	else
+		bench.perc = 0;
 	total_ops = counters->sa + counters->sb + counters->ss;
 	total_ops += counters->pa + counters->pb + counters->ra;
 	total_ops += counters->rb + counters->rr + counters->rra;
 	total_ops += counters->rrb + counters->rrr;
-	set_bench_strategy(algo, &strategy, &complexity);
-	ft_printf_fd(2, "[bench] disorder:   %f%%\n", perc);
+	set_bench_strategy(&bench, &strategy, &complexity);
+	ft_printf_fd(2, "[bench] disorder:   %f%%\n", bench.perc);
 	ft_printf_fd(2, "[bench] strategy:   %s / %s\n", strategy, complexity);
 	ft_printf_fd(2, "[bench] total_ops:  %d\n", total_ops);
 	ft_printf_fd(2, "[bench] sa: %d  sb: %d  ss: %d  pa: %d  pb: %d\n",
