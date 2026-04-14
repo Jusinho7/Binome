@@ -104,6 +104,12 @@ void	sort_simple(t_list **stack_a, t_list **stack_, t_options *opts)
 	}
 	if (size == 3)
 		sort_three(stack_a, opts);
+	if (size == 2)
+	{
+		if ((*stack_a)->value > (*stack_a)->next->value)
+			swap_a(stack_a, opts->bench_mode, &opts->counters);
+		return ;
+	}
 	while (*stack_)
 		push_a(stack_, stack_a, opts->bench_mode, &opts->counters);
 }
