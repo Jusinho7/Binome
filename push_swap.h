@@ -125,6 +125,7 @@ char				**ft_split(char const *s, char c);
 void				ft_free_split(char **args);
 int					ft_isnumber(char *str);
 int					is_blank(char *str);
+void				clean_flags(char **args, t_algo *algo, int *bench);
 
 void				ft_error(t_list **stack);
 void				ft_free(t_list **stack);

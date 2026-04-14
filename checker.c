@@ -72,3 +72,32 @@ int	is_blank(char *str)
 	}
 	return (1);
 }
+
+void	clean_flags(char **args, t_algo *algo, int *bench)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (args[i])
+	{
+		if (ft_strcmp(args[i], "--adaptive") == 0)
+			*algo = ADAPTIVE;
+		else if (ft_strcmp(args[i], "--simple") == 0)
+			*algo = SIMPLE;
+		else if (ft_strcmp(args[i], "--medium") == 0)
+			*algo = MEDIUM;
+		else if (ft_strcmp(args[i], "--complex") == 0)
+			*algo = COMPLEX;
+		else if (ft_strcmp(args[i], "--bench") == 0)
+			*bench = 1;
+		else
+		{
+			args[j] = args[i];
+			j++;
+		}
+		i++;
+	}
+	args[j] = NULL;
+}

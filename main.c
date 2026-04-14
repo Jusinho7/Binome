@@ -62,6 +62,8 @@ int	main(int argc, char **argv)
 	init_context(&ctx);
 	ctx.algo = search_flag(&argc, argv, &ctx.opts.bench_mode);
 	ctx.args = parse_args(argc, argv, &ctx.split, &ctx.stack_a);
+	if (ctx.split)
+		clean_flags(ctx.args, &ctx.algo, &ctx.opts.bench_mode);
 	ft_parse(&ctx.stack_a, ctx.args);
 	handle_bench(&ctx);
 	sort(&ctx.stack_a, ctx.algo, &ctx.used_algo, &ctx.opts);
