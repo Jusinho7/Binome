@@ -92,14 +92,14 @@ static void	sort_three(t_list **stack_a, t_options *opts)
 	}
 }
 
-void	sort_simple(t_list **stack_a, t_list **stack_, t_options *opts)
+void	sort_simple(t_list **stack_a, t_list **stack_b, t_options *opts)
 {
 	int	size;
 
 	size = ft_lstsize(*stack_a);
 	while (size > 3)
 	{
-		move_min_to_b(stack_a, stack_, opts);
+		move_min_to_b(stack_a, stack_b, opts);
 		size--;
 	}
 	if (size == 3)
@@ -110,6 +110,6 @@ void	sort_simple(t_list **stack_a, t_list **stack_, t_options *opts)
 			swap_a(stack_a, opts->bench_mode, &opts->counters);
 		return ;
 	}
-	while (*stack_)
-		push_a(stack_, stack_a, opts->bench_mode, &opts->counters);
+	while (*stack_b)
+		push_a(stack_b, stack_a, opts->bench_mode, &opts->counters);
 }
