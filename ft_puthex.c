@@ -12,17 +12,6 @@
 
 #include "ft_printf.h"
 
-int	ft_puthex(unsigned int num, char *base)
-{
-	int	count;
-
-	count = 0;
-	if (num >= 16)
-		count += ft_puthex(num / 16, base);
-	count += ft_putchar(base[num % 16]);
-	return (count);
-}
-
 int	ft_puthex_fd(unsigned int num, char *base, int fd)
 {
 	int	count;

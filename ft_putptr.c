@@ -12,29 +12,6 @@
 
 #include "ft_printf.h"
 
-static int	ft_puthex_long(unsigned long num)
-{
-	int	count;
-
-	count = 0;
-	if (num >= 16)
-		count += ft_puthex_long(num / 16);
-	count += ft_putchar("0123456789abcdef"[num % 16]);
-	return (count);
-}
-
-int	ft_putptr(void *ptr)
-{
-	int	count;
-
-	if (!ptr)
-		return (write(1, "(nil)", 5));
-	count = 0;
-	count += write(1, "0x", 2);
-	count += ft_puthex_long((unsigned long)ptr);
-	return (count);
-}
-
 int	ft_puthex_long_fd(unsigned long num, int fd)
 {
 	int	count;

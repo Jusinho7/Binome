@@ -60,14 +60,14 @@ void	ft_print(t_list *stack, char *name)
 	int	i;
 
 	i = 0;
-	ft_printf("Stack %s: ", name);
+	ft_printf_fd(1, "Stack %s: ", name);
 	while (stack)
 	{
-		ft_printf("[%d]", stack->value);
+		ft_printf_fd(1, "[%d]", stack->value);
 		stack = stack->next;
 		i++;
 	}
-	ft_printf("\n");
+	ft_printf_fd(1, "\n");
 }
 
 int	count_arg(char **args)

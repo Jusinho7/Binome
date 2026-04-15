@@ -12,17 +12,6 @@
 
 #include "ft_printf.h"
 
-int	ft_putunsigned(unsigned int num)
-{
-	int	count;
-
-	count = 0;
-	if (num >= 10)
-		count += ft_putunsigned(num / 10);
-	count += ft_putchar(num % 10 + '0');
-	return (count);
-}
-
 int	ft_putunsigned_fd(unsigned int num, int fd)
 {
 	int	count;

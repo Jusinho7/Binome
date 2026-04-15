@@ -4,197 +4,217 @@
 
 ## Description
 
-Push_swap is a sorting algorithm project from the 42 School curriculum. The goal is to **sort a list of integers** using only **two stacks** (called **stack A** and **stack B**) and a limited set of predefined operations.
+`push_swap` is a 42 School sorting project written in C. Its purpose is to sort a list of integers using only two stacks (`stack A` and `stack B`) and a limited set of stack operations. The main goal is to produce a valid sorting sequence while minimizing the number of operations.
 
 > **What is a stack?**
 > A stack is a data structure that works like a pile of plates: you can only place or remove a plate from the top. The last element added is the first to be removed. This is known as the **LIFO** principle (Last In, First Out).
 
-Unlike standard sorting where you can use built-in sort functions, here you must **implement the sorting logic yourself** using only basic stack manipulation operations.
-
-The program receives a list of integers as input and outputs a sequence of operations that, when applied in order, will sort the numbers **in ascending order in stack A**. The challenge is to find the shortest possible sequence — fewer operations means better performance.
-
----
+The program reads integers from the command line. It validates the input, detects duplicate values and out-of-range integers, and applies one of several stack-based algorithms to generate a sequence of operations. The output is a plain list of moves that sorts the numbers in ascending order in `stack A`.
 
 ## Instructions
 
 ### Compilation
 
-Use the provided Makefile to compile the project:
+Compile the project with the provided `Makefile`:
 
 ```bash
 make
 ```
 
-This command reads the `Makefile` (a kind of build script) and generates the `push_swap` executable.
+This command builds the `push_swap` executable using the system C compiler (`cc`) and the flags `-Wall -Wextra -Werror`.
 
-> **What is a Makefile?**
-> It's a file that contains instructions to automate the compilation of your C code. Instead of manually typing long `gcc` commands, you simply type `make` and it handles everything for you.
+Supported Makefile targets:
 
----
+```bash
+make         # build push_swap
+make clean   # remove object files
+make fclean  # remove object files and push_swap executable
+make re      # rebuild from scratch
+```
+
+### Dependencies
+
+This project does not require external libraries beyond the standard C toolchain. It uses a custom `ft_printf` implementation included in the repository.
 
 ### Running the Program
 
-Once compiled, run the program by passing integers as arguments:
-
-```bash
-./push_swap [numbers]
-```
-
-For example:
+Use `push_swap` with numbers separated by spaces:
 
 ```bash
 ./push_swap 3 2 1
 ```
 
-> **How to read this command?**
-> - `./push_swap` — runs the program located in the current directory
-> - `3 2 1` — the numbers to sort, separated by spaces
->
-> The program will print in the terminal the list of operations needed to sort those numbers.
-
----
-
-### Counting Operations with `wc -l`
-
-To measure your algorithm's efficiency, you can count how many operations are generated:
+Or pass a single quoted string of numbers:
 
 ```bash
-./push_swap 3 2 1 | wc -l
+./push_swap "3 2 1"
 ```
 
-> **How does this command work?**
-> - `|` is called a "pipe". It redirects the output of one command into the input of another.
-> - `wc -l` counts the number of lines in the text it receives.
-> - Combined, they count how many operations `push_swap` generated.
-> - The smaller this number, the more efficient your algorithm is!
+Additional flags:
 
----
+- `--bench`: enables benchmark output printed to standard error after the operation list
+- `--adaptive`: choose the algorithm automatically (default)
+- `--simple`: force the simple sorting strategy
+- `--medium`: force the medium sorting strategy
+- `--complex`: force the complex sorting strategy
 
-## Algorithms
+Example with benchmark mode:
 
-The project implements **three main sorting strategies**, automatically selected based on the size of the input. This adaptive selection ensures the program stays efficient regardless of how much data it receives.
+```bash
+./push_swap --bench 4 2 1 3
+```
 
----
+### Output
 
-### Simple Sort (O(n²))
+The program prints the list of stack operations to standard output. Each operation is one of the allowed commands:
 
-- **For what input size?** Small lists (typically up to 5–6 numbers).
-- **How does it work?** It uses a **selection sort** approach:
-  1. Find the smallest element in stack A.
-  2. Rotate it to the top of the stack.
-  3. Push it to stack B.
-  4. Repeat until stack A is empty.
-  5. Push everything back to stack A.
-- **Why this choice?** For tiny lists, simplicity wins. There's no need for complex logic when sorting only 5 numbers.
-- **Time complexity:** O(n²) — acceptable for small n.
+- `sa`, `sb`, `ss`
+- `pa`, `pb`
+- `ra`, `rb`, `rr`
+- `rra`, `rrb`, `rrr`
 
-> **What is O(n²)?**
-> It's a notation that measures how the number of operations grows relative to the input size. O(n²) means that if you double the number of elements, the number of operations is multiplied by 4. Fine for small lists, but slow for large ones.
-
----
-
-### Medium Sort (O(n√n))
-
-- **For what input size?** Medium lists (roughly 6 to 100 numbers).
-- **How does it work?** It uses a **hybrid approach**:
-  1. Divide the stack into several **chunks** of similar size.
-  2. Sort within each chunk using rotations and pushes to stack B.
-  3. Merge the chunks back to rebuild a sorted list in stack A.
-- **Why this choice?** This is a good middle ground — more efficient than simple sort for medium lists, without the overhead of more complex algorithms.
-- **Time complexity:** O(n√n) — a solid balance between simplicity and performance.
-
-> **What is O(n√n)?**
-> It sits between O(n²) and O(n log n). For example, for 100 elements: n√n ≈ 1,000 operations, compared to 10,000 for O(n²). A significant improvement!
-
----
-
-### Complex Sort (O(n log n))
-
-- **For what input size?** Large lists (100+ numbers).
-- **How does it work?** It uses **radix sort** or a similar bit-level technique:
-  1. Examine numbers bit by bit (right to left in binary representation).
-  2. For each bit, distribute elements into the two stacks based on the bit value (0 or 1).
-  3. Repeat for each significant bit.
-- **Why this choice?** Highly efficient for large datasets. Radix sort is stable and performs very well with integers within the constraints of a stack-based system.
-- **Time complexity:** O(n log n) — optimal for sorting algorithms.
-
-> **What is O(n log n)?**
-> For 1,000 elements: n log n ≈ 10,000 operations, versus 1,000,000 for O(n²). This is one of the most efficient complexities achievable for a sorting algorithm.
-
-The adaptive selection ensures the program always performs well: small inputs use simple methods, while large ones leverage advanced techniques.
-
----
+If input validation fails, the program writes `Error` to standard error and exits.
 
 ## Features
 
-- **Error Handling:** The program validates input and reports any errors:
-  - Duplicate numbers in the list
-  - Non-numeric values (e.g. letters)
-  - Integer overflow (numbers too large or too small for an `int`)
-  - On any error, the program prints `Error` to the standard error output.
+- Adaptive algorithm selection based on input size and disorder
+- Multiple algorithm modes: simple, medium, complex
+- Input validation for:
+  - non-numeric values
+  - integer overflow outside `INT_MIN`..`INT_MAX`
+  - duplicate integers
+  - empty or blank input strings
+- Benchmark mode with operation counts and strategy classification
+- Support for both separate arguments and a single quoted argument string
 
-- **Optimized Operations:** Algorithms are designed to minimize unnecessary moves, reducing the total operation count.
+## Algorithms and Justification
 
-- **Benchmark System:** Use the `--bench` flag to display detailed performance statistics after sorting (see examples below).
+The project uses three sorting strategies. The chosen algorithm is either explicitly forced by a flag or selected automatically using `detect_algo()`.
 
----
+### Simple Sort
+
+- Used when the input has 5 or fewer elements, or when adaptive selection decides the list is nearly sorted.
+- Implementation:
+  - Find the minimum value in `stack A`
+  - Rotate `stack A` or reverse-rotate it until the minimum is on top
+  - Push the minimum to `stack B`
+  - Repeat until `stack A` has 2 or 3 elements
+  - Sort the remaining 2 or 3 elements with direct stack moves
+  - Push elements back from `stack B` to `stack A`
+
+- Complexity:
+  - Worst-case time: O(n²)
+  - Reason: each minimum search and rotation is O(n), and it is repeated for up to n elements
+
+- Why chosen:
+  - Best for very small lists where simple selection and minimal moves are easier to optimize
+  - Avoids overhead from ranking or chunking
+
+- Trade-offs:
+  - Not efficient for large input sizes
+  - Easy to implement and reliably produces a low operation count on small arrays
+
+### Medium Sort
+
+- Used for moderately disordered lists where adaptive selection finds a disorder ratio between 20% and 50%.
+- Implementation:
+  - Compute a chunk size using `ceil(sqrt(n))`
+  - Create a rank array for every value in `stack A`
+  - Move values in rank order from `stack A` to `stack B` chunk by chunk
+  - For each chunk, if a value belongs to the current range, push it to `stack B`; otherwise rotate `stack A`
+  - After all chunks are pushed, move values back from `stack B` to `stack A`, bringing the maximum in `stack B` to the top before each push
+
+- Complexity:
+  - Estimated operation complexity: O(n√n)
+  - Reason: the algorithm uses roughly √n chunks and processes each remaining element with O(1) stack operations per step
+  - Note: ranking uses an O(n²) pass once, which is acceptable for the expected medium range
+
+- Why chosen:
+  - Balances simplicity and performance for medium-sized inputs
+  - Reduces the number of costly operations compared to a pure O(n²) method
+
+- Trade-offs:
+  - Requires rank computation and chunk management
+  - Better than simple sort for moderate input sizes, but less scalable than radix-based sorting
+
+### Complex Sort
+
+- Used when the input is very disordered or when the `--complex` flag is forced.
+- Implementation:
+  - Convert each value to its rank among all values (`get_ranks()`)
+  - Replace stack values with their ranks to normalize the range to `0..n-1`
+  - Perform radix sort on the rank values using binary digits
+  - For each bit position, push values with bit=0 to `stack B` and rotate values with bit=1 in `stack A`
+  - After each bit pass, push all values back from `stack B` to `stack A`
+  - Restore the original values after the sort completes
+
+- Complexity:
+  - Radix phase: O(n log n)
+  - Rank conversion phase: O(n²) due to pairwise comparisons while building ranks
+  - Overall: O(n² + n log n), but the main sorting phase is radix-based
+
+- Why chosen:
+  - Radix sort is a strong fit for integer sorting with stack operations because it avoids direct comparisons and uses only allowed stack moves
+  - Rank compression prevents large or negative values from affecting bit-based grouping
+
+- Trade-offs:
+  - Ranking uses extra memory and O(n²) preprocessing
+  - Still effective when the primary cost is measured in stack operations rather than CPU comparisons
+
+### Adaptive Strategy
+
+The adaptive mode chooses the algorithm automatically using `detect_algo()`:
+
+- `n <= 5` → `SIMPLE`
+- `disorder < 0.20` → `SIMPLE`
+- `0.20 <= disorder < 0.50` → `MEDIUM`
+- `disorder >= 0.50` → `COMPLEX`
+
+Disorder is measured as the ratio of inversion count to the maximum number of inversions. This gives a numeric assessment of how far the list is from being sorted.
+
+## Project Structure
+
+- `main.c` — argument parsing, flag handling, bench mode, sort execution
+- `push_swap.h` — shared types, function declarations, and core structures
+- `check_files.c` — numeric parsing, range checking, duplicate detection
+- `checker.c` — argument parsing utilities, flag cleanup, blank-string handling
+- `check_flag.c` — algorithm selection and adaptive detection
+- `search_flag.c` — command line flag scanning and removal
+- `sort.c` — top-level sorter dispatch
+- `sort_simple.c` — simple sorting strategy for small inputs
+- `sort_medium.c` / `sort_medium_utils.c` — chunk-based medium strategy
+- `sort_complex.c` / `sort_complex_utils.c` — radix-based complex strategy
+- `push.c`, `swap.c`, `rotate.c`, `reverse.c` — stack operations
+- `bench.c` — benchmarking output and strategy labels
+- `ft_printf.*` — custom printf implementation used by the project
+- `ft_split.c`, `ft_strcmp.c` — utility functions for parsing and string comparison
+- `utils.c` — error handling, list freeing, and helper functions
 
 ## Usage Examples
 
-### Basic Sorting
+Sort a small list:
 
 ```bash
-$ ./push_swap 3 2 1
-pb
-sa
-pa
+./push_swap 2 1 3
 ```
 
-> 💡 **What happens step by step?**
-> - Initial stack A: `[3, 2, 1]` (3 is on top)
-> - `pb` — push 3 from A to B → A: `[2, 1]`, B: `[3]`
-> - `sa` — swap the top two elements of A → A: `[1, 2]`, B: `[3]`
-> - `pa` — push 3 from B back to A → A: `[1, 2, 3]`
->
-> Stack A is now sorted in ascending order (1 on top, 3 on bottom) in just 3 operations!
-
----
-
-### With Benchmark Mode
+Force medium mode:
 
 ```bash
-$ ./push_swap --bench 4 2 1 3
-pb
-pb
-sa
-pa
-pa
-[bench] disorder:   75.00%
-[bench] strategy:   Simple / O(n²)
-[bench] total_ops:  5
-[bench] sa: 1  sb: 0  ss: 0  pa: 2  pb: 2
-[bench] ra: 0  rb: 0  rr: 0  rra: 0
-[bench] rrb: 0  rrr: 0
+./push_swap --medium 9 1 8 2 7 3
 ```
 
-> 💡 **How to read this report?**
-> - `disorder: 75.00%` — the initial list was 75% out of order. The higher this percentage, the harder it is to sort.
-> - `strategy: Simple / O(n²)` — the algorithm automatically selected (Simple sort here, since there are only 4 numbers).
-> - `total_ops: 5` — only 5 operations were needed to sort the list.
-> - `sa: 1, pa: 2, pb: 2` — a breakdown of how many times each operation was used.
-
----
-
-### Counting Operations
+Use adaptive mode with benchmark output:
 
 ```bash
-$ ./push_swap 1 5 2 4 3 | wc -l
-12
+./push_swap --bench 5 2 8 4 1
 ```
 
-Here, 12 operations were needed to sort the list `[1, 5, 2, 4, 3]`.
+Sort from a quoted string:
 
----
+```bash
+./push_swap "12 4 99 3"
+```
 
 ## Resources
 
@@ -211,7 +231,6 @@ Here, 12 operations were needed to sort the list `[1, 5, 2, 4, 3]`.
 This project was developed as a pair, with clearly defined responsibilities to maximize efficiency and maintain code quality throughout the development process.
 
 ---
-
 ###  srasolov — Infrastructure & Tooling
 
 Responsible for the foundation that makes the algorithms run — data structures, input handling, and tooling:
@@ -253,13 +272,24 @@ Beyond their individual domains, both members collaborated on:
 
 > Good code is rarely written alone. Every major decision in this project was discussed, reviewed, and validated by both contributors.
 
----
 
 ### AI Usage in This Project
 
 AI tools were used to assist with development and documentation:
 
-- **Tools Used:** GitHub Copilot (for code suggestions and debugging) and ChatGPT (for explanations and optimization ideas).
+- **Tools Used:** GitHub Copilot (for code suggestions and debugging), Claude AI and ChatGPT (for explanations and optimization ideas).
 - **Tasks:** Debugging complex sorting logic, generating code snippets for edge cases, explaining algorithm concepts, and drafting documentation like this README.
 - **Impact:** Helped accelerate problem-solving and ensure clarity, but all final code and decisions were reviewed and implemented by the developers. AI served as a supportive tool, not a replacement for manual coding.
 
+
+## Limitations
+
+- Only supports 32-bit signed integers (`INT_MIN`..`INT_MAX`)
+- Invalid input prints `Error` and exits without partial output
+- Does not include a separate `checker` executable target; all logic is compiled into `push_swap`
+- The complex sorting strategy includes a rank mapping pass that is O(n²), so the real runtime is influenced by both preprocessing and stack operation counts
+
+## Notes
+
+- The benchmark mode prints detailed statistics to standard error, while the sort operations remain on standard output.
+- If the input is already sorted, the program exits without printing any operations.

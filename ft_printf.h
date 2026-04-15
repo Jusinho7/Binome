@@ -16,15 +16,7 @@
 # include <stdarg.h>
 # include <unistd.h>
 
-int	ft_printf(const char *format, ...);
 int	ft_printf_fd(int fd, const char *format, ...);
-int	ft_putchar(int c);
-int	ft_putstr(char *str);
-int	ft_putptr(void *ptr);
-int	ft_putnbr(int num);
-int	ft_putunsigned(unsigned int num);
-int	ft_puthex(unsigned int num, char *base);
-
 int	set_format_fd_branch2(char set_type, va_list args, int fd);
 int	ft_putunsigned_fd(unsigned int num, int fd);
 int	ft_puthex_fd(unsigned int num, char *base, int fd);
