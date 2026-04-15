@@ -18,7 +18,7 @@ static void	set_bench_strategy(t_bench *bench, char **strategy,
 	if (bench->algo == ADAPTIVE)
 	{
 		*strategy = "Adaptive";
-		if (bench->n <= 5 || bench->perc < 20)
+		if (bench->perc < 20)
 			*complexity = "O(n²)";
 		else if (bench->perc < 50)
 			*complexity = "O(n√n)";
