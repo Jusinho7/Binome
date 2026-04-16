@@ -43,8 +43,8 @@ int	ft_strlen(char *str)
 
 int	calc_joined_len(int argc, char **argv, int *valid_args)
 {
-	int total_len;
-	int i;
+	int	total_len;
+	int	i;
 
 	total_len = 0;
 	*valid_args = 0;

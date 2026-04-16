@@ -6,12 +6,11 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 06:52:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/16 06:52:00 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/16 07:05:49 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-
 
 static void	init_context(t_ctx *ctx)
 {
@@ -24,11 +23,11 @@ static void	init_context(t_ctx *ctx)
 
 static char	**parse_args(int argc, char **argv, int *split, t_list **stack_a)
 {
-	char **args;
-	char *joined;
-	int total_len;
-	int i;
-	int valid_args;
+	char	**args;
+	char	*joined;
+	int		total_len;
+	int		i;
+	int		valid_args;
 
 	*split = 1;
 	total_len = calc_joined_len(argc, argv, &valid_args);
@@ -68,7 +67,7 @@ static void	print_bench_if_needed(t_ctx *ctx)
 
 int	main(int argc, char **argv)
 {
-	t_ctx ctx;
+	t_ctx	ctx;
 
 	if (argc == 1)
 		return (0);

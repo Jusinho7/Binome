@@ -12,8 +12,6 @@
 
 #include "push_swap.h"
 
-#include "push_swap.h"
-
 static int	find_min(t_list *stack_a)
 {
 	int		min;
