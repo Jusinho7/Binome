@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 06:52:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/16 07:05:49 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/16 07:18:58 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,26 +25,9 @@ static char	**parse_args(int argc, char **argv, int *split, t_list **stack_a)
 {
 	char	**args;
 	char	*joined;
-	int		total_len;
-	int		i;
-	int		valid_args;
 
 	*split = 1;
-	total_len = calc_joined_len(argc, argv, &valid_args);
-	if (valid_args == 0)
-		ft_error(stack_a);
-	joined = malloc(total_len + 1);
-	if (!joined)
-		ft_error(stack_a);
-	*joined = '\0';
-	i = 0;
-	while (++i < argc)
-		if (argv[i] && !is_blank(argv[i]))
-		{
-			if (*joined)
-				ft_strcat(joined, " ");
-			ft_strcat(joined, argv[i]);
-		}
+	joined = build_joined(argc, argv, stack_a);
 	args = ft_split(joined, ' ');
 	free(joined);
 	return (args);

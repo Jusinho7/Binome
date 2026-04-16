@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 06:34:19 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/16 06:53:34 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/16 07:18:29 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,4 +59,31 @@ int	calc_joined_len(int argc, char **argv, int *valid_args)
 		i++;
 	}
 	return (total_len);
+}
+
+char	*build_joined(int argc, char **argv, t_list **stack_a)
+{
+	char	*joined;
+	int		total_len;
+	int		valid_args;
+	int		i;
+
+	total_len = calc_joined_len(argc, argv, &valid_args);
+	if (valid_args == 0)
+		ft_error(stack_a);
+	joined = malloc(total_len + 1);
+	if (!joined)
+		ft_error(stack_a);
+	*joined = '\0';
+	i = 0;
+	while (++i < argc)
+	{
+		if (argv[i] && !is_blank(argv[i]))
+		{
+			if (*joined)
+				ft_strcat(joined, " ");
+			ft_strcat(joined, argv[i]);
+		}
+	}
+	return (joined);
 }

@@ -34,7 +34,7 @@ make re      # rebuild from scratch
 
 ### Dependencies
 
-This project does not require external libraries beyond the standard C toolchain. It uses a custom `ft_printf` implementation included in the repository.
+This project does not require external libraries beyond the standard C toolchain. It uses a custom `ft_printf` implementation included in the repository that supports file descriptors for flexible output redirection.
 
 ### Running the Program
 
@@ -86,6 +86,7 @@ If input validation fails, the program writes `Error` to standard error and exit
   - empty or blank input strings
 - Benchmark mode with operation counts and strategy classification
 - Support for both separate arguments and a single quoted argument string
+- Robust argument parsing that ignores empty or whitespace-only arguments
 
 ## Algorithms and Justification
 
@@ -278,7 +279,7 @@ Beyond their individual domains, both members collaborated on:
 AI tools were used to assist with development and documentation:
 
 - **Tools Used:** GitHub Copilot (for code suggestions and debugging), Claude AI and ChatGPT (for explanations and optimization ideas).
-- **Tasks:** Debugging complex sorting logic, generating code snippets for edge cases, explaining algorithm concepts, and drafting documentation like this README.
+- **Tasks:** Debugging complex sorting logic, generating code snippets for edge cases, explaining algorithm concepts, drafting documentation like this README, and helping with code refactoring to meet 42 School norms.
 - **Impact:** Helped accelerate problem-solving and ensure clarity, but all final code and decisions were reviewed and implemented by the developers. AI served as a supportive tool, not a replacement for manual coding.
 
 
@@ -288,8 +289,10 @@ AI tools were used to assist with development and documentation:
 - Invalid input prints `Error` and exits without partial output
 - Does not include a separate `checker` executable target; all logic is compiled into `push_swap`
 - The complex sorting strategy includes a rank mapping pass that is O(n²), so the real runtime is influenced by both preprocessing and stack operation counts
+- Code follows 42 School norms: functions limited to 25 lines maximum and 4 parameters maximum
 
 ## Notes
 
 - The benchmark mode prints detailed statistics to standard error, while the sort operations remain on standard output.
 - If the input is already sorted, the program exits without printing any operations.
+- The implementation has been optimized for robustness, including improved argument parsing and file descriptor support in printf functions.

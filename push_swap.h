@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 06:51:35 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/16 06:51:35 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/04/16 07:18:48 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ void				clean_flags(char **args, t_algo *algo, int *bench);
 char				*ft_strcat(char *dest, char *src);
 int					ft_strlen(char *str);
 int					calc_joined_len(int argc, char **argv, int *valid_args);
+char				*build_joined(int argc, char **argv, t_list **stack_a);
 
 void				ft_error(t_list **stack);
 void				ft_free(t_list **stack);
