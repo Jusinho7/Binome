@@ -24,6 +24,7 @@ SRCS =  main.c \
         rotate.c \
         reverse.c \
         utils.c \
+        utils2.c \
         ft_printf.c \
         ft_putchar.c \
         ft_putstr.c \

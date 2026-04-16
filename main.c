@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: frazanak <frazanak@student.42antananari    +#+  +:+       +#+        */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/27 19:43:17 by srasolov          #+#    #+#             */
-/*   Updated: 2026/04/12 09:22:17 by frazanak         ###   ########.fr       */
+/*   Created: 2026/04/16 06:52:00 by srasolov          #+#    #+#             */
+/*   Updated: 2026/04/16 06:52:00 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
+
 
 static void	init_context(t_ctx *ctx)
 {
@@ -23,18 +24,30 @@ static void	init_context(t_ctx *ctx)
 
 static char	**parse_args(int argc, char **argv, int *split, t_list **stack_a)
 {
-	char	**args;
+	char **args;
+	char *joined;
+	int total_len;
+	int i;
+	int valid_args;
 
-	*split = 0;
-	if (argc == 2)
-	{
-		if (!argv[1] || is_blank(argv[1]))
-			ft_error(stack_a);
-		args = ft_split(argv[1], ' ');
-		*split = 1;
-	}
-	else
-		args = argv + 1;
+	*split = 1;
+	total_len = calc_joined_len(argc, argv, &valid_args);
+	if (valid_args == 0)
+		ft_error(stack_a);
+	joined = malloc(total_len + 1);
+	if (!joined)
+		ft_error(stack_a);
+	*joined = '\0';
+	i = 0;
+	while (++i < argc)
+		if (argv[i] && !is_blank(argv[i]))
+		{
+			if (*joined)
+				ft_strcat(joined, " ");
+			ft_strcat(joined, argv[i]);
+		}
+	args = ft_split(joined, ' ');
+	free(joined);
 	return (args);
 }
 
@@ -55,7 +68,7 @@ static void	print_bench_if_needed(t_ctx *ctx)
 
 int	main(int argc, char **argv)
 {
-	t_ctx	ctx;
+	t_ctx ctx;
 
 	if (argc == 1)
 		return (0);
