@@ -1,14 +1,2 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    ft_hello_garden.py                                 :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/02/27 01:59:54 by srasolov          #+#    #+#              #
-#    Updated: 2026/03/31 06:29:11 by srasolov         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-def ft_hello_garden():
+def ft_hello_garden() -> None:
     print("Hello, Garden Community!")

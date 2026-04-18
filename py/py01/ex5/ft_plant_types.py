@@ -1,21 +1,9 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    ft_plant_types.py                                  :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/04/01 06:50:52 by srasolov          #+#    #+#              #
-#    Updated: 2026/04/12 07:45:10 by srasolov         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 class Plant:
     def __init__(self, name: str, height: int, age: int) -> None:
         self._name = name
         self._height = height
         self._age = age
-    
+
     def show(self):
         print(f"{self._name}: {self._height}cm, {self._age} days old")
 
@@ -24,7 +12,8 @@ class Plant:
 
     def few_age(self):
         self._age += 1
-    
+
+
 class Flower(Plant):
     def __init__(self, name: str, height: int, age: int, color: str) -> None:
         super().__init__(name, height, age)
@@ -38,24 +27,42 @@ class Flower(Plant):
             print(f"{self._name} is blooming beautifully!")
         else:
             print(f"{self._name} has not bloomed yet")
-            
+
     def bloom(self):
         self._to_bloom = True
-        
+
+
 class Tree(Plant):
-    def __init__(self, name: str, height: int, age: int, trunk_diameter: int) -> None:
-        super().__init__(name , height, age)
+    def __init__(
+        self,
+        name: str,
+        height: int,
+        age: int,
+        trunk_diameter: int,
+    ) -> None:
+        super().__init__(name, height, age)
         self._trunk_diameter = trunk_diameter
-        
+
     def show(self):
         super().show()
         print(f"Trunk diameter:  {self._trunk_diameter}cm")
 
     def produce_shade(self):
-        print(f"Tree {self._name} now produces a shade of {self._height}cm long and {self._trunk_diameter}cm wide.")
+        print(
+            f"Tree {self._name} now produces a shade of {self._height}cm long "
+            f" and {self._trunk_diameter}cm wide."
+        )
+
 
 class Vegetable(Plant):
-    def __init__(self, name: str, height: int, age: int, harvest_season: int, nutritional_value: int) -> None:
+    def __init__(
+        self,
+        name: str,
+        height: int,
+        age: int,
+        harvest_season: int,
+        nutritional_value: int,
+    ) -> None:
         super().__init__(name, height, age)
         self._harvest_season = harvest_season
         self._nutritional_value = nutritional_value
@@ -68,9 +75,10 @@ class Vegetable(Plant):
     def grow(self, growth_rate):
         super().grow(growth_rate)
 
-    def few_age(self):      
+    def few_age(self):
         super().few_age()
-        self._nutritional_value += 1       
+        self._nutritional_value += 1
+
 
 def main():
     print("=== Garden Plant Types ===")
@@ -88,7 +96,7 @@ def main():
     print("[asking the oak to produce shade]")
     oak.produce_shade()
     print()
-    
+
     print("=== Vegetable")
     tomato = Vegetable("Tomato", 5.0, 10, "April", 0)
     tomato.show()
@@ -97,6 +105,7 @@ def main():
         tomato.grow(2.1)
         tomato.few_age()
     tomato.show()
+
 
 if __name__ == "__main__":
     main()

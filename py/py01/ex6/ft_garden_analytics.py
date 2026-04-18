@@ -1,36 +1,24 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    ft_garden_analytics.py                             :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/04/01 09:41:00 by srasolov          #+#    #+#              #
-#    Updated: 2026/04/12 09:23:52 by srasolov         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 class Plant:
     class __stats:
         def __init__(self) -> None:
             self.grow_calls = 0
-            self.age_calls =0
+            self.age_calls = 0
             self.show_calls = 0
 
         def display(self) -> None:
             print(
-                f"Stats:" 
+                f"Stats:"
                 f" {self.grow_calls} grow,"
                 f" {self.age_calls} age,"
                 f" {self.show_calls} show"
             )
-       
-    def __init__(self, name: str, age: int)-> None:
+
+    def __init__(self, name: str, age: int) -> None:
         self.name = name
         self.age = age
         self.__stats = Plant.__stats()
 
-    def grow(self) ->None:
+    def grow(self) -> None:
         self.__stats.grow_calls += 1
         self.age += 1
 
@@ -40,14 +28,19 @@ class Plant:
     @staticmethod
     def is_mature(age: int) -> bool:
         return age > 12
-    
+
     @classmethod
-    def anonymous(cls) -> "Plant" :
+    def anonymous(cls) -> "Plant":
         return cls(name="Unknown", age=0)
-    
+
     def show(self) -> None:
-        print(f"Plant  → name: {self.name} | age: {self.age} months | mature: {self.is_mature(self.age)}")
-            
+        print(
+            f"Plant  → name: {self.name} |"
+            f" age: {self.age} months |"
+            f" mature: {self.is_mature(self.age)}"
+        )
+
+
 class Seed(Plant):
     def __init__(self, name: str, age: int, seed_counter: int = 0) -> None:
         super().__init__(name, age)
@@ -56,7 +49,8 @@ class Seed(Plant):
     def show(self) -> None:
         super().show()
         print(f"Seeds: {self.seed_counter}")
-        
+
+
 def main():
     print("=== Test Plant ===")
     plant1 = Plant("Rose", 15)
@@ -78,6 +72,7 @@ def main():
     seed2.show()
     print()
     seed3.show()
+
 
 if __name__ == "__main__":
     main()

@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    ft_garden_data.py                                  :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/02/27 13:25:07 by srasolov          #+#    #+#              #
-#    Updated: 2026/04/01 04:06:05 by srasolov         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 class Plant:
     def __init__(self):
         self.name = None
@@ -18,6 +6,7 @@ class Plant:
 
     def show(self):
         print(f"{self.name}: {self.height} cm {self.age} days old")
+
 
 def main():
     print("=== Garden Plant Registry ===")
@@ -40,5 +29,6 @@ def main():
     cactus.age = 120
     cactus.show()
 
-if __name__== "__main__":
+
+if __name__ == "__main__":
     main()
