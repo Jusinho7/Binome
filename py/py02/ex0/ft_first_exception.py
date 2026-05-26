@@ -6,7 +6,6 @@ def test_temperature() -> None:
     print("=== Garden Temperature ===")
 
     tmp_list = ["25", "abc"]
-    not_error = True
 
     for temp_str in tmp_list:
         print()
@@ -16,11 +15,9 @@ def test_temperature() -> None:
             print(f"Temperature is now {result}°C")
         except ValueError as err:
             print(f"Caught input_temperature error: {err}")
-            not_error = False
 
     print()
-    if not_error:
-        print("All tests completed - program didn't crash")
+    print("All tests completed - program didn't crash")
 
 
 def main() -> None:
