@@ -37,9 +37,11 @@ def main() -> None:
     print(f"Common achievements: {common}")
 
     for name, achievements in players.items():
-        others: set[str] = set.union(
-            *[a for n, a in players.items() if n != name]
-        )
+        all_sets = []
+        for n, a in players.items():
+            if n != name:
+                all_sets.append(a)
+        others = set.union(*all_sets)
         only_player: set[str] = set.difference(achievements, others)
         missing: set[str] = set.difference(all_distinct, achievements)
         print(f"Only {name} has: {only_player}")
