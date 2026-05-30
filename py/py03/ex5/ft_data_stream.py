@@ -22,7 +22,7 @@ def consume_event(
     while len(events) > 0:
         idx: int = random.randrange(len(events))
         event: tuple[str, str] = events[idx]
-        events.pop(idx)
+        events[:] = events[:idx] + events[idx + 1:]
         yield event
 
 

@@ -29,7 +29,9 @@ def main() -> None:
     print(f"Score average is {average}")
 
     high_scores: dict[str, int] = {
-        name: score for name, score in score_dict.items() if score > average
+        name: score_dict[name]
+        for name in score_dict
+        if score_dict[name] > average
     }
     print(f"High scores: {high_scores}")
 

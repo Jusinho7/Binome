@@ -25,10 +25,12 @@ def main() -> None:
         "Dylan": gen_player_achievements(),
     }
 
-    for name, achievements in players.items():
-        print(f"Player {name}: {achievements}")
+    for name in players:
+        print(f"Player {name}: {players[name]}")
 
-    all_sets: list[set[str]] = list(players.values())
+    all_sets: list[set[str]] = []
+    for name in players:
+        all_sets += [players[name]]
 
     all_distinct: set[str] = set.union(*all_sets)
     print(f"\nAll distinct achievements: {all_distinct}")
@@ -36,18 +38,17 @@ def main() -> None:
     common: set[str] = set.intersection(*all_sets)
     print(f"Common achievements: {common}")
 
-    for name, achievements in players.items():
-        all_sets = []
-        for n, a in players.items():
+    for name in players:
+        all_sets: list[set[str]] = []
+        for n in players:
             if n != name:
-                all_sets.append(a)
+                all_sets += [players[n]]
         others = set.union(*all_sets)
-        only_player: set[str] = set.difference(achievements, others)
-        missing: set[str] = set.difference(all_distinct, achievements)
+        only_player: set[str] = set.difference(players[name], others)
         print(f"Only {name} has: {only_player}")
 
-    for name, achievements in players.items():
-        missing = set.difference(all_distinct, achievements)
+    for name in players:
+        missing = set.difference(all_distinct, players[name])
         print(f"{name} is missing: {missing}")
 
 

@@ -12,7 +12,7 @@ def get_player_pos() -> tuple[float, float, float]:
         valid: bool = True
         for part in parts:
             try:
-                coords.append(float(part.strip()))
+                coords += [float(part.strip())]
             except ValueError as e:
                 print(f"Error on parameter '{part.strip()}': {e}")
                 valid = False

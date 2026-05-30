@@ -15,7 +15,8 @@ def parse_inventory(args: list[str]) -> dict[str, int]:
             continue
         try:
             quantity: int = int(quantity_str)
-            inventory[name] = quantity
+            if quantity > 0:
+                inventory[name] = quantity
         except ValueError as e:
             print(f"Quantity error for '{name}': {e}")
     return inventory
@@ -38,12 +39,18 @@ def main() -> None:
     total: int = sum(dict.values(inventory))
     print(f"Total quantity of the {len(inventory)} items: {total}")
 
-    for item, qty in inventory.items():
-        pct: float = round(qty / total * 100, 1)
+    for item in inventory:
+        pct: float = round(inventory[item] / total * 100, 1)
         print(f"Item {item} represents {pct}%")
 
-    most: str = max(inventory, key=lambda k: (inventory[k], -items.index(k)))
-    least: str = min(inventory, key=lambda k: (inventory[k], items.index(k)))
+    least: str = ""
+    most: str = ""
+
+    for item in inventory:
+        if not most or inventory[item] > inventory[most]:
+            most = item
+        if not least or inventory[item] < inventory[least]:
+            least = item
     print(f"Item most abundant: {most} with quantity {inventory[most]}")
     print(f"Item least abundant: {least} with quantity {inventory[least]}")
 
