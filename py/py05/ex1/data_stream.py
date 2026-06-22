@@ -150,7 +150,7 @@ def main() -> None:
     stream = DataStream()
     stream.print_processors_stats()
 
-    print("\nRegistering Numeric Processor")
+    print("\nRegistering Numeric Processor\n")
     num_proc = NumericProcessor()
     stream.register_processor(num_proc)
 

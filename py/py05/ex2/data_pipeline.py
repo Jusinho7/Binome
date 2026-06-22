@@ -153,7 +153,7 @@ class DataStream:
                 )
 
     def print_processors_stats(self) -> None:
-        print("== DataStream statistics ==")
+        print("\n== DataStream statistics ==")
         if not self._processors:
             print("No processor found, no data")
             return
@@ -179,12 +179,12 @@ class DataStream:
 
 def main() -> None:
     print("=== Code Nexus - Data Pipeline ===")
-    print("\nInitialize Data Stream...")
+    print("\nInitialize Data Stream...\n")
 
     stream = DataStream()
     stream.print_processors_stats()
 
-    print("\nRegistering Processors")
+    print("\nRegistering Processors\n")
     num_proc = NumericProcessor()
     txt_proc = TextProcessor()
     log_proc = LogProcessor()
