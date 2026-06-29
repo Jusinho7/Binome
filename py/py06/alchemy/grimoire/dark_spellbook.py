@@ -7,6 +7,7 @@ def dark_spell_allowed_ingredients() -> list[str]:
 
 def dark_spell_record(spell_name: str, ingredients: str) -> str:
     result = validate_dark_ingredients(ingredients)
-    if "VALID" in result and "INVALID" not in result:
+    if "VALID" in result:
         return f"Dark spell recorded: {spell_name} ({result})"
-    return f"Dark spell rejected: {spell_name} ({result})"
+    else:
+        return f"Dark spell rejected: {spell_name} ({result})"
