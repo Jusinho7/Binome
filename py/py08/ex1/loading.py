@@ -15,7 +15,7 @@ def show_dependencies(name: str, description: str) -> Optional[Any]:
     return module
 
 
-def show_versions(package_names: list) -> None:
+def show_versions(package_names: list[str]) -> None:
     print("\nInstalled package versions:")
     for name in package_names:
         try:
@@ -49,14 +49,15 @@ def show_dependency_comparison() -> None:
     print("  • Stores exact versions in poetry.lock")
 
 
-def fetch_matrix_data_from_api(requests_module: Any) -> Optional[dict]:
+def fetch_matrix_data_from_api(
+        requests_module: Any) -> Optional[dict[str, int]]:
     try:
         response = requests_module.get(
             "https://api.github.com/repos/python/cpython", timeout=5
         )
         response.raise_for_status()
         payload = response.json()
-        return {"seed": payload.get("stargazers_count", 42)}
+        return {"seed": int(payload.get("stargazers_count", 42))}
     except Exception as exc:
         print(f"API fetch failed ({exc}); falling back to numpy simulation.")
         return None
