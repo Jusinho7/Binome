@@ -1,5 +1,3 @@
-from enum import Enum
-from datetime import datetime
 try:
     from pydantic import BaseModel, Field, ValidationError, model_validator
     HAVE_PYDANTIC = True
@@ -7,18 +5,14 @@ except ImportError:
     HAVE_PYDANTIC = False
 
 
-class ContactType(str, Enum):
-    RADIO = "radio"
-    VISUAL = "visual"
-    PHYSICAL = "physical"
-    TELEPATHIC = "telepathic"
+_ALLOWED_CONTACT_TYPES = {"radio", "visual", "physical", "telepathic"}
 
 
 class AlienContact(BaseModel):
     contact_id: str = Field(..., min_length=5, max_length=15)
-    timestamp: datetime
+    timestamp: str
     location: str = Field(..., min_length=3, max_length=100)
-    contact_type: ContactType
+    contact_type: str
     signal_strength: float = Field(..., ge=0.0, le=10.0)
     duration_minutes: int = Field(..., ge=1, le=1440)
     witness_count: int = Field(..., ge=1, le=100)
@@ -29,10 +23,12 @@ class AlienContact(BaseModel):
     def check_business_rules(self) -> "AlienContact":
         if not self.contact_id.startswith("AC"):
             raise ValueError('Contact ID must start with "AC"')
-        if (self.contact_type == ContactType.PHYSICAL and
+        if self.contact_type not in _ALLOWED_CONTACT_TYPES:
+            raise ValueError(f"Invalid contact_type: {self.contact_type}")
+        if (self.contact_type == "physical" and
                 not self.is_verified):
             raise ValueError("Physical contact reports must be verified")
-        if (self.contact_type == ContactType.TELEPATHIC and
+        if (self.contact_type == "telepathic" and
                 self.witness_count < 3):
             raise ValueError(
                 "Telepathic contact requires at least 3 witnesses")
@@ -46,7 +42,7 @@ class AlienContact(BaseModel):
 def print_alien(contact: AlienContact) -> None:
     print("Valid contact report:")
     print(f"ID: {contact.contact_id}")
-    print(f"Type: {contact.contact_type.value}")
+    print(f"Type: {contact.contact_type}")
     print(f"Location: {contact.location}")
     print(f"Signal: {contact.signal_strength}/10")
     print(f"Duration: {contact.duration_minutes} minutes")
@@ -61,8 +57,8 @@ def main() -> None:
         try:
             contact = AlienContact(
                 contact_id="AC_2024_001",
-                timestamp=datetime.now(),
-                contact_type=ContactType.RADIO,
+                timestamp="2026-07-14T00:00:00",
+                contact_type="radio",
                 location="Area 51, Nevada",
                 signal_strength=8.5,
                 duration_minutes=45,
