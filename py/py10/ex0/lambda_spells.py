@@ -2,12 +2,22 @@ from typing import Any
 
 
 def artifact_sorter(artifacts: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return sorted(artifacts, key=lambda x: x['power'], reverse=True)
+    if not artifacts:
+        return []
+    try:
+        return sorted(artifacts, key=lambda x: x['power'], reverse=True)
+    except KeyError:
+        return [{"error": "missing key"}]
 
 
 def power_filter(
         mages: list[dict[str, Any]], min_power: int) -> list[dict[str, Any]]:
-    return list(filter(lambda x: x['power'] >= min_power, mages))
+    if not mages:
+        return []
+    try:
+        return list(filter(lambda x: x['power'] >= min_power, mages))
+    except KeyError:
+        return [{"error": "missing key"}]
 
 
 def spell_transformer(spells: list[str]) -> list[str]:
@@ -15,14 +25,19 @@ def spell_transformer(spells: list[str]) -> list[str]:
 
 
 def mage_stats(mages: list[dict[str, Any]]) -> dict[str, Any]:
-    min_power = min(mages, key=lambda x: x['power'])
-    max_power = max(mages, key=lambda x: x['power'])
-    avg_power = round(sum(x['power'] for x in mages) / len(mages), 2)
-    return {
-        "min_power": min_power['power'],
-        "max_power": max_power['power'],
-        "avg_power": avg_power
-    }
+    if not mages:
+        return {}
+    try:
+        min_power = min(mages, key=lambda x: x['power'])
+        max_power = max(mages, key=lambda x: x['power'])
+        avg_power = round(sum(x['power'] for x in mages) / len(mages), 2)
+        return {
+            "min_power": min_power['power'],
+            "max_power": max_power['power'],
+            "avg_power": avg_power
+        }
+    except KeyError:
+        return {"error": "missing key"}
 
 
 def main() -> None:
@@ -46,22 +61,34 @@ def main() -> None:
     spell = spell_transformer(spells)
     mage = mage_stats(mages)
 
-    print(
-        "\nTesting artifact sorter...\n"
-        f"{art[0]['name']} ({art[0]['power']} power) comes before "
-        f"{art[1]['name']} ({art[1]['power']} power)"
-    )
+    print("\nTesting artifact sorter...")
+    if not art:
+        print("[WARNING]: No artifacts to display.")
+    elif art and "error" in art[0]:
+        print("[Error]: key is not found")
+    else:
+        print(' -> '.join(f"{a['name']}:({a['power']})" for a in art))
 
     print("\nTesting power filter...")
-    for m in power:
-        print(f" {m['name']} ({m['power']} power)")
+    if not power:
+        print("[WARNING]: No mages to display.")
+    elif power and "error" in power[0]:
+        print("[Error]: key is not found")
+    else:
+        for m in power:
+            print(f" - {m['name']}: {m['power']}")
 
     print("\nTesting spell transformer...")
-    print(' '.join(spell))
+    print(' '.join(spell) if spell else "List is empty.")
 
     print("\nTesting mages stats...")
-    for key, item in mage.items():
-        print(f"{key} = {item}")
+    if not mage:
+        print("[WARNING]: No mages to display.")
+    elif "error" in mage:
+        print("[Error]: key is not found")
+    else:
+        for key, item in mage.items():
+            print(f"{key} = {item}")
 
 
 if __name__ == "__main__":
