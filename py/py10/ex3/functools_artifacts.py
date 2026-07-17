@@ -5,19 +5,27 @@ from random import randint, choice
 from typing import Any
 
 
+def max_op(a: int, b: int) -> int:
+    return max(a, b)
+
+
+def min_op(a: int, b: int) -> int:
+    return min(a, b)
+
+
 def spell_reducer(spells: list[int], operation: str) -> int:
     if not spells:
         return 0
     op: dict[str, Callable[[int, int], int]] = {
         "add": add,
         "multiply": mul,
-        "max": max,
-        "min": min
+        "max": max_op,
+        "min": min_op
     }
     if operation not in op:
         print(f"[ERROR]: unknown operation '{operation}'")
         return 0
-    return reduce(op[operation], spells, 0)
+    return reduce(op[operation], spells)
 
 
 def base_enchantment(power: int, element: str, target: str) -> str:
@@ -25,17 +33,19 @@ def base_enchantment(power: int, element: str, target: str) -> str:
 
 
 def partial_enchanter(
-        base_enchantment: Callable[[int, str, str], str]
-        ) -> dict[str, partial[str]]:
-    fire_enchant: partial[str] = partial(
+        base_enchantment: Callable[..., str]
+        ) -> dict[str, Callable[..., str]]:
+    fire_enchant: Callable[..., str] = partial(
         base_enchantment,
         power=50,
-        element="fire")
-    ice_enchant: partial[str] = partial(
+        element="fire"
+    )
+    ice_enchant: Callable[..., str] = partial(
         base_enchantment,
         power=50,
-        element="ice")
-    lightning_enchant: partial[str] = partial(
+        element="ice"
+    )
+    lightning_enchant: Callable[..., str] = partial(
         base_enchantment,
         power=50,
         element="lightning"
@@ -68,16 +78,16 @@ def spell_dispatcher() -> Callable[[Any], str]:
         return f"Enchantment: {spell}"
 
     @cast.register
-    def _(spell: list[Any]) -> str:
+    def _(spell: list) -> str:  # type: ignore[type-arg]
         return f"Multi-cast: {len(spell)} spells"
 
     return cast
 
 
 def main() -> None:
-    spell_powers = [43, 32, 30, 27, 25, 29]
-    operations = ['add', 'multiply', 'max', 'min']
-    assets = ['Dragon', 'Goblin', 'Wizard', 'Knight']
+    spell_powers: list[int] = [43, 32, 30, 27, 25, 29]
+    operations: list[str] = ['add', 'multiply', 'max', 'min']
+    assets: list[str] = ['Dragon', 'Goblin', 'Wizard', 'Knight']
 
     print("\nTesting spell reducer...")
     for op in operations:
@@ -92,7 +102,7 @@ def main() -> None:
 
     print("\nTesting memoized fibonacci...")
     y: int = randint(1, 4)
-    for i in range(y):
+    for _ in range(y):
         x: int = randint(0, 20)
         print(f"Fib({x}): {memoized_fibonacci(x)}")
         print(f"Cache info: {memoized_fibonacci.cache_info()}")
@@ -101,7 +111,7 @@ def main() -> None:
     spells: list[int] = []
     spell_count: int = randint(1, 5)
     number: int = randint(0, 100)
-    item = choice(assets)
+    item: str = choice(assets)
     for _ in range(spell_count):
         r: int = randint(0, 10)
         spells.append(r)
