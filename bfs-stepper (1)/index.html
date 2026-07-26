@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>BFS - plus court chemin - simulation pas à pas</title>
+<style>
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    background: #f5f4f0;
+    color: #26251f;
+    margin: 0;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 1.5rem;
+  }
+  .layout {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  #grid {
+    display: grid;
+    gap: 0;
+    border-top: 2px solid #33322f;
+    border-left: 2px solid #33322f;
+    width: max-content;
+  }
+  .maze-cell {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    background: #ffffff;
+    transition: background 0.15s;
+  }
+  .cell-visited { background: #f1efe8; }
+  .cell-queue { background: #e5f0fe; }
+  .cell-path { background: #ffdcb8; }
+  .cell-current { background: #afa9ec; }
+
+  #desc {
+    font-size: 13px;
+    color: #57564e;
+    margin: 12px 0 0;
+    max-width: 240px;
+  }
+
+  #code {
+    display: block;
+    background: #eeecE4;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.85;
+    margin: 0;
+    min-width: 300px;
+  }
+  .code-line {
+    display: block;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .line-active {
+    background: #cecbf6;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+  button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #b4b2a9;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover:not(:disabled) { background: #f1efe8; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  #counter { font-size: 13px; color: #57564e; min-width: 70px; text-align: center; }
+
+  #queue-label {
+    font-size: 12px;
+    color: #888780;
+    margin: 1rem 0 6px;
+  }
+  #queue {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .queue-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #e5f0fe;
+    border: 1px solid #bcd7f7;
+  }
+  .queue-empty {
+    font-size: 11px;
+    color: #888780;
+  }
+
+  kbd {
+    border: 1px solid #d3d1c7;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 11px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    font-size: 11px;
+    color: #57564e;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+  <h1>BFS (parcours en largeur) - plus court chemin, simulation pas à pas</h1>
+
+  <div class="layout">
+    <div>
+      <div id="grid"></div>
+      <p id="desc"></p>
+      <div class="legend">
+        <span><span class="swatch" style="background:#afa9ec;"></span> cellule courante</span>
+        <span><span class="swatch" style="background:#e5f0fe;"></span> dans la file</span>
+        <span><span class="swatch" style="background:#f1efe8;"></span> visitée</span>
+        <span><span class="swatch" style="background:#ffdcb8;"></span> chemin final</span>
+      </div>
+    </div>
+
+    <div style="flex: 1; min-width: 270px;">
+      <pre id="code"></pre>
+
+      <div class="controls">
+        <button id="prev">&larr; précédent</button>
+        <span id="counter"></span>
+        <button id="next">suivant &rarr;</button>
+      </div>
+      <p style="font-size: 11px; color: #888780; margin-top: 6px;">
+        Navigation aussi possible au clavier : <kbd>&larr;</kbd> / <kbd>&rarr;</kbd>
+      </p>
+
+      <p id="queue-label">File (queue) — prochaines à traiter</p>
+      <div id="queue"></div>
+    </div>
+  </div>
+
+  <script src="bfs_stepper.js"></script>
+</body>
+</html>
