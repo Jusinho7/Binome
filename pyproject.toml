@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "1.0.0"
+description = "Reusable maze generation library (A-Maze-ing project)."
+readme = "mazegen/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "A-Maze-ing team" }]
+
+[tool.setuptools]
+packages = ["mazegen"]
+
+[tool.setuptools.package-data]
+mazegen = ["py.typed"]
