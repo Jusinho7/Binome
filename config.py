@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
 
-class ConfigError(Exception): ...
+class ConfigError(Exception):
+    ...
 
 
 @dataclass
@@ -17,8 +18,6 @@ class MazeConfig:
     seed: int | None = None
 
 
-# Accept the canonical English keys, with a couple of common aliases so the
-# same config file understood by the subject's examples always works.
 _ALIASES: dict[str, str] = {
     "WIDTH": "WIDTH",
     "HEIGHT": "HEIGHT",
@@ -34,7 +33,7 @@ _ALIASES: dict[str, str] = {
     "GRAINE": "SEED",
 }
 
-_REQUIRED = ("WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT")
+_REQUIRED = ("WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE")
 
 
 def _parse_coord(raw: str, key: str) -> tuple[int, int]:
@@ -115,7 +114,12 @@ def load_config(path: str) -> MazeConfig:
     if not output_file:
         raise ConfigError("OUTPUT_FILE must not be empty")
 
-    perfect = _parse_bool(raw_values["PERFECT"], "PERFECT")
+    perfect_raw = raw_values.get("PERFECT")
+    perfect: bool
+    if perfect_raw is None or perfect_raw == "":
+        perfect = True
+    else:
+        perfect = _parse_bool(perfect_raw, "PERFECT")
 
     seed_raw = raw_values.get("SEED")
     seed: int | None

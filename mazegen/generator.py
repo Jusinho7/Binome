@@ -3,6 +3,7 @@ from collections import deque
 from typing import Optional
 from .pattern42 import PATTERN_42, PATTERN_HEIGHT, PATTERN_WIDTH
 
+
 NORTH, EAST, SOUTH, WEST = "N", "E", "S", "W"
 
 _DIRECTIONS: dict[str, tuple[int, int, int]] = {
@@ -22,7 +23,8 @@ _OPPOSITE: dict[str, str] = {
 FULLY_CLOSED = 0b1111
 
 
-class MazeGenerationError(Exception): ...
+class MazeGenerationError(Exception):
+    ...
 
 
 class MazeGenerator:
@@ -54,6 +56,7 @@ class MazeGenerator:
         self.pattern_warning: Optional[str] = None
 
     def generate(self) -> None:
+        """Generate the maze in place (walls grid, pattern, loops)."""
         self._validate_entry_exit()
         self._place_pattern()
         self._carve_spanning_tree()
@@ -92,7 +95,7 @@ class MazeGenerator:
             x, y = cur
             for direction, (dx, dy, bit) in _DIRECTIONS.items():
                 if self._walls[y][x] & bit:
-                    continue
+                    continue  # wall closed
                 nxt = (x + dx, y + dy)
                 if nxt in visited:
                     continue
@@ -129,7 +132,7 @@ class MazeGenerator:
             raise MazeGenerationError("entry and exit must be different")
 
     def _place_pattern(self) -> None:
-        """Reserve cells to put it "42", if the maze is large enough."""
+        """Reserve cells for the '42' glyph, if the maze is large enough."""
         if not self.embed_pattern:
             return
         margin = 1
@@ -199,7 +202,6 @@ class MazeGenerator:
                 f"{len(unreached)} cell(s) unreachable from entry"
             )
 
-    """open a wall"""
     def _open_wall(self, cell: tuple[int, int], direction: str) -> None:
         x, y = cell
         dx, dy, bit = _DIRECTIONS[direction]
@@ -208,7 +210,6 @@ class MazeGenerator:
         opp_bit = _DIRECTIONS[_OPPOSITE[direction]][2]
         self._walls[ny][nx] &= ~opp_bit
 
-    """validation test if the wall is open or not"""
     def _wall_open(self, x: int, y: int, direction: str) -> bool:
         _dx, _dy, bit = _DIRECTIONS[direction]
         return not (self._walls[y][x] & bit)
@@ -265,7 +266,7 @@ class MazeGenerator:
             if opened >= target:
                 break
             if self._wall_open(x, y, direction):
-                continue  # already opened by a previous iteration
+                continue
             dx, dy, _bit = _DIRECTIONS[direction]
             nx, ny = x + dx, y + dy
             self._open_wall((x, y), direction)

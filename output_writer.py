@@ -1,5 +1,3 @@
-"""Writes the generated maze to disk in the subject's hexadecimal format."""
-
 from mazegen import MazeGenerator
 
 

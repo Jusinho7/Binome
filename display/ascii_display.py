@@ -1,11 +1,9 @@
-"""Interactive ASCII terminal display for a generated maze."""
-
 from mazegen import MazeGenerator
 import subprocess
 
+
 _RESET = "\033[0m"
 
-# A handful of color themes to cycle through (ANSI escape codes).
 _THEMES: list[dict[str, str]] = [
     {"wall": "\033[97m", "entry": "\033[95m", "exit": "\033[91m",
      "path": "\033[96m", "pattern": "\033[90m"},
@@ -15,9 +13,6 @@ _THEMES: list[dict[str, str]] = [
      "path": "\033[96m", "pattern": "\033[32m"},
 ]
 
-# Light box-drawing glyph for every (up, down, left, right) connectivity
-# combination at a grid corner. Using single-line Unicode characters gives
-# a much lighter maze render than a blocky '#' at every corner.
 _CORNER_GLYPHS: dict[tuple[bool, bool, bool, bool], str] = {
     (True, True, True, True): "┼",
     (False, True, True, True): "┬",
@@ -26,10 +21,10 @@ _CORNER_GLYPHS: dict[tuple[bool, bool, bool, bool], str] = {
     (True, True, True, False): "┤",
     (True, True, False, False): "│",
     (False, False, True, True): "─",
-    (False, True, False, True): "┌",
-    (False, True, True, False): "┐",
-    (True, False, False, True): "└",
-    (True, False, True, False): "┘",
+    (False, True, False, True): "╭",
+    (False, True, True, False): "╮",
+    (True, False, False, True): "╰",
+    (True, False, True, False): "╯",
     (True, False, False, False): "╵",
     (False, True, False, False): "╷",
     (False, False, True, False): "╴",
@@ -39,13 +34,10 @@ _CORNER_GLYPHS: dict[tuple[bool, bool, bool, bool], str] = {
 
 _HORIZONTAL_GLYPH = "─"
 _VERTICAL_GLYPH = "│"
+_H_SCALE = 2
 
 
 class ASCIIDisplay:
-    """Renders a :class:`MazeGenerator` maze to the terminal and drives a
-    small interactive menu (regenerate, show/hide path, rotate colors).
-    """
-
     def __init__(self, generator: MazeGenerator) -> None:
         self.generator = generator
         self._show_path = False
@@ -78,15 +70,6 @@ class ASCIIDisplay:
     def _build_edge_grids(
         self,
     ) -> tuple[list[list[bool]], list[list[bool]]]:
-        """Build boolean grids of unit wall segments on the canvas.
-
-        Returns:
-            A pair ``(horiz, vert)`` where ``horiz[r][c]`` is True if a
-            unit horizontal wall segment connects canvas points
-            ``(r, c)`` and ``(r, c + 1)``, and ``vert[r][c]`` is True if
-            a unit vertical wall segment connects ``(r, c)`` and
-            ``(r + 1, c)``.
-        """
         walls = self.generator.get_walls()
         width, height = self.generator.width, self.generator.height
 
@@ -137,8 +120,9 @@ class ASCIIDisplay:
 
         if r % 2 == 0 and c % 2 == 1:
             if horiz[r][c]:
-                return f"{wall_color}{_HORIZONTAL_GLYPH}{_RESET}"
-            return " "
+                segment = _HORIZONTAL_GLYPH * _H_SCALE
+                return f"{wall_color}{segment}{_RESET}"
+            return " " * _H_SCALE
 
         if r % 2 == 1 and c % 2 == 0:
             if vert[r][c]:
@@ -157,15 +141,17 @@ class ASCIIDisplay:
         pattern_cells: set[tuple[int, int]],
         path_cells: set[tuple[int, int]],
     ) -> str:
+        pad = " " * (_H_SCALE - 1)
         if (x, y) == self.generator.entry:
-            return f"{theme['entry']}E{_RESET}"
+            return f"{theme['entry']}E{_RESET}{pad}"
         if (x, y) == self.generator.exit:
-            return f"{theme['exit']}X{_RESET}"
+            return f"{theme['exit']}X{_RESET}{pad}"
         if (x, y) in pattern_cells:
-            return f"{theme['pattern']}█{_RESET}"
+            block = "█" * _H_SCALE
+            return f"{theme['pattern']}{block}{_RESET}"
         if (x, y) in path_cells:
-            return f"{theme['path']}●{_RESET}"
-        return " "
+            return f"{theme['path']}●{_RESET}{pad}"
+        return " " * _H_SCALE
 
     def _path_cell_set(self) -> set[tuple[int, int]]:
         directions = {

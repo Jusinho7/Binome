@@ -69,7 +69,7 @@ One `KEY=VALUE` pair per line; lines starting with `#` are comments.
 | `ENTRY`       | Entry coordinates `x,y`                   | `ENTRY=0,0`            |
 | `EXIT`        | Exit coordinates `x,y`                    | `EXIT=19,14`           |
 | `OUTPUT_FILE` | Path of the generated maze file           | `OUTPUT_FILE=maze.txt` |
-| `PERFECT`     | `True`/`False` — exactly one path or not  | `PERFECT=True`         |
+| `PERFECT`     | *(optional, default `True`)* `True`/`False` — exactly one path or not | `PERFECT=True` |
 | `SEED`        | *(optional)* RNG seed, for reproducibility | `SEED=42`             |
 
 `ENTREE`/`SORTIE`/`FICHIER_SORTIE`/`HAUTEUR`/`GRAINE` are also accepted as
