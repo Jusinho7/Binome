@@ -1,14 +1,7 @@
-"""Configuration file parsing for A-Maze-ing.
-
-The config file format is one ``KEY=VALUE`` pair per line, with ``#``
-starting a comment line (fully ignored).
-"""
-
 from dataclasses import dataclass
 
 
-class ConfigError(Exception):
-    """Raised when the configuration file is missing, malformed or invalid."""
+class ConfigError(Exception): ...
 
 
 @dataclass
@@ -74,18 +67,6 @@ def _parse_int(raw: str, key: str) -> int:
 
 
 def load_config(path: str) -> MazeConfig:
-    """Read and validate a maze configuration file.
-
-    Args:
-        path: Path to the config file.
-
-    Returns:
-        A validated :class:`MazeConfig`.
-
-    Raises:
-        ConfigError: If the file is missing, malformed, or a required key
-            is missing/invalid.
-    """
     try:
         with open(path, "r", encoding="utf-8") as handle:
             lines = handle.readlines()

@@ -70,6 +70,7 @@ class MazeGenerator:
         """returns the cell with 42 pattern."""
         return set(self._pattern_cells)
 
+    """BFS"""
     def shortest_path(
         self,
         start: Optional[tuple[int, int]] = None,
@@ -110,13 +111,16 @@ class MazeGenerator:
         path.reverse()
         return "".join(path)
 
+    """verif"""
     def _ensure_generated(self) -> None:
         if not self._generated:
             raise MazeGenerationError("generate() must be called first")
 
+    """Overflow test"""
     def _in_bounds(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
 
+    """checking the input and output coordinate"""
     def _validate_entry_exit(self) -> None:
         for name, (x, y) in (("entry", self.entry), ("exit", self.exit)):
             if not self._in_bounds(x, y):
@@ -191,11 +195,11 @@ class MazeGenerator:
 
         unreached = free_cells - visited
         if unreached:
-            # Should not normally happen; guard against disconnected areas.
             raise MazeGenerationError(
                 f"{len(unreached)} cell(s) unreachable from entry"
             )
 
+    """open a wall"""
     def _open_wall(self, cell: tuple[int, int], direction: str) -> None:
         x, y = cell
         dx, dy, bit = _DIRECTIONS[direction]
@@ -204,6 +208,7 @@ class MazeGenerator:
         opp_bit = _DIRECTIONS[_OPPOSITE[direction]][2]
         self._walls[ny][nx] &= ~opp_bit
 
+    """validation test if the wall is open or not"""
     def _wall_open(self, x: int, y: int, direction: str) -> bool:
         _dx, _dy, bit = _DIRECTIONS[direction]
         return not (self._walls[y][x] & bit)
