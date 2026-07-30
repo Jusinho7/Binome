@@ -22,6 +22,8 @@ class MazeGenerator:
     ) -> None:
         if width < 1 or height < 1:
             raise MazeGenerationError("width and height must be >= 1")
+        if width > 62 or height > 62:
+            raise MazeGenerationError("width and height must be <= 62")
         self.width = width
         self.height = height
         self.seed = seed
@@ -93,7 +95,7 @@ class MazeGenerator:
         if self.width < needed_w or self.height < needed_h:
             self.pattern_warning = (
                 "Maze too small to embed the '42' pattern "
-                f"(needs at least {needed_w}x{needed_h})."
+                f"(needs at least {needed_w + 2}x{needed_h})."
             )
             print(f"[warning] {self.pattern_warning}")
             return
