@@ -2,7 +2,7 @@ PYTHON  ?= python3
 PIP     ?= $(PYTHON) -m pip
 CONFIG  ?= config.txt
 
-.PHONY: install run debug clean lint lint-strict test package
+.PHONY: install run debug clean lint lint-strict package
 
 install:
 	$(PIP) install --break-system-packages -r requirements-dev.txt
@@ -21,9 +21,6 @@ lint:
 lint-strict:
 	flake8 .
 	mypy . --strict
-
-test:
-	pytest tests/ -q
 
 package:
 	$(PYTHON) -m build --wheel -o dist

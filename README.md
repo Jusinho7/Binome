@@ -20,7 +20,7 @@ or the display code, so it can be dropped into another project as-is.
 ### Requirements
 
 - Python 3.10+
-- `pip install -r requirements-dev.txt` (flake8, mypy, pytest, build) for
+- `pip install -r requirements-dev.txt` (flake8, mypy, build) for
   development tooling.
 
 ### Run
@@ -53,7 +53,6 @@ make install       # install dev dependencies
 make debug         # run under pdb
 make lint          # flake8 + mypy (subject-mandated options)
 make lint-strict   # flake8 --strict-ish + mypy --strict
-make test          # run the (ungraded) pytest suite
 make package        # rebuild the mazegen-*.whl at the repo root
 make clean          # remove caches/build artifacts
 ```
@@ -164,21 +163,31 @@ installable wheel, independent of the rest of the repository.
 
 ## Team & project management
 
-- Roles: *\<fill in per-member roles here>*.
-- Planning: *\<describe initial plan and how it evolved>*.
-- Retro: *\<what worked well, what could be improved>*.
-- Tools used: Python 3, flake8, mypy, pytest, `build` (PEP 517 wheel
+- **srasolov**: ASCII display (interactive terminal rendering,
+  menu) and the backtracker generation algorithm.
+- **maeandri**: config parsing/validation and the BFS
+  pathfinding algorithm.
+- **Shared**: overall project structure and keeping the codebase
+  modular (decoupling `mazegen` from the config/output/display
+  layers).
+- **Tools** used: Python 3, flake8, mypy, `build` (PEP 517 wheel
   builder).
 
 ## Resources
 
-- Classic references on maze generation: recursive backtracker, Prim's
-  and Kruskal's algorithms, and their link to spanning trees in graph
-  theory.
-- Python standard library docs for `random`, `collections.deque` (BFS),
-  and `dataclasses`.
-- AI assistance: used to scaffold the initial project layout, the ASCII
-  rendering routine, and the test suite; all generated code was reviewed,
-  tested (see `make test`), type-checked (`make lint`), and understood
-  before being kept — per the "Instructions pour l'IA" chapter of the
-  subject.
+- Backtracking: [Mastering Backtracking: From LeetCode to Real-World Applications](https://medium.com/@hanxuyang0826/mastering-backtracking-from-leetcode-to-real-world-applications-4c9150de20da)
+- BFS: [Breadth-First Search (BFS)](https://medium.com/@prajun_t/breadth-first-search-bfs-db7ffb384da7)
+- Bit manipulation: [Bit Operation: Solving Algorithm Problem in Python](https://medium.com/@pcheng5/bit-operation-solving-algorithm-problem-in-python-42a375efd3eb)
+- pip: [Pip in Python: what it is and how to install packages](https://www.luisllamas.es/python-como-usar-pip/)
+- Poetry: [POETRY](https://python-poetry.org/docs/basic-usage/)
+- Makefiles: [MAKEFILE](https://earthly.dev/blog/python-makefile/)
+- Packaging: [PACKAGE](https://blog.stephane-robert.info/docs/developper/programmation/python/modules/)
+
+## AI Usage
+
+- Explanation and understanding of key concepts (bit manipulation,
+  backtracking, BFS).
+- Generation of the wall-encoding logic and the "42" pattern
+  placement.
+- Debugging (mypy/flake8 errors, rendering bugs, config parsing
+  edge cases).
