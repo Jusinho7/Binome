@@ -1,4 +1,4 @@
-"""Maze carving: recursive-backtracker spanning tree + optional loop-adding."""
+"""Maze carving: recursive-backtracker spanning tree and optional loops."""
 import random
 from .directions import DIRECTIONS, OPPOSITE
 from .exceptions import MazeGenerationError
@@ -9,6 +9,7 @@ def open_wall(
         cell: tuple[int, int],
         direction: str
 ) -> None:
+    """Open the wall between a cell and its adjacent neighbor."""
     x, y = cell
     dx, dy, bit = DIRECTIONS[direction]
     nx, ny = x + dx, y + dy
@@ -22,6 +23,7 @@ def close_wall(
         cell: tuple[int, int],
         direction: str
 ) -> None:
+    """Close the wall between a cell and its adjacent neighbor."""
     x, y = cell
     dx, dy, bit = DIRECTIONS[direction]
     nx, ny = x + dx, y + dy
@@ -31,6 +33,7 @@ def close_wall(
 
 
 def wall_open(walls: list[list[int]], x: int, y: int, direction: str) -> bool:
+    """Return whether the wall in the given direction is open."""
     _dx, _dy, bit = DIRECTIONS[direction]
     return not (walls[y][x] & bit)
 
@@ -43,7 +46,7 @@ def carve_spanning_tree(
     pattern_cells: set[tuple[int, int]],
     rng: random.Random,
 ) -> None:
-    """Recursive-backtracker (iterative) carve over the free cells."""
+    """Carve a spanning tree using an iterative recursive backtracker."""
     free_cells = {
         (x, y)
         for y in range(height)

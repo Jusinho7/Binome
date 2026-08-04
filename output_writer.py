@@ -1,7 +1,10 @@
+"""Write generated mazes to the required output file format."""
+
 from mazegen import MazeGenerator
 
 
 def write_maze_file(path: str, generator: MazeGenerator) -> None:
+    """Write a generated maze to an output file."""
     walls = generator.get_walls()
     path_str = generator.shortest_path()
 

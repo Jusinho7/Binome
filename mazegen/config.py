@@ -1,8 +1,9 @@
+"""Load and validate maze configuration files."""
 from dataclasses import dataclass
 
 
 class ConfigError(Exception):
-    ...
+    """Represent an error while reading or validating a configuration."""
 
 
 @dataclass
@@ -37,6 +38,10 @@ _REQUIRED = ("WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE")
 
 
 def _parse_coord(raw: str, key: str) -> tuple[int, int]:
+    """Parse a coordinate from a ``x,y`` string.
+
+    Raise ConfigError if the value is not a valid coordinate.
+    """
     parts = raw.split(",")
     if len(parts) != 2:
         raise ConfigError(f"{key} must be formatted as 'x,y' (got: {raw!r})")
@@ -50,6 +55,10 @@ def _parse_coord(raw: str, key: str) -> tuple[int, int]:
 
 
 def _parse_bool(raw: str, key: str) -> bool:
+    """Parse a boolean value from a string.
+
+    Accept common true and false representations.
+    """
     normalized = raw.strip().lower()
     if normalized in ("true", "1", "yes", "y"):
         return True
@@ -59,6 +68,10 @@ def _parse_bool(raw: str, key: str) -> bool:
 
 
 def _parse_int(raw: str, key: str) -> int:
+    """Parse an integer from a string.
+
+    Raise ConfigError if the value is not a valid integer.
+    """
     try:
         return int(raw.strip())
     except ValueError as exc:
@@ -66,6 +79,14 @@ def _parse_int(raw: str, key: str) -> int:
 
 
 def load_config(path: str) -> MazeConfig:
+    """Load and validate a maze configuration file.
+
+    Read the configuration file, validate its contents, and return a
+    MazeConfig instance.
+
+    Raise ConfigError if the file cannot be read or if the
+    configuration is invalid.
+    """
     try:
         with open(path, "r", encoding="utf-8") as handle:
             lines = handle.readlines()
@@ -76,7 +97,7 @@ def load_config(path: str) -> MazeConfig:
 
     raw_values: dict[str, str] = {}
     for line_no, line in enumerate(lines, start=1):
-        stripped = line.strip()
+        stripped = line.split("#")[0].strip()
         if not stripped or stripped.startswith("#"):
             continue
         if "=" not in stripped:
@@ -89,7 +110,6 @@ def load_config(path: str) -> MazeConfig:
         value = value.strip()
         canonical = _ALIASES.get(key)
         if canonical is None:
-            # Unknown/extra keys are tolerated (subject allows extra keys).
             canonical = key
         raw_values[canonical] = value
 

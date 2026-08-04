@@ -1,3 +1,5 @@
+"""Generate mazes and provide access to their structure and paths."""
+
 import random
 from typing import Optional
 from .pattern42 import PATTERN_42, PATTERN_HEIGHT, PATTERN_WIDTH
@@ -10,6 +12,8 @@ __all__ = ["MazeGenerator", "MazeGenerationError"]
 
 
 class MazeGenerator:
+    """Generate and manage a rectangular maze."""
+
     def __init__(
         self,
         width: int,
@@ -20,6 +24,7 @@ class MazeGenerator:
         exit: tuple[int, int] = (0, 0),
         embed_pattern: bool = True,
     ) -> None:
+        """Initialize a maze generator."""
         if width < 1 or height < 1:
             raise MazeGenerationError("width and height must be >= 1")
         if width > 62 or height > 62:
@@ -40,7 +45,7 @@ class MazeGenerator:
         self.pattern_warning: Optional[str] = None
 
     def generate(self) -> None:
-        """Generate the maze in place (walls grid, pattern, loops)."""
+        """Generate the maze in place."""
         self._validate_entry_exit()
         self._place_pattern()
         self._carve_spanning_tree()
@@ -49,12 +54,12 @@ class MazeGenerator:
         self._generated = True
 
     def get_walls(self) -> list[list[int]]:
-        """Return walls."""
+        """Return a copy of the maze wall grid."""
         self._ensure_generated()
         return [row[:] for row in self._walls]
 
     def get_pattern_cells(self) -> set[tuple[int, int]]:
-        """returns the cell with 42 pattern."""
+        """Return the cells occupied by the 42 pattern."""
         return set(self._pattern_cells)
 
     def shortest_path(
@@ -62,23 +67,23 @@ class MazeGenerator:
         start: Optional[tuple[int, int]] = None,
         end: Optional[tuple[int, int]] = None,
     ) -> str:
-        """BFS, délégué au module pathfinding."""
+        """Return the shortest path between two cells."""
         self._ensure_generated()
         start = start or self.entry
         end = end or self.exit
         return _bfs_shortest_path(self._walls, start, end)
 
-    """verif"""
     def _ensure_generated(self) -> None:
+        """Ensure that the maze has been generated."""
         if not self._generated:
             raise MazeGenerationError("generate() must be called first")
 
-    """Overflow test"""
     def _in_bounds(self, x: int, y: int) -> bool:
+        """Return whether the given coordinates are inside the maze."""
         return 0 <= x < self.width and 0 <= y < self.height
 
-    """checking the input and output coordinate"""
     def _validate_entry_exit(self) -> None:
+        """Validate the entry and exit coordinates."""
         for name, (x, y) in (("entry", self.entry), ("exit", self.exit)):
             if not self._in_bounds(x, y):
                 raise MazeGenerationError(f"{name} {(x, y)} is out of bounds")
@@ -86,7 +91,7 @@ class MazeGenerator:
             raise MazeGenerationError("entry and exit must be different")
 
     def _place_pattern(self) -> None:
-        """Reserve cells for the '42' glyph, if the maze is large enough."""
+        """Reserve cells for the 42 pattern when possible."""
         if not self.embed_pattern:
             return
         margin = 1
@@ -108,7 +113,6 @@ class MazeGenerator:
                 if ch == "1":
                     candidate.add((ox + col_idx, oy + row_idx))
 
-        # Never let the pattern swallow the entry/exit cells.
         if self.entry in candidate or self.exit in candidate:
             self.pattern_warning = (
                 "Entry/exit collide with the '42' pattern; pattern skipped."
@@ -119,7 +123,7 @@ class MazeGenerator:
         self._pattern_cells = candidate
 
     def _carve_spanning_tree(self) -> None:
-        """Backtracker, delegate to the sculpture module."""
+        """Delegate spanning-tree carving to the carving module."""
         carve_spanning_tree(
             self._walls,
             self.width,
@@ -130,7 +134,7 @@ class MazeGenerator:
         )
 
     def _add_loops(self, extra_ratio: float = 0.12) -> None:
-        """Addition of loops, delegated to the carving module."""
+        """Add extra loops to the maze."""
         add_loops(
             self._walls,
             self.width,

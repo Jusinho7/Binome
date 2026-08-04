@@ -1,4 +1,5 @@
-"""BFS pathfinding over a maze's wall grid."""
+"""Compute shortest paths through a maze using breadth-first search."""
+
 from collections import deque
 from .directions import DIRECTIONS
 from .exceptions import MazeGenerationError
@@ -9,8 +10,10 @@ def shortest_path(
     start: tuple[int, int],
     end: tuple[int, int],
 ) -> str:
-    """Return the shortest path from start to end as a string of
-    direction letters."""
+    """Return the shortest path between two cells.
+
+    Use breadth-first search to guarantee the shortest path.
+    """
     if start == end:
         return ""
 
@@ -24,7 +27,7 @@ def shortest_path(
         x, y = cur
         for direction, (dx, dy, bit) in DIRECTIONS.items():
             if walls[y][x] & bit:
-                continue  # wall closed
+                continue
             nxt = (x + dx, y + dy)
             if nxt in visited:
                 continue

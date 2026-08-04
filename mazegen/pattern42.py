@@ -1,3 +1,5 @@
+"""Define the 42 pattern used for maze embedding."""
+
 _DIGIT_4 = (
     "10010",
     "10010",
@@ -20,6 +22,7 @@ _DIGIT_2 = (
 
 
 def build_pattern(gap: int = 1) -> list[str]:
+    """Build the 42 pattern with the requested spacing."""
     rows: list[str] = []
     spacer = "0" * gap
     for row4, row2 in zip(_DIGIT_4, _DIGIT_2):

@@ -1,7 +1,12 @@
+"""Run the maze generator application."""
+
 import sys
-from config import ConfigError, MazeConfig, load_config
 from display import ASCIIDisplay
-from mazegen import MazeGenerationError, MazeGenerator
+try:
+    from mazegen import MazeGenerationError, MazeGenerator, ConfigError, MazeConfig, load_config
+except ModuleNotFoundError:
+    print("Module not found")
+    sys.exit()
 from output_writer import write_maze_file
 
 
@@ -20,6 +25,14 @@ def build_generator(cfg: MazeConfig) -> MazeGenerator:
 
 
 def main(argv: list[str]) -> int:
+    """Run the maze generator application.
+
+    Parse the command-line arguments, load the configuration, generate
+    the maze, write it to the output file, and display the result.
+
+    Return:
+        ``0`` if the program completes successfully, otherwise ``1``.
+    """
     if len(argv) != 1:
         print("Usage: python3 a_maze_ing.py <config_file>", file=sys.stderr)
         return 1

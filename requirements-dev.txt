@@ -1,3 +1,4 @@
 flake8
 mypy
 build
+flake8-docstrings

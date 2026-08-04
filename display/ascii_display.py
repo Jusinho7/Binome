@@ -1,4 +1,10 @@
-from mazegen import MazeGenerator
+"""Render and interact with mazes in a colored ASCII terminal."""
+import sys
+try:
+    from mazegen import MazeGenerator
+except ModuleNotFoundError:
+    print("Module not found")
+    sys.exit()
 import subprocess
 
 
@@ -38,7 +44,10 @@ _H_SCALE = 2
 
 
 class ASCIIDisplay:
+    """Display and interact with a maze in the terminal."""
+
     def __init__(self, generator: MazeGenerator) -> None:
+        """Initialize the ASCII display with a maze generator."""
         self.generator = generator
         self._show_path = False
         self._theme_index = 0
@@ -70,6 +79,7 @@ class ASCIIDisplay:
     def _build_edge_grids(
         self,
     ) -> tuple[list[list[bool]], list[list[bool]]]:
+        """Build horizontal and vertical wall grids for rendering."""
         walls = self.generator.get_walls()
         width, height = self.generator.width, self.generator.height
 
@@ -80,16 +90,16 @@ class ASCIIDisplay:
             for x in range(width):
                 bits = walls[y][x]
                 r0, c0 = 2 * y, 2 * x
-                if bits & 0b0001:  # North
+                if bits & 0b0001:
                     horiz[r0][c0] = True
                     horiz[r0][c0 + 1] = True
-                if bits & 0b0100:  # South
+                if bits & 0b0100:
                     horiz[r0 + 2][c0] = True
                     horiz[r0 + 2][c0 + 1] = True
-                if bits & 0b1000:  # West
+                if bits & 0b1000:
                     vert[r0][c0] = True
                     vert[r0 + 1][c0] = True
-                if bits & 0b0010:  # East
+                if bits & 0b0010:
                     vert[r0][c0 + 2] = True
                     vert[r0 + 1][c0 + 2] = True
 
@@ -105,6 +115,7 @@ class ASCIIDisplay:
         pattern_cells: set[tuple[int, int]],
         path_cells: set[tuple[int, int]],
     ) -> str:
+        """Render a single point of the ASCII maze."""
         wall_color = theme["wall"]
         height2, width2 = len(vert), len(horiz[0])
 
@@ -141,6 +152,7 @@ class ASCIIDisplay:
         pattern_cells: set[tuple[int, int]],
         path_cells: set[tuple[int, int]],
     ) -> str:
+        """Render the contents of a maze cell."""
         pad = " " * (_H_SCALE - 1)
         if (x, y) == self.generator.entry:
             return f"{theme['entry']}E{_RESET}{pad}"
@@ -154,6 +166,7 @@ class ASCIIDisplay:
         return " " * _H_SCALE
 
     def _path_cell_set(self) -> set[tuple[int, int]]:
+        """Return the cells belonging to the shortest path."""
         directions = {
             "N": (0, -1), "E": (1, 0), "S": (0, 1), "W": (-1, 0),
         }
@@ -201,6 +214,7 @@ class ASCIIDisplay:
                 )
 
     def _regenerate(self) -> None:
+        """Generate a new maze using the current configuration."""
         old = self.generator
         new_seed = None if old.seed is None else old.seed + 1
         self.generator = MazeGenerator(

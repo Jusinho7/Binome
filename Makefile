@@ -1,29 +1,37 @@
-PYTHON  ?= python3
-PIP     ?= $(PYTHON) -m pip
-CONFIG  ?= config.txt
+PYTHON ?= python3
+CONFIG ?= config.txt
+VENV_DIR ?= .venv
+
+VENV_PYTHON = $(VENV_DIR)/bin/python3
+VENV_PIP = $(VENV_DIR)/bin/pip
 
 .PHONY: install run debug clean lint lint-strict package
 
-install:
-	$(PIP) install --break-system-packages -r requirements-dev.txt
+$(VENV_DIR)/bin/activate:
+	$(PYTHON) -m venv $(VENV_DIR)
+	$(VENV_PIP) install --upgrade pip -q
 
-run:
-	$(PYTHON) a_maze_ing.py $(CONFIG)
+install: $(VENV_DIR)/bin/activate
+	$(VENV_PIP) install -r requirements-dev.txt
 
-debug:
-	$(PYTHON) -m pdb a_maze_ing.py $(CONFIG)
+run: $(VENV_DIR)/bin/activate
+	$(VENV_PYTHON) a_maze_ing.py $(CONFIG)
 
-lint:
-	flake8 .
-	mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports \
-		--disallow-untyped-defs --check-untyped-defs .
+debug: $(VENV_DIR)/bin/activate
+	$(VENV_PYTHON) -m pdb a_maze_ing.py $(CONFIG)
 
-lint-strict:
-	flake8 .
-	mypy . --strict
+lint: $(VENV_DIR)/bin/activate
+	$(VENV_DIR)/bin/flake8 --exclude=$(VENV_DIR) .
+	$(VENV_DIR)/bin/mypy --warn-return-any --warn-unused-ignores \
+		--ignore-missing-imports --disallow-untyped-defs \
+		--check-untyped-defs --exclude $(VENV_DIR) .
 
-package:
-	$(PYTHON) -m build --wheel -o dist
+lint-strict: $(VENV_DIR)/bin/activate
+	$(VENV_DIR)/bin/flake8 --exclude=$(VENV_DIR) .
+	$(VENV_DIR)/bin/mypy . --strict --exclude $(VENV_DIR)
+
+package: $(VENV_DIR)/bin/activate
+	$(VENV_PYTHON) -m build --wheel -o dist
 	cp dist/mazegen-*.whl .
 
 clean:

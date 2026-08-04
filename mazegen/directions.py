@@ -1,3 +1,5 @@
+"""Define direction constants and wall bit masks for maze generation."""
+
 NORTH, EAST, SOUTH, WEST = "N", "E", "S", "W"
 
 DIRECTIONS: dict[str, tuple[int, int, int]] = {
