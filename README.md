@@ -91,8 +91,9 @@ All lines end with `\n`.
 Building the wheel:
 
 ```bash
-python3 -m build --wheel -o dist
+python3 -m build --sdist --wheel -o dist
 cp dist/mazegen-*.whl .
+cp dist/*.tar.gz .
 ```
 
 A pre-built `mazegen-1.0.0-py3-none-any.whl` is already provided at the

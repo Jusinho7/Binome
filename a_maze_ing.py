@@ -3,7 +3,13 @@
 import sys
 from display import ASCIIDisplay
 try:
-    from mazegen import MazeGenerationError, MazeGenerator, ConfigError, MazeConfig, load_config
+    from mazegen import (
+        MazeGenerationError,
+        MazeGenerator,
+        ConfigError,
+        MazeConfig,
+        load_config
+    )
 except ModuleNotFoundError:
     print("Module not found")
     sys.exit()

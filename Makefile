@@ -29,10 +29,11 @@ lint: $(VENV_DIR)/bin/activate
 lint-strict: $(VENV_DIR)/bin/activate
 	$(VENV_DIR)/bin/flake8 --exclude=$(VENV_DIR) .
 	$(VENV_DIR)/bin/mypy . --strict --exclude $(VENV_DIR)
-
+	
 package: $(VENV_DIR)/bin/activate
-	$(VENV_PYTHON) -m build --wheel -o dist
-	cp dist/mazegen-*.whl .
+	$(VENV_PYTHON) -m build --sdist --wheel -o dist
+	cp dist/*.whl .
+	cp dist/*.tar.gz .
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
