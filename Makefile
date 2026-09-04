@@ -1,49 +1,19 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/03/12 09:24:52 by srasolov          #+#    #+#              #
-#    Updated: 2026/03/17 10:26:49 by srasolov         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-NAME = push_swap
+NAME = codexion
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -pthread
 
-SRCS =  main.c \
-        checker.c \
-        check_files.c \
-        ft_split.c \
-        push.c \
-        swap.c \
-        rotate.c \
-        reverse.c \
-        utils.c \
-        ft_printf.c \
-        ft_putchar.c \
-        ft_putstr.c \
-        ft_putnbr.c \
-        ft_puthex.c \
-        ft_putptr.c \
-        ft_putunsigned.c\
-        ft_strcmp.c \
-        check_flag.c \
-        sort.c \
-        sort_simple.c 
-
-OBJS = $(SRCS:.c=.o)
+SRC_DIR = coders
+SRCS = main.c parsing.c init.c dongle.c coder.c monitor.c log_utils.c time_utils.c cleanup.c
+OBJS = $(addprefix $(SRC_DIR)/, $(SRCS:.c=.o))
+HEADER = $(SRC_DIR)/codexion.h
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.c
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
