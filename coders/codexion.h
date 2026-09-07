@@ -1,7 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        CODEXION            */
-/*   codexion.h                                                              */
+/*                                                        :::      ::::::::   */
+/*   codexion.h                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/06 05:23:13 by srasolov          #+#    #+#             */
+/*   Updated: 2026/09/06 05:41:16 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,35 +85,20 @@ struct s_sim
 	pthread_t			monitor;
 };
 
-/* parsing.c */
 int			parse_args(int argc, char **argv, t_sim *sim);
-
-/* init.c */
 int			init_sim(t_sim *sim);
-
-/* time_utils.c */
 long long	get_time_ms(t_sim *sim);
 void		sleep_ms(long long ms);
 void		ms_to_abs_timespec(t_sim *sim, long long ms, struct timespec *ts);
-
-/* log_utils.c */
 void		log_event(t_sim *sim, int coder_id, const char *msg);
-
-/* dongle.c */
 void		dongle_init(t_dongle *d, int id);
 void		dongle_destroy(t_dongle *d);
 int			dongle_acquire(t_dongle *d, t_coder *c, t_sim *sim);
 void		dongle_release(t_dongle *d, t_sim *sim);
-
-/* coder.c */
 void		*coder_routine(void *arg);
-
-/* monitor.c */
 void		*monitor_routine(void *arg);
 int			sim_is_stopped(t_sim *sim);
 void		sim_stop(t_sim *sim);
-
-/* cleanup.c */
 void		free_sim(t_sim *sim);
 
 #endif

@@ -1,4 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cleanup.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 19:38:31 by srasolov          #+#    #+#             */
+/*   Updated: 2026/09/07 21:24:11 by srasolov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
+
+void	dongle_destroy(t_dongle *d)
+{
+	pthread_mutex_destroy(&d->lock);
+	pthread_cond_destroy(&d->cond);
+}
 
 void	free_sim(t_sim *sim)
 {

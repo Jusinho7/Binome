@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 19:39:08 by srasolov          #+#    #+#             */
+/*   Updated: 2026/09/07 21:19:31 by srasolov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 void	sim_stop(t_sim *sim)
@@ -17,10 +29,11 @@ int	sim_is_stopped(t_sim *sim)
 	return (v);
 }
 
-static int	check_burnout(t_sim *sim, int i)
+static int	check_coder(t_sim *sim, int i)
 {
 	long long	now;
 	int			burned;
+	int			done;
 
 	pthread_mutex_lock(&sim->coders[i].state_lock);
 	now = get_time_ms(sim);
@@ -33,45 +46,50 @@ static int	check_burnout(t_sim *sim, int i)
 		sim->coders[i].state = STATE_BURNED;
 		burned = 1;
 	}
-	pthread_mutex_unlock(&sim->coders[i].state_lock);
-	return (burned);
-}
-
-static int	check_all_done(t_sim *sim, int i)
-{
-	int	done;
-
-	pthread_mutex_lock(&sim->coders[i].state_lock);
 	done = (sim->coders[i].compiles_done >= sim->n_compiles_required);
 	pthread_mutex_unlock(&sim->coders[i].state_lock);
+	if (burned)
+		return (-1);
 	return (done);
+}
+
+static int	monitor_step(t_sim *sim)
+{
+	int	i;
+	int	done;
+	int	all_done;
+
+	i = 0;
+	all_done = 1;
+	while (i < sim->n_coders)
+	{
+		done = check_coder(sim, i);
+		if (done == -1)
+			return (-1);
+		if (!done)
+			all_done = 0;
+		i++;
+	}
+	return (all_done);
 }
 
 void	*monitor_routine(void *arg)
 {
 	t_sim	*sim;
-	int		i;
-	int		all_done;
+	int		status;
 
 	sim = arg;
 	while (!sim_is_stopped(sim))
 	{
 		usleep(1000);
-		all_done = 1;
-		i = 0;
-		while (i < sim->n_coders)
+		status = monitor_step(sim);
+		if (status == -1)
 		{
-			if (check_burnout(sim, i))
-			{
-				log_event(sim, sim->coders[i].id, "burned out");
-				sim_stop(sim);
-				return (NULL);
-			}
-			if (!check_all_done(sim, i))
-				all_done = 0;
-			i++;
+			log_event(sim, sim->coders[0].id, "burned out");
+			sim_stop(sim);
+			return (NULL);
 		}
-		if (all_done)
+		if (status)
 		{
 			sim_stop(sim);
 			return (NULL);

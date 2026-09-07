@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 19:38:54 by srasolov          #+#    #+#             */
+/*   Updated: 2026/09/07 20:57:51 by srasolov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 static void	init_coder(t_sim *sim, int i)
@@ -10,7 +22,8 @@ static void	init_coder(t_sim *sim, int i)
 	sim->coders[i].last_compile_start = 0;
 	pthread_mutex_init(&sim->coders[i].state_lock, NULL);
 	sim->coders[i].right = &sim->dongles[i];
-	sim->coders[i].left = &sim->dongles[(i - 1 + sim->n_coders) % sim->n_coders];
+	sim->coders[i].left = &sim->dongles[
+		(i - 1 + sim->n_coders) % sim->n_coders];
 }
 
 int	init_sim(t_sim *sim)
