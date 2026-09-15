@@ -6,7 +6,7 @@ except ModuleNotFoundError:
     sys.exit()
 from .models import DroneMap
 
-WINDOW_SIZE = (1920, 1070)
+WINDOW_SIZE = (890, 780)
 COLORS = {
     "green": (0, 200, 0),
     "red": (200, 0, 0),
