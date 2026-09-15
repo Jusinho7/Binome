@@ -6,7 +6,8 @@ except ModuleNotFoundError:
     sys.exit()
 from .models import DroneMap
 
-WINDOW_SIZE = (890, 780)
+WINDOW_SIZE = (1920, 1070)
+BACKGROUND_IMAGE = "assets/bc.jpg"
 COLORS = {
     "green": (0, 200, 0),
     "red": (200, 0, 0),
@@ -63,6 +64,10 @@ class PygameDisplay:
     def __init__(self, drone_map: DroneMap) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
+        self.background = pygame.transform.smoothscale(
+            pygame.image.load(BACKGROUND_IMAGE).convert(),
+            WINDOW_SIZE
+        )
         pygame.display.set_caption("Fly-in — Map Preview")
         self.font = pygame.font.SysFont("consolas", 14)
         self.drone_map = drone_map
@@ -87,7 +92,12 @@ class PygameDisplay:
 
     def draw_static_map(self) -> None:
         """Draws zones and connections once, then waits until the window is closed."""
-        self.screen.fill((20, 20, 20))
+        self.screen.blit(self.background, (0, 0))
+
+        overlay = pygame.Surface(WINDOW_SIZE)
+        overlay.set_alpha(120)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
 
         for conn in self.drone_map.connections:
             p1 = self.positions[conn.zone_a.name]
