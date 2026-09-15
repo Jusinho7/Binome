@@ -9,6 +9,14 @@ class ParseError(Exception):
 
 
 VALID_ZONE_TYPES = {"normal", "blocked", "restricted", "priority"}
+COLORS = ["green", "red", "yellow", "blue", "gray", "purple",
+    "orange", "pink", "brown", "black", "white", "cyan", "magenta",
+    "lime", "teal", "navy", "maroon", "olive", "silver", "gold", "beige",
+    "lavender", "coral", "salmon", "khaki", "plum", "orchid", "turquoise",
+    "indigo", "violet", "peach", "mint", "cream", "tan", "chocolate", "charcoal",
+    "burgundy", "mustard", "rust", "sienna", "amber", "cerulean", "periwinkle", "fuchsia"
+]
+
 
 class Parser:
     def __init__(self, filepath: str) -> None:
@@ -79,6 +87,22 @@ class Parser:
             if not metadata_part.strip().endswith("]"):
                 raise ParseError(line_no, "malformed metadata block, missing ']'")
             metadata_str = metadata_part.strip()[:-1]
+            duplicate_check = metadata_str.split()
+            pile = []
+            for token in duplicate_check:
+                if "=" not in token:
+                    raise ParseError(line_no, f"invalid metadata token '{token}'")
+                key, value = token.split("=")
+                if key not in ["zone", "color", "max_drones"]:
+                    raise ParseError(line_no, f"invalid metadata key '{key}'")
+                pile.append(key)
+                if value == "":
+                    raise ParseError(line_no, f"metadata key '{key}' has empty value")
+                if key == "color" and value not in COLORS:
+                    raise ParseError(line_no, f"invalid color value '{value}'")
+            if len(pile) != len(set(pile)):
+                raise ParseError(line_no, "duplicate metadata keys in zone definition")
+
 
         parts = rest.strip().split()
         if len(parts) != 3:
