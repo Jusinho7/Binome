@@ -1,5 +1,5 @@
 from typing import Optional
-from models import Zone, Connection, DroneMap
+from .models import Zone, Connection, DroneMap
 
 
 class ParseError(Exception):
@@ -9,7 +9,6 @@ class ParseError(Exception):
 
 
 VALID_ZONE_TYPES = {"normal", "blocked", "restricted", "priority"}
-
 
 class Parser:
     def __init__(self, filepath: str) -> None:
@@ -47,6 +46,8 @@ class Parser:
             raise ParseError(0, "missing 'start_hub' zone")
         if drone_map.end is None:
             raise ParseError(0, "missing 'end_hub' zone")
+        if drone_map.start.x == drone_map.end.x and drone_map.start.y == drone_map.end.y:
+            raise ParseError(0, "start_hub and end_hub cannot share the same coordinates")
 
         drone_map.nb_drones = nb_drones
         return drone_map

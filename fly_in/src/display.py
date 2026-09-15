@@ -1,58 +1,77 @@
 import sys
 try:
     import pygame
-except ImportError:
+except ModuleNotFoundError:
     print("Error")
     sys.exit()
+from .models import DroneMap
+
+WINDOW_SIZE = (1920, 1070)
+COLORS = {
+    "green": (0, 200, 0),
+    "red": (200, 0, 0),
+    "yellow": (220, 200, 0),
+    "blue": (0, 100, 200),
+    "gray": (120, 120, 120),
+    None: (180, 180, 180),
+}
+ZONE_RADIUS = 25
 
 
-pygame.init()
+class PygameDisplay:
+    """Renders the static drone network (zones + connections)."""
 
-LARGEUR, HAUTEUR = 1920, 1080
-ecran = pygame.display.set_mode((LARGEUR, HAUTEUR))
-pygame.display.set_caption("Visualisation du tri à bulles")
-horloge = pygame.time.Clock()
+    def __init__(self, drone_map: DroneMap) -> None:
+        pygame.init()
+        self.screen = pygame.display.set_mode(WINDOW_SIZE)
+        pygame.display.set_caption("Fly-in — Map Preview")
+        self.font = pygame.font.SysFont("consolas", 14)
+        self.drone_map = drone_map
+        self._compute_layout()
 
-pile = [15, 20, 36, 98, 15, 20, 10, 55, 70, 5]
+    def _compute_layout(self) -> None:
+        """Maps zone (x, y) coordinates to screen pixel positions."""
+        xs = [z.x for z in self.drone_map.zones.values()]
+        ys = [z.y for z in self.drone_map.zones.values()]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
 
-def tri_bulles(pile):
-    n = len(pile)
-    for i in range(n):
-        for j in range(n - 1 - i):
-            if pile[j] > pile[j + 1]:
-                pile[j], pile[j + 1] = pile[j + 1], pile[j]
-            yield j, j + 1
+        margin = 80
+        span_x = (max_x - min_x) or 1
+        span_y = (max_y - min_y) or 1
 
-generateur = tri_bulles(pile)
+        self.positions: dict[str, tuple[int, int]] = {}
+        for zone in self.drone_map.zones.values():
+            px = margin + (zone.x - min_x) / span_x * (WINDOW_SIZE[0] - 2 * margin)
+            py = margin + (zone.y - min_y) / span_y * (WINDOW_SIZE[1] - 2 * margin)
+            self.positions[zone.name] = (int(px), int(py))
 
-def dessiner_barres(surface, pile, indices_actifs=()):
-    largeur_barre = LARGEUR // len(pile)
-    max_valeur = max(pile)
-    for idx, valeur in enumerate(pile):
-        hauteur = int((valeur / max_valeur) * (HAUTEUR - 40))
-        x = idx * largeur_barre
-        y = HAUTEUR - hauteur
-        couleur = (255, 80, 80) if idx in indices_actifs else (100, 200, 255)
-        pygame.draw.rect(surface, couleur, (x, y, largeur_barre - 2, hauteur))
+    def draw_static_map(self) -> None:
+        """Draws zones and connections once, then waits until the window is closed."""
+        self.screen.fill((20, 20, 20))
 
-def run(loading = True, finish = False):
-    while loading:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                loading = False
+        for conn in self.drone_map.connections:
+            p1 = self.positions[conn.zone_a.name]
+            p2 = self.positions[conn.zone_b.name]
+            pygame.draw.line(self.screen, (100, 100, 100), p1, p2, 2)
 
-        indices_actifs = ()
-        if not finish:
-            try:
-                indices_actifs = next(generateur)
-            except StopIteration:
-                finish = True
+        for zone in self.drone_map.zones.values():
+            pos = self.positions[zone.name]
+            color = COLORS.get(zone.color, COLORS[None])
+            pygame.draw.circle(self.screen, color, pos, ZONE_RADIUS)
+            label = self.font.render(zone.name, True, (255, 255, 255))
+            self.screen.blit(label, (pos[0] - label.get_width() // 2, pos[1] + ZONE_RADIUS + 4))
 
-        ecran.fill((20, 20, 20))
-        dessiner_barres(ecran, pile, indices_actifs)
         pygame.display.flip()
 
-        horloge.tick(30) 
-
-run()  
-pygame.quit()
+    def run(self) -> None:
+        """Keeps the window open until the user closes it."""
+        self.draw_static_map()
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    running = False
+        pygame.quit()
