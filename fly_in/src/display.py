@@ -82,11 +82,13 @@ class PygameDisplay:
             WINDOW_SIZE
         )
         drone_image = pygame.image.load(DRONE_IMAGE).convert_alpha()
-        self.drone_image = pygame.transform.smoothscale(drone_image, (72, 48))
+        self.drone_image = pygame.transform.smoothscale(drone_image, (54, 36))
         self.station_image = None
         if os.path.exists(STATION_IMAGE):
             station_image = pygame.image.load(STATION_IMAGE).convert_alpha()
-            self.station_image = pygame.transform.smoothscale(station_image, (64, 64))
+            self.station_image = pygame.transform.smoothscale(
+                station_image, (46, 46)
+            )
         self.start_image = self._load_hub_image(START_IMAGE)
         self.end_image = self._load_hub_image(END_IMAGE)
         pygame.display.set_caption("Fly-in — Map Preview")
@@ -98,7 +100,9 @@ class PygameDisplay:
         self.paused = False
         self.speed = 1.0
         self.help_visible = False
-        self.hud_rect = pygame.Rect((WINDOW_SIZE[0] - 460) // 2, 20, 460, 50)
+        hud_group_width = 460 + 12 + 100
+        hud_group_x = (WINDOW_SIZE[0] - hud_group_width) // 2
+        self.hud_rect = pygame.Rect(hud_group_x, 20, 460, 50)
         self.help_button_rect = pygame.Rect(self.hud_rect.right + 12, 20, 100, 44)
         self.help_panel_rect = pygame.Rect(self.help_button_rect.x, 72, 330, 260)
         self._compute_layout()
@@ -107,7 +111,7 @@ class PygameDisplay:
         if not os.path.exists(image_path):
             return self.station_image
         image = pygame.image.load(image_path).convert_alpha()
-        return pygame.transform.smoothscale(image, (64, 64))
+        return pygame.transform.smoothscale(image, (46, 46))
 
     def _compute_layout(self) -> None:
         """Maps zone (x, y) coordinates to screen pixel positions."""
@@ -116,14 +120,22 @@ class PygameDisplay:
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
 
-        margin = 80
+        margin = 120
         span_x = (max_x - min_x) or 1
         span_y = (max_y - min_y) or 1
+        scale = min(
+            (WINDOW_SIZE[0] - 2 * margin) / span_x,
+            (WINDOW_SIZE[1] - 2 * margin) / span_y,
+        ) * 0.82
+        graph_width = span_x * scale
+        graph_height = span_y * scale
+        offset_x = (WINDOW_SIZE[0] - graph_width) / 2
+        offset_y = (WINDOW_SIZE[1] - graph_height) / 2
 
         self.positions: dict[str, tuple[int, int]] = {}
         for zone in self.drone_map.zones.values():
-            px = margin + (zone.x - min_x) / span_x * (WINDOW_SIZE[0] - 2 * margin)
-            py = margin + (zone.y - min_y) / span_y * (WINDOW_SIZE[1] - 2 * margin)
+            px = offset_x + (zone.x - min_x) * scale
+            py = offset_y + (zone.y - min_y) * scale
             self.positions[zone.name] = (int(px), int(py))
 
     def _draw_frame(
@@ -162,7 +174,7 @@ class PygameDisplay:
                 station_rect = station.get_rect(center=pos)
                 self.screen.blit(station, station_rect)
             label = self.font.render(zone.name, True, (255, 255, 255))
-            label_y = pos[1] + (ZONE_RADIUS if hub_image is None else 32) + 4
+            label_y = pos[1] + (ZONE_RADIUS if hub_image is None else 23) + 4
             self.screen.blit(label, (pos[0] - label.get_width() // 2, label_y))
 
         for drone_id, zone in positions.items():
@@ -251,7 +263,7 @@ class PygameDisplay:
     def run(self) -> None:
         running = True
         frame_index = 0
-        elapsed = 0
+        elapsed = 0.0
         clock = pygame.time.Clock()
         while running:
             for event in pygame.event.get():

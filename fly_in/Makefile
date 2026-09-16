@@ -1,6 +1,6 @@
 PYTHON = python3
 MAIN = main.py
-FILE = maps/easy/01_linear_path.txt
+FILE = maps/easy/03_basic_capacity.txt
 
 .PHONY: run help clean
 
