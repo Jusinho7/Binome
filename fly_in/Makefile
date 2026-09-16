@@ -1,6 +1,6 @@
 PYTHON = python3
 MAIN = main.py
-FILE = maps/hard/03_ultimate_challenge.txt
+FILE = maps/easy/01_linear_path.txt
 
 .PHONY: run help clean
 
@@ -12,7 +12,7 @@ install:
 
 help:
 	@echo "Available targets:"
-	@echo "  make run       Run the project with ex.txt"
+	@echo "  make run       Run the project with the default map"
 	@echo "  make help      Show this help"
 	@echo "  make clean     Remove Python cache files"
 

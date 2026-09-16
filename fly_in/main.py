@@ -37,7 +37,7 @@ def main() -> None:
 
     display.print_summary(len(turns))
 
-    display = PygameDisplay(drone_map, engine.position_history)
+    display = PygameDisplay(drone_map, engine.position_history, turns)
     display.run()
 
 

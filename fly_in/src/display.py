@@ -69,9 +69,12 @@ ZONE_RADIUS = 25
 
 
 class PygameDisplay:
-    """Renders the drone network and replays the simulation turns."""
-
-    def __init__(self, drone_map: DroneMap, position_history: list[dict[int, Zone]]) -> None:
+    def __init__(
+        self,
+        drone_map: DroneMap,
+        position_history: list[dict[int, Zone]],
+        turn_log: list[list[str]] | None = None,
+    ) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
         self.background = pygame.transform.smoothscale(
@@ -88,8 +91,16 @@ class PygameDisplay:
         self.end_image = self._load_hub_image(END_IMAGE)
         pygame.display.set_caption("Fly-in — Map Preview")
         self.font = pygame.font.SysFont("consolas", 14)
+        self.hud_font = pygame.font.SysFont("consolas", 16)
         self.drone_map = drone_map
         self.position_history = position_history
+        self.turn_log = turn_log or []
+        self.paused = False
+        self.speed = 1.0
+        self.help_visible = False
+        self.hud_rect = pygame.Rect((WINDOW_SIZE[0] - 460) // 2, 20, 460, 50)
+        self.help_button_rect = pygame.Rect(self.hud_rect.right + 12, 20, 100, 44)
+        self.help_panel_rect = pygame.Rect(self.help_button_rect.x, 72, 330, 260)
         self._compute_layout()
 
     def _load_hub_image(self, image_path: str) -> pygame.Surface | None:
@@ -115,7 +126,13 @@ class PygameDisplay:
             py = margin + (zone.y - min_y) / span_y * (WINDOW_SIZE[1] - 2 * margin)
             self.positions[zone.name] = (int(px), int(py))
 
-    def _draw_frame(self, positions: dict[int, Zone]) -> None:
+    def _draw_frame(
+        self,
+        positions: dict[int, Zone],
+        next_positions: dict[int, Zone] | None = None,
+        progress: float = 0.0,
+        turn_number: int = 0,
+    ) -> None:
         self.screen.blit(self.background, (0, 0))
 
         overlay = pygame.Surface(WINDOW_SIZE)
@@ -148,21 +165,90 @@ class PygameDisplay:
             label_y = pos[1] + (ZONE_RADIUS if hub_image is None else 32) + 4
             self.screen.blit(label, (pos[0] - label.get_width() // 2, label_y))
 
-        drone_colors = [
-            (0, 255, 255), (255, 0, 255), (255, 255, 0),
-            (0, 255, 0), (0, 120, 255), (255, 80, 80),
-        ]
         for drone_id, zone in positions.items():
-            pos = self.positions[zone.name]
+            start_x, start_y = self.positions[zone.name]
+            end_x, end_y = start_x, start_y
+            if next_positions is not None and drone_id in next_positions:
+                next_zone = next_positions[drone_id]
+                end_x, end_y = self.positions[next_zone.name]
+            pos = (
+                round(start_x + (end_x - start_x) * progress),
+                round(start_y + (end_y - start_y) * progress),
+            )
             sprite_rect = self.drone_image.get_rect(center=pos)
             self.screen.blit(self.drone_image, sprite_rect)
             label = self.font.render(f"D{drone_id}", True, (255, 255, 255))
             self.screen.blit(label, (pos[0] + 12, pos[1] - 8))
 
+        self._draw_hud(turn_number)
+        self._draw_movement(turn_number)
         pygame.display.flip()
 
+    def _draw_hud(self, turn_number: int = 0) -> None:
+        status = "PAUSE" if self.paused else "LECTURE"
+        status_color = (255, 210, 80) if self.paused else (130, 255, 150)
+        lines = [
+            f"{status}  |  Tour: {turn_number}/{max(len(self.position_history) - 1, 0)}  |  Vitesse: x{self.speed:g}"
+        ]
+        panel = pygame.Surface(self.hud_rect.size, pygame.SRCALPHA)
+        panel.fill((0, 0, 0, 180))
+        self.screen.blit(panel, self.hud_rect.topleft)
+        for index, line in enumerate(lines):
+            color = status_color if index == 0 else (240, 240, 240)
+            text = self.hud_font.render(line, True, color)
+            text_rect = text.get_rect(center=self.hud_rect.center)
+            self.screen.blit(text, text_rect)
+
+        mouse_over_help = self.help_button_rect.collidepoint(pygame.mouse.get_pos())
+        button_color = (70, 130, 210) if mouse_over_help else (45, 85, 150)
+        pygame.draw.rect(self.screen, button_color, self.help_button_rect, border_radius=6)
+        pygame.draw.rect(self.screen, (220, 235, 255), self.help_button_rect, 2, border_radius=6)
+        help_text = self.hud_font.render("HELP", True, (255, 255, 255))
+        help_rect = help_text.get_rect(center=self.help_button_rect.center)
+        self.screen.blit(help_text, help_rect)
+
+        if self.help_visible:
+            help_panel = pygame.Surface(self.help_panel_rect.size, pygame.SRCALPHA)
+            help_panel.fill((0, 0, 0, 220))
+            self.screen.blit(help_panel, self.help_panel_rect.topleft)
+            pygame.draw.rect(self.screen, (220, 235, 255), self.help_panel_rect, 2, border_radius=6)
+
+            help_lines = [
+                    "COMMANDS",
+                    "Space -> Pause / Resume",
+                    "R -> Restart",
+                    "+ / - -> Change speed",
+                    "N -> Next turn",
+                    "B -> Previous turn",
+                    "0 -> Normal speed",
+                    "Escape -> Quit",
+                    "H -> Show / hide help",
+            ]
+            for index, line in enumerate(help_lines):
+                color = (255, 220, 100) if index == 0 else (245, 245, 245)
+                text = self.font.render(line, True, color)
+                self.screen.blit(text, (self.help_panel_rect.x + 16, self.help_panel_rect.y + 12 + index * 26))
+
+    def _draw_movement(self, turn_number: int) -> None:
+        if turn_number == 0:
+            movement = "Debut de la simulation"
+        elif turn_number <= len(self.turn_log):
+            moves = self.turn_log[turn_number - 1]
+            movement = " ".join(moves) if moves else "(attente)"
+        else:
+            movement = "(aucun deplacement)"
+
+        text = self.font.render(f"Tour {turn_number}: {movement}", True, (245, 245, 245))
+        panel_width = min(max(text.get_width() + 32, 360), WINDOW_SIZE[0] - 80)
+        panel = pygame.Surface((panel_width, 38), pygame.SRCALPHA)
+        panel.fill((0, 0, 0, 190))
+        panel_x = (WINDOW_SIZE[0] - panel_width) // 2
+        panel_y = WINDOW_SIZE[1] - 58
+        self.screen.blit(panel, (panel_x, panel_y))
+        text_rect = text.get_rect(center=(WINDOW_SIZE[0] // 2, panel_y + 19))
+        self.screen.blit(text, text_rect)
+
     def run(self) -> None:
-        """Replays the simulation while keeping the window responsive."""
         running = True
         frame_index = 0
         elapsed = 0
@@ -171,15 +257,67 @@ class PygameDisplay:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.help_button_rect.collidepoint(event.pos):
+                        self.help_visible = not self.help_visible
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                    elif event.key in (pygame.K_SPACE, pygame.K_p):
+                        self.paused = not self.paused
+                    elif event.key == pygame.K_r:
+                        frame_index = 0
+                        elapsed = 0
+                        self.paused = False
+                    elif event.key in (pygame.K_PLUS, pygame.K_EQUALS, pygame.K_KP_PLUS):
+                        self.speed = min(self.speed * 2, 8.0)
+                    elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+                        self.speed = max(self.speed / 2, 0.25)
+                    elif event.key == pygame.K_0:
+                        self.speed = 1.0
+                    elif event.key == pygame.K_h:
+                        self.help_visible = not self.help_visible
+                    elif event.key == pygame.K_n:
+                        frame_index = min(frame_index + 1, len(self.position_history) - 1)
+                        elapsed = 0
+                        self.paused = True
+                    elif event.key == pygame.K_b:
+                        frame_index = max(frame_index - 1, 0)
+                        elapsed = 0
+                        self.paused = True
+                    elif event.key == pygame.K_RIGHT:
+                        frame_index = min(frame_index + 1, len(self.position_history) - 1)
+                        elapsed = 0
+                        self.paused = True
+                    elif event.key == pygame.K_LEFT:
+                        frame_index = max(frame_index - 1, 0)
+                        elapsed = 0
+                        self.paused = True
+                    elif event.key == pygame.K_HOME:
+                        frame_index = 0
+                        elapsed = 0
+                        self.paused = True
+                    elif event.key == pygame.K_END:
+                        frame_index = len(self.position_history) - 1
+                        elapsed = 0
+                        self.paused = True
 
             if self.position_history:
-                self._draw_frame(self.position_history[frame_index])
-                elapsed += clock.tick(60)
-                if elapsed >= 500 and frame_index < len(self.position_history) - 1:
-                    frame_index += 1
-                    elapsed = 0
+                next_positions = None
+                if frame_index < len(self.position_history) - 1:
+                    next_positions = self.position_history[frame_index + 1]
+                self._draw_frame(
+                    self.position_history[frame_index],
+                    next_positions,
+                    min(elapsed / 500, 1.0),
+                    frame_index,
+                )
+                delta_time = clock.tick(60)
+                if not self.paused:
+                    elapsed += delta_time * self.speed
+                    if elapsed >= 500 and frame_index < len(self.position_history) - 1:
+                        frame_index += 1
+                        elapsed = 0
             else:
                 clock.tick(60)
         pygame.quit()
