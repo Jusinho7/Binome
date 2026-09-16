@@ -97,3 +97,9 @@ class SpaceTimePathfinder:
             current = previous[current]
         path.reverse()
         return [(self.drone_map.zones[name], turn) for name, turn in path]
+
+
+class Pathfinder(SpaceTimePathfinder):
+    def shortest_path(self, start: Zone, end: Zone) -> list[Zone]:
+        timed_path = self.find_path(start, end, {})
+        return [zone for zone, _ in timed_path]

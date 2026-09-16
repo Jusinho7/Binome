@@ -16,7 +16,9 @@ class SimulationEngine:
         self.zone_occupancy[drone_map.start.name] = len(self.drones)
         self.future_arrivals: dict[int, dict[str, int]] = defaultdict(lambda: defaultdict(int))
         self.turn_log: list[list[str]] = []
+        self.position_history: list[dict[int, Zone]] = []
         self._compute_initial_paths()
+        self._save_positions()
 
     def _compute_initial_paths(self) -> None:
         path = self.pathfinder.shortest_path(self.drone_map.start, self.drone_map.end)
@@ -41,7 +43,11 @@ class SimulationEngine:
             if turn > max_turns:
                 raise RuntimeError("Simulation exceeded max_turns — possible deadlock")
             self.turn_log.append(self._simulate_turn(turn))
+            self._save_positions()
         return self.turn_log
+
+    def _save_positions(self) -> None:
+        self.position_history.append({drone.id: drone.current_zone for drone in self.drones})
 
     def _simulate_turn(self, turn: int) -> list[str]:
         moves: list[str] = []

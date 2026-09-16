@@ -1,3 +1,4 @@
+import os
 import sys
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -9,10 +10,14 @@ except ModuleNotFoundError:
         f"{RED}Please install it using 'pip install pygame' and try again.{RESET}"
     )
     sys.exit()
-from .models import DroneMap
+from .models import DroneMap, Zone
 
 WINDOW_SIZE = (1920, 1070)
 BACKGROUND_IMAGE = "assets/bc.jpg"
+DRONE_IMAGE = "assets/drone.png"
+STATION_IMAGE = "assets/hubs/station.png"
+START_IMAGE = "assets/hubs/start_stop.png"
+END_IMAGE = "assets/hubs/start_stop.png"
 COLORS = {
     "green": (0, 200, 0),
     "red": (200, 0, 0),
@@ -64,19 +69,34 @@ ZONE_RADIUS = 25
 
 
 class PygameDisplay:
-    """Renders the static drone network (zones + connections)."""
+    """Renders the drone network and replays the simulation turns."""
 
-    def __init__(self, drone_map: DroneMap) -> None:
+    def __init__(self, drone_map: DroneMap, position_history: list[dict[int, Zone]]) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
         self.background = pygame.transform.smoothscale(
             pygame.image.load(BACKGROUND_IMAGE).convert(),
             WINDOW_SIZE
         )
+        drone_image = pygame.image.load(DRONE_IMAGE).convert_alpha()
+        self.drone_image = pygame.transform.smoothscale(drone_image, (72, 48))
+        self.station_image = None
+        if os.path.exists(STATION_IMAGE):
+            station_image = pygame.image.load(STATION_IMAGE).convert_alpha()
+            self.station_image = pygame.transform.smoothscale(station_image, (64, 64))
+        self.start_image = self._load_hub_image(START_IMAGE)
+        self.end_image = self._load_hub_image(END_IMAGE)
         pygame.display.set_caption("Fly-in — Map Preview")
         self.font = pygame.font.SysFont("consolas", 14)
         self.drone_map = drone_map
+        self.position_history = position_history
         self._compute_layout()
+
+    def _load_hub_image(self, image_path: str) -> pygame.Surface | None:
+        if not os.path.exists(image_path):
+            return self.station_image
+        image = pygame.image.load(image_path).convert_alpha()
+        return pygame.transform.smoothscale(image, (64, 64))
 
     def _compute_layout(self) -> None:
         """Maps zone (x, y) coordinates to screen pixel positions."""
@@ -95,8 +115,7 @@ class PygameDisplay:
             py = margin + (zone.y - min_y) / span_y * (WINDOW_SIZE[1] - 2 * margin)
             self.positions[zone.name] = (int(px), int(py))
 
-    def draw_static_map(self) -> None:
-        """Draws zones and connections once, then waits until the window is closed."""
+    def _draw_frame(self, positions: dict[int, Zone]) -> None:
         self.screen.blit(self.background, (0, 0))
 
         overlay = pygame.Surface(WINDOW_SIZE)
@@ -112,20 +131,55 @@ class PygameDisplay:
         for zone in self.drone_map.zones.values():
             pos = self.positions[zone.name]
             color = COLORS.get(zone.color, COLORS[None])
-            pygame.draw.circle(self.screen, color, pos, ZONE_RADIUS)
+            hub_image = self.station_image
+            if zone is self.drone_map.start:
+                hub_image = self.start_image
+            elif zone is self.drone_map.end:
+                hub_image = self.end_image
+
+            if hub_image is None:
+                pygame.draw.circle(self.screen, color, pos, ZONE_RADIUS)
+            else:
+                station = hub_image.copy()
+                station.fill((*color, 255), special_flags=pygame.BLEND_RGBA_MULT)
+                station_rect = station.get_rect(center=pos)
+                self.screen.blit(station, station_rect)
             label = self.font.render(zone.name, True, (255, 255, 255))
-            self.screen.blit(label, (pos[0] - label.get_width() // 2, pos[1] + ZONE_RADIUS + 4))
+            label_y = pos[1] + (ZONE_RADIUS if hub_image is None else 32) + 4
+            self.screen.blit(label, (pos[0] - label.get_width() // 2, label_y))
+
+        drone_colors = [
+            (0, 255, 255), (255, 0, 255), (255, 255, 0),
+            (0, 255, 0), (0, 120, 255), (255, 80, 80),
+        ]
+        for drone_id, zone in positions.items():
+            pos = self.positions[zone.name]
+            sprite_rect = self.drone_image.get_rect(center=pos)
+            self.screen.blit(self.drone_image, sprite_rect)
+            label = self.font.render(f"D{drone_id}", True, (255, 255, 255))
+            self.screen.blit(label, (pos[0] + 12, pos[1] - 8))
 
         pygame.display.flip()
 
     def run(self) -> None:
-        """Keeps the window open until the user closes it."""
-        self.draw_static_map()
+        """Replays the simulation while keeping the window responsive."""
         running = True
+        frame_index = 0
+        elapsed = 0
+        clock = pygame.time.Clock()
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     running = False
+
+            if self.position_history:
+                self._draw_frame(self.position_history[frame_index])
+                elapsed += clock.tick(60)
+                if elapsed >= 500 and frame_index < len(self.position_history) - 1:
+                    frame_index += 1
+                    elapsed = 0
+            else:
+                clock.tick(60)
         pygame.quit()
