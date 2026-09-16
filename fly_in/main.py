@@ -37,8 +37,8 @@ def main() -> None:
 
     display.print_summary(len(turns))
 
-    # display = PygameDisplay(drone_map)
-    # display.run()
+    display = PygameDisplay(drone_map)
+    display.run()
 
 
 if __name__ == "__main__":
