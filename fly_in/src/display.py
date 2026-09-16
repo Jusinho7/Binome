@@ -1,8 +1,13 @@
 import sys
+RED = "\033[31m"
+RESET = "\033[0m"
 try:
     import pygame
 except ModuleNotFoundError:
-    print("Error")
+    print(
+        f"{RED}Error: The 'pygame' library is not installed.{RESET}"
+        f"{RED}Please install it using 'pip install pygame' and try again.{RESET}"
+    )
     sys.exit()
 from .models import DroneMap
 

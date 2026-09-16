@@ -1,10 +1,14 @@
 PYTHON = python3
 MAIN = main.py
+FILE = maps/hard/03_ultimate_challenge.txt
 
 .PHONY: run help clean
 
 run:
-	$(PYTHON) $(MAIN) ex.txt
+	$(PYTHON) $(MAIN) $(FILE)
+
+install:
+	$(PYTHON) -m pip install -r requirements.txt
 
 help:
 	@echo "Available targets:"
