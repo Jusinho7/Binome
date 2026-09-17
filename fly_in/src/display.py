@@ -7,9 +7,11 @@ try:
 except ModuleNotFoundError:
     print(
         f"{RED}Error: The 'pygame' library is not installed.{RESET}"
-        f"{RED}Please install it using 'pip install pygame' and try again.{RESET}"
+        f"{RED}Please install it using 'pip install pygame'"
+        f"{RED}and try again.{RESET}"
     )
     sys.exit()
+
 from .models import DroneMap, Zone
 
 WINDOW_SIZE = (1920, 1070)
@@ -103,8 +105,10 @@ class PygameDisplay:
         hud_group_width = 460 + 12 + 100
         hud_group_x = (WINDOW_SIZE[0] - hud_group_width) // 2
         self.hud_rect = pygame.Rect(hud_group_x, 20, 460, 50)
-        self.help_button_rect = pygame.Rect(self.hud_rect.right + 12, 20, 100, 44)
-        self.help_panel_rect = pygame.Rect(self.help_button_rect.x, 72, 330, 260)
+        self.help_button_rect = pygame.Rect(
+            self.hud_rect.right + 12, 20, 100, 44)
+        self.help_panel_rect = pygame.Rect(
+            self.help_button_rect.x, 72, 330, 260)
         self._compute_layout()
 
     def _load_hub_image(self, image_path: str) -> pygame.Surface | None:
@@ -170,7 +174,8 @@ class PygameDisplay:
                 pygame.draw.circle(self.screen, color, pos, ZONE_RADIUS)
             else:
                 station = hub_image.copy()
-                station.fill((*color, 255), special_flags=pygame.BLEND_RGBA_MULT)
+                station.fill((*color, 255),
+                             special_flags=pygame.BLEND_RGBA_MULT)
                 station_rect = station.get_rect(center=pos)
                 self.screen.blit(station, station_rect)
             label = self.font.render(zone.name, True, (255, 255, 255))
@@ -200,7 +205,9 @@ class PygameDisplay:
         status = "PAUSE" if self.paused else "LECTURE"
         status_color = (255, 210, 80) if self.paused else (130, 255, 150)
         lines = [
-            f"{status}  |  Tour: {turn_number}/{max(len(self.position_history) - 1, 0)}  |  Vitesse: x{self.speed:g}"
+            f"{status}  |  "
+            f"Tour: {turn_number}/{max(len(self.position_history) - 1, 0)}"
+            f"  |  Vitesse: x{self.speed:g}"
         ]
         panel = pygame.Surface(self.hud_rect.size, pygame.SRCALPHA)
         panel.fill((0, 0, 0, 180))
@@ -211,10 +218,18 @@ class PygameDisplay:
             text_rect = text.get_rect(center=self.hud_rect.center)
             self.screen.blit(text, text_rect)
 
-        mouse_over_help = self.help_button_rect.collidepoint(pygame.mouse.get_pos())
+        mouse_over_help = self.help_button_rect.collidepoint(
+            pygame.mouse.get_pos())
         button_color = (70, 130, 210) if mouse_over_help else (45, 85, 150)
-        pygame.draw.rect(self.screen, button_color, self.help_button_rect, border_radius=6)
-        pygame.draw.rect(self.screen, (220, 235, 255), self.help_button_rect, 2, border_radius=6)
+        pygame.draw.rect(
+            self.screen, button_color, self.help_button_rect, border_radius=6)
+        pygame.draw.rect(
+            self.screen,
+            (220, 235, 255),
+            self.help_button_rect,
+            2,
+            border_radius=6
+        )
         help_text = self.hud_font.render("HELP", True, (255, 255, 255))
         help_rect = help_text.get_rect(center=self.help_button_rect.center)
         self.screen.blit(help_text, help_rect)

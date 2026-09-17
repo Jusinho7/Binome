@@ -22,7 +22,6 @@ def main() -> None:
     print(f"Loaded {len(drone_map.zones)} zones, {drone_map.nb_drones} drones")
     print(f"Start: {drone_map.start.name} -> End: {drone_map.end.name}")
 
-
     display = TerminalDisplay(drone_map)
     display.print_header()
     engine = SimulationEngine(drone_map)
