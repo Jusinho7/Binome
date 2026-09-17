@@ -1,11 +1,16 @@
 def string_sculptor(text: str) -> str:
     res = ""
+    n = 0
 
-    for i, char in enumerate(text):
-        if i % 2 == 0:
-            res += char.lower()
+    for char in text:
+        if char == " ":
+            n = 0
+            res += char
+        elif char.isalpha():
+            res += char.lower() if n % 2 == 0 else char.upper()
+            n += 1
         else:
-            res += char.upper()
+            res += char
 
     return res
 
