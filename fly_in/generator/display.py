@@ -1,19 +1,18 @@
 import os
 import sys
-RED = "\033[31m"
-RESET = "\033[0m"
 try:
     import pygame
 except ModuleNotFoundError:
     print(
-        f"{RED}Error: The 'pygame' library is not installed.{RESET}"
-        f"{RED}Please install it using 'pip install pygame'"
-        f"{RED}and try again.{RESET}"
+        "\033[31mError: The 'pygame' library is not installed. \033[0m"
+        "\033[31mPlease install it using 'pip install pygame' "
+        "and try again.\033[0m"
     )
     sys.exit()
-
 from .models import DroneMap, Zone
 
+RED = "\033[31m"
+RESET = "\033[0m"
 WINDOW_SIZE = (1920, 1070)
 BACKGROUND_IMAGE = "assets/bc.jpg"
 DRONE_IMAGE = "assets/drone.png"
@@ -79,20 +78,34 @@ class PygameDisplay:
     ) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
-        self.background = pygame.transform.smoothscale(
-            pygame.image.load(BACKGROUND_IMAGE).convert(),
-            WINDOW_SIZE
-        )
-        drone_image = pygame.image.load(DRONE_IMAGE).convert_alpha()
-        self.drone_image = pygame.transform.smoothscale(drone_image, (54, 36))
-        self.station_image = None
-        if os.path.exists(STATION_IMAGE):
-            station_image = pygame.image.load(STATION_IMAGE).convert_alpha()
-            self.station_image = pygame.transform.smoothscale(
-                station_image, (46, 46)
+
+        if not os.path.exists(BACKGROUND_IMAGE):
+            print(
+                f"{RED}Missing required asset: {BACKGROUND_IMAGE}{RESET}"
             )
-        self.start_image = self._load_hub_image(START_IMAGE)
-        self.end_image = self._load_hub_image(END_IMAGE)
+            sys.exit(1)
+        self.background = pygame.transform.smoothscale(
+            pygame.image.load(BACKGROUND_IMAGE).convert(), WINDOW_SIZE
+        )
+
+        self.drone_image = self._load_image(
+            DRONE_IMAGE, (54, 36), required=True
+        )
+        assert self.drone_image is not None
+        self.station_image = self._load_image(
+            STATION_IMAGE, (46, 46), required=False
+        )
+        if self.station_image is None:
+            self.station_image = self._load_image(
+                DRONE_IMAGE, (46, 46), required=False
+            )
+        self.start_image = self._load_image(
+            START_IMAGE, (46, 46), required=False
+        ) or self.station_image
+        self.end_image = self._load_image(
+            END_IMAGE, (46, 46), required=False
+        ) or self.station_image
+
         pygame.display.set_caption("Fly-in — Map Preview")
         self.font = pygame.font.SysFont("consolas", 14)
         self.hud_font = pygame.font.SysFont("consolas", 16)
@@ -106,16 +119,28 @@ class PygameDisplay:
         hud_group_x = (WINDOW_SIZE[0] - hud_group_width) // 2
         self.hud_rect = pygame.Rect(hud_group_x, 20, 460, 50)
         self.help_button_rect = pygame.Rect(
-            self.hud_rect.right + 12, 20, 100, 44)
+            self.hud_rect.right + 12, 20, 100, 44
+        )
         self.help_panel_rect = pygame.Rect(
-            self.help_button_rect.x, 72, 330, 260)
+            self.help_button_rect.x, 72, 330, 260
+        )
         self._compute_layout()
 
-    def _load_hub_image(self, image_path: str) -> pygame.Surface | None:
+    def _load_image(
+        self,
+        image_path: str,
+        size: tuple[int, int],
+        required: bool = False,
+    ) -> pygame.Surface | None:
         if not os.path.exists(image_path):
-            return self.station_image
+            if required:
+                print(
+                    f"{RED}Missing required asset: {image_path}{RESET}"
+                )
+                sys.exit(1)
+            return None
         image = pygame.image.load(image_path).convert_alpha()
-        return pygame.transform.smoothscale(image, (46, 46))
+        return pygame.transform.smoothscale(image, size)
 
     def _compute_layout(self) -> None:
         """Maps zone (x, y) coordinates to screen pixel positions."""
@@ -173,15 +198,18 @@ class PygameDisplay:
             if hub_image is None:
                 pygame.draw.circle(self.screen, color, pos, ZONE_RADIUS)
             else:
+                assert hub_image is not None
                 station = hub_image.copy()
-                station.fill((*color, 255),
-                             special_flags=pygame.BLEND_RGBA_MULT)
+                station.fill(
+                    (*color, 255), special_flags=pygame.BLEND_RGBA_MULT
+                )
                 station_rect = station.get_rect(center=pos)
                 self.screen.blit(station, station_rect)
             label = self.font.render(zone.name, True, (255, 255, 255))
             label_y = pos[1] + (ZONE_RADIUS if hub_image is None else 23) + 4
             self.screen.blit(label, (pos[0] - label.get_width() // 2, label_y))
 
+        assert self.drone_image is not None
         for drone_id, zone in positions.items():
             start_x, start_y = self.positions[zone.name]
             end_x, end_y = start_x, start_y
@@ -202,12 +230,12 @@ class PygameDisplay:
         pygame.display.flip()
 
     def _draw_hud(self, turn_number: int = 0) -> None:
-        status = "PAUSE" if self.paused else "LECTURE"
+        status = "BREAK" if self.paused else "RUNNING"
         status_color = (255, 210, 80) if self.paused else (130, 255, 150)
         lines = [
             f"{status}  |  "
             f"Tour: {turn_number}/{max(len(self.position_history) - 1, 0)}"
-            f"  |  Vitesse: x{self.speed:g}"
+            f"  |  Speed: x{self.speed:g}"
         ]
         panel = pygame.Surface(self.hud_rect.size, pygame.SRCALPHA)
         panel.fill((0, 0, 0, 180))
@@ -219,53 +247,78 @@ class PygameDisplay:
             self.screen.blit(text, text_rect)
 
         mouse_over_help = self.help_button_rect.collidepoint(
-            pygame.mouse.get_pos())
+            pygame.mouse.get_pos()
+        )
         button_color = (70, 130, 210) if mouse_over_help else (45, 85, 150)
         pygame.draw.rect(
-            self.screen, button_color, self.help_button_rect, border_radius=6)
+            self.screen, button_color, self.help_button_rect, border_radius=6
+        )
         pygame.draw.rect(
             self.screen,
             (220, 235, 255),
             self.help_button_rect,
             2,
-            border_radius=6
+            border_radius=6,
         )
-        help_text = self.hud_font.render("HELP", True, (255, 255, 255))
-        help_rect = help_text.get_rect(center=self.help_button_rect.center)
+        help_text = self.hud_font.render(
+            "HELP",
+            True,
+            (255, 255, 255),
+        )
+        help_rect = help_text.get_rect(
+            center=self.help_button_rect.center
+        )
         self.screen.blit(help_text, help_rect)
 
         if self.help_visible:
-            help_panel = pygame.Surface(self.help_panel_rect.size, pygame.SRCALPHA)
+            help_panel = pygame.Surface(
+                self.help_panel_rect.size,
+                pygame.SRCALPHA,
+            )
             help_panel.fill((0, 0, 0, 220))
             self.screen.blit(help_panel, self.help_panel_rect.topleft)
-            pygame.draw.rect(self.screen, (220, 235, 255), self.help_panel_rect, 2, border_radius=6)
+            pygame.draw.rect(
+                self.screen,
+                (220, 235, 255),
+                self.help_panel_rect,
+                2,
+                border_radius=6,
+            )
 
             help_lines = [
-                    "COMMANDS",
-                    "Space -> Pause / Resume",
-                    "R -> Restart",
-                    "+ / - -> Change speed",
-                    "N -> Next turn",
-                    "B -> Previous turn",
-                    "0 -> Normal speed",
-                    "Escape -> Quit",
-                    "H -> Show / hide help",
+                "COMMANDS",
+                "Space -> Pause / Resume",
+                "R -> Restart",
+                "+ / - -> Change speed",
+                "N -> Next turn",
+                "B -> Previous turn",
+                "0 -> Normal speed",
+                "Escape -> Quit",
+                "H -> Show / hide help",
             ]
             for index, line in enumerate(help_lines):
                 color = (255, 220, 100) if index == 0 else (245, 245, 245)
                 text = self.font.render(line, True, color)
-                self.screen.blit(text, (self.help_panel_rect.x + 16, self.help_panel_rect.y + 12 + index * 26))
+                self.screen.blit(
+                    text,
+                    (
+                        self.help_panel_rect.x + 16,
+                        self.help_panel_rect.y + 12 + index * 26,
+                    ),
+                )
 
     def _draw_movement(self, turn_number: int) -> None:
         if turn_number == 0:
-            movement = "Debut de la simulation"
+            movement = "Start simulation"
         elif turn_number <= len(self.turn_log):
             moves = self.turn_log[turn_number - 1]
-            movement = " ".join(moves) if moves else "(attente)"
+            movement = " ".join(moves) if moves else "(waiting)"
         else:
-            movement = "(aucun deplacement)"
+            movement = "(no movement)"
 
-        text = self.font.render(f"Tour {turn_number}: {movement}", True, (245, 245, 245))
+        text = self.font.render(
+            f"Tour {turn_number}: {movement}", True, (245, 245, 245)
+        )
         panel_width = min(max(text.get_width() + 32, 360), WINDOW_SIZE[0] - 80)
         panel = pygame.Surface((panel_width, 38), pygame.SRCALPHA)
         panel.fill((0, 0, 0, 190))
@@ -296,7 +349,11 @@ class PygameDisplay:
                         frame_index = 0
                         elapsed = 0
                         self.paused = False
-                    elif event.key in (pygame.K_PLUS, pygame.K_EQUALS, pygame.K_KP_PLUS):
+                    elif event.key in (
+                        pygame.K_PLUS,
+                        pygame.K_EQUALS,
+                        pygame.K_KP_PLUS,
+                    ):
                         self.speed = min(self.speed * 2, 8.0)
                     elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
                         self.speed = max(self.speed / 2, 0.25)
@@ -305,7 +362,10 @@ class PygameDisplay:
                     elif event.key == pygame.K_h:
                         self.help_visible = not self.help_visible
                     elif event.key == pygame.K_n:
-                        frame_index = min(frame_index + 1, len(self.position_history) - 1)
+                        frame_index = min(
+                            frame_index + 1,
+                            len(self.position_history) - 1,
+                        )
                         elapsed = 0
                         self.paused = True
                     elif event.key == pygame.K_b:
@@ -313,7 +373,10 @@ class PygameDisplay:
                         elapsed = 0
                         self.paused = True
                     elif event.key == pygame.K_RIGHT:
-                        frame_index = min(frame_index + 1, len(self.position_history) - 1)
+                        frame_index = min(
+                            frame_index + 1,
+                            len(self.position_history) - 1,
+                        )
                         elapsed = 0
                         self.paused = True
                     elif event.key == pygame.K_LEFT:
@@ -342,7 +405,10 @@ class PygameDisplay:
                 delta_time = clock.tick(60)
                 if not self.paused:
                     elapsed += delta_time * self.speed
-                    if elapsed >= 500 and frame_index < len(self.position_history) - 1:
+                    if (
+                        elapsed >= 500
+                        and frame_index < len(self.position_history) - 1
+                    ):
                         frame_index += 1
                         elapsed = 0
             else:

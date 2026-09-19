@@ -1,21 +1,37 @@
-PYTHON = python3
-MAIN = main.py
-FILE = maps/easy/03_basic_capacity.txt
+# Fly-in — Makefile
 
-.PHONY: run help clean
+PYTHON := python3
+PIP := pip3
+VENV := venv
+MAP ?= maps/easy/01_linear_path.txt
 
-run:
-	$(PYTHON) $(MAIN) $(FILE)
+.PHONY: install run debug clean lint lint-strict benchmark test
 
 install:
-	$(PYTHON) -m pip install -r requirements.txt
+	$(PIP) install --upgrade pip
+	$(PIP) install -r requirements.txt
 
-help:
-	@echo "Available targets:"
-	@echo "  make run       Run the project with the default map"
-	@echo "  make help      Show this help"
-	@echo "  make clean     Remove Python cache files"
+run:
+	$(PYTHON) main.py $(MAP)
+
+debug:
+	$(PYTHON) -m pdb main.py $(MAP)
 
 clean:
-	find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
+
+lint:
+	flake8 .
+	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports \
+		--disallow-untyped-defs --check-untyped-defs
+
+lint-strict:
+	flake8 .
+	flake8-docstrings .
+	mypy . --strict
+
+benchmark:
+	$(PYTHON) benchmark.py

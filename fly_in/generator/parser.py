@@ -1,0 +1,350 @@
+from typing import Optional
+
+from .models import Connection, DroneMap, Zone
+
+
+class ParseError(Exception):
+    def __init__(self, line_number: int, message: str) -> None:
+        super().__init__(f"Line {line_number}: {message}")
+        self.line_number = line_number
+
+
+VALID_ZONE_TYPES = {"normal", "blocked", "restricted", "priority"}
+COLORS = [
+    "green",
+    "red",
+    "yellow",
+    "blue",
+    "gray",
+    "purple",
+    "orange",
+    "pink",
+    "brown",
+    "black",
+    "white",
+    "cyan",
+    "magenta",
+    "lime",
+    "teal",
+    "navy",
+    "maroon",
+    "olive",
+    "silver",
+    "gold",
+    "beige",
+    "lavender",
+    "coral",
+    "salmon",
+    "khaki",
+    "plum",
+    "orchid",
+    "turquoise",
+    "indigo",
+    "violet",
+    "peach",
+    "mint",
+    "cream",
+    "tan",
+    "chocolate",
+    "charcoal",
+    "burgundy",
+    "mustard",
+    "rust",
+    "sienna",
+    "amber",
+    "cerulean",
+    "periwinkle",
+    "fuchsia",
+]
+RED = "\033[31m"
+RESET = "\033[0m"
+
+
+class Parser:
+    def __init__(self, filepath: str) -> None:
+        self.filepath = filepath
+
+    def parse(self) -> DroneMap:
+        drone_map = DroneMap()
+        nb_drones: Optional[int] = None
+
+        with open(self.filepath, "r", encoding="utf-8") as handle:
+            lines = handle.readlines()
+
+        for i, raw_line in enumerate(lines, start=1):
+            line = raw_line.strip()
+
+            if not line or line.startswith("#"):
+                continue
+
+            if line.startswith("nb_drones:"):
+                nb_drones = self._parse_nb_drones(line, i)
+            elif line.startswith("start_hub:"):
+                self._parse_zone(line, i, drone_map, is_start=True)
+            elif line.startswith("end_hub:"):
+                self._parse_zone(line, i, drone_map, is_end=True)
+            elif line.startswith("hub:"):
+                self._parse_zone(line, i, drone_map)
+            elif line.startswith("connection:"):
+                self._parse_connection(line, i, drone_map)
+            else:
+                raise ParseError(i, f"{RED}unrecognized line: '{line}'{RESET}")
+
+        if nb_drones is None:
+            raise ParseError(
+                1,
+                f"{RED}missing 'nb_drones' declaration{RESET}",
+            )
+        if drone_map.start is None:
+            raise ParseError(0, f"{RED}missing 'start_hub' zone{RESET}")
+        if drone_map.end is None:
+            raise ParseError(0, f"{RED}missing 'end_hub' zone{RESET}")
+        if (
+            drone_map.start.x == drone_map.end.x
+            and drone_map.start.y == drone_map.end.y
+        ):
+            raise ParseError(
+                0,
+                f"{RED}start_hub and end_hub cannot share the same "
+                f"coordinates{RESET}",
+            )
+
+        drone_map.nb_drones = nb_drones
+        return drone_map
+
+    def _parse_nb_drones(self, line: str, line_no: int) -> int:
+        try:
+            value = line.split(":", 1)[1].strip()
+            nb = int(value)
+        except (IndexError, ValueError):
+            raise ParseError(
+                line_no,
+                f"{RED}invalid nb_drones value{RESET}",
+            )
+        if nb <= 0:
+            raise ParseError(
+                line_no,
+                f"{RED}nb_drones must be a positive integer{RESET}",
+            )
+        return nb
+
+    def _parse_zone(
+        self,
+        line: str,
+        line_no: int,
+        drone_map: DroneMap,
+        is_start: bool = False,
+        is_end: bool = False,
+    ) -> None:
+        _, rest = line.split(":", 1)
+        rest = rest.strip()
+
+        metadata_str = ""
+        if "[" in rest:
+            rest, metadata_part = rest.split("[", 1)
+            if not metadata_part.strip().endswith("]"):
+                raise ParseError(
+                    line_no,
+                    f"{RED}malformed metadata block, missing ']'{RESET}",
+                )
+            metadata_str = metadata_part.strip()[:-1]
+            duplicate_check = metadata_str.split()
+            pile: list[str] = []
+            for token in duplicate_check:
+                if "=" not in token:
+                    raise ParseError(
+                        line_no,
+                        f"{RED}invalid metadata token '{token}'{RESET}",
+                    )
+                key, value = token.split("=", 1)
+                if key not in ["zone", "color", "max_drones"]:
+                    raise ParseError(
+                        line_no,
+                        f"{RED}invalid metadata key '{key}'{RESET}",
+                    )
+                pile.append(key)
+                if value == "":
+                    raise ParseError(
+                        line_no,
+                        f"{RED}metadata key '{key}' has empty value{RESET}",
+                    )
+                if key == "color" and value not in COLORS:
+                    raise ParseError(
+                        line_no,
+                        f"{RED}invalid color value '{value}'{RESET}",
+                    )
+            if len(pile) != len(set(pile)):
+                raise ParseError(
+                    line_no,
+                    f"{RED}duplicate metadata keys in zone definition{RESET}",
+                )
+
+        parts = rest.strip().split()
+        if len(parts) != 3:
+            raise ParseError(
+                line_no,
+                f"{RED}expected '<name> <x> <y>', got '{rest.strip()}'"
+                f"{RESET}",
+            )
+
+        name, x_str, y_str = parts
+
+        if "-" in name or " " in name:
+            raise ParseError(
+                line_no,
+                f"{RED}invalid zone name '{name}' "
+                f"(no dashes/spaces allowed){RESET}",
+            )
+        if name in drone_map.zones:
+            raise ParseError(
+                line_no,
+                f"{RED}duplicate zone name '{name}'{RESET}",
+            )
+
+        try:
+            x, y = int(x_str), int(y_str)
+        except ValueError:
+            raise ParseError(
+                line_no,
+                f"{RED}zone coordinates must be integers{RESET}",
+            )
+
+        metadata = self._parse_metadata(metadata_str, line_no)
+
+        zone_type = metadata.get("zone", "normal")
+        if zone_type not in VALID_ZONE_TYPES:
+            raise ParseError(
+                line_no,
+                f"{RED}invalid zone type '{zone_type}'{RESET}",
+            )
+
+        color = metadata.get("color")
+
+        max_drones_str = metadata.get("max_drones")
+        if is_start or is_end:
+            max_drones: Optional[int] = None
+        elif max_drones_str is not None:
+            max_drones = self._parse_positive_int(
+                max_drones_str,
+                line_no,
+                "max_drones",
+            )
+        else:
+            max_drones = 1
+
+        zone = Zone(
+            name=name,
+            x=x,
+            y=y,
+            zone_type=zone_type,
+            color=color,
+            max_drones=max_drones,
+        )
+        drone_map.add_zone(zone)
+
+        if is_start:
+            drone_map.start = zone
+        if is_end:
+            drone_map.end = zone
+
+    def _parse_connection(
+        self,
+        line: str,
+        line_no: int,
+        drone_map: DroneMap,
+    ) -> None:
+        _, rest = line.split(":", 1)
+        rest = rest.strip()
+
+        metadata_str = ""
+        if "[" in rest:
+            rest, metadata_part = rest.split("[", 1)
+            if not metadata_part.strip().endswith("]"):
+                raise ParseError(
+                    line_no,
+                    f"{RED}malformed metadata block, missing ']'{RESET}",
+                )
+            metadata_str = metadata_part.strip()[:-1]
+
+        names = rest.strip().split("-")
+        if len(names) != 2:
+            raise ParseError(
+                line_no,
+                f"{RED}invalid connection syntax: '{rest.strip()}'{RESET}",
+            )
+
+        name_a, name_b = names[0].strip(), names[1].strip()
+
+        if name_a not in drone_map.zones or name_b not in drone_map.zones:
+            raise ParseError(
+                line_no,
+                f"{RED}connection references undefined zone(s): "
+                f"{name_a}-{name_b}{RESET}",
+            )
+
+        zone_a, zone_b = drone_map.zones[name_a], drone_map.zones[name_b]
+
+        for existing in drone_map.connections:
+            if {existing.zone_a.name, existing.zone_b.name} == {
+                name_a,
+                name_b,
+            }:
+                raise ParseError(
+                    line_no,
+                    f"{RED}duplicate connection '{name_a}-{name_b}'{RESET}",
+                )
+
+        metadata = self._parse_metadata(metadata_str, line_no)
+        capacity_str = metadata.get("max_link_capacity")
+        capacity = (
+            self._parse_positive_int(
+                capacity_str,
+                line_no,
+                "max_link_capacity",
+            )
+            if capacity_str is not None
+            else 1
+        )
+
+        drone_map.add_connection(
+            Connection(zone_a, zone_b, max_link_capacity=capacity)
+        )
+
+    def _parse_metadata(
+        self,
+        metadata_str: str,
+        line_no: int,
+    ) -> dict[str, str]:
+        metadata: dict[str, str] = {}
+        if not metadata_str:
+            return metadata
+
+        for token in metadata_str.split():
+            if "=" not in token:
+                raise ParseError(
+                    line_no,
+                    f"{RED}invalid metadata token '{token}'{RESET}",
+                )
+            key, value = token.split("=", 1)
+            metadata[key] = value
+        return metadata
+
+    def _parse_positive_int(
+        self,
+        value: str,
+        line_no: int,
+        field_name: str,
+    ) -> int:
+        try:
+            n = int(value)
+        except ValueError:
+            raise ParseError(
+                line_no,
+                f"{RED}'{field_name}' must be an integer{RESET}",
+            )
+        if n <= 0:
+            raise ParseError(
+                line_no,
+                f"{RED}'{field_name}' must be a positive integer{RESET}",
+            )
+        return n

@@ -9,7 +9,7 @@ class Zone:
         y: int,
         zone_type: str = "normal",
         color: Optional[str] = None,
-        max_drones: int = 1,
+        max_drones: Optional[int] = 1,
     ) -> None:
         self.name = name
         self.x = x
@@ -28,7 +28,12 @@ class Zone:
 
 
 class Connection:
-    def __init__(self, zone_a: Zone, zone_b: Zone, max_link_capacity: int = 1) -> None:
+    def __init__(
+        self,
+        zone_a: Zone,
+        zone_b: Zone,
+        max_link_capacity: int = 1,
+    ) -> None:
         self.zone_a = zone_a
         self.zone_b = zone_b
         self.max_link_capacity = max_link_capacity
@@ -43,6 +48,7 @@ class DroneMap:
         self.connections: list[Connection] = []
         self.start: Optional[Zone] = None
         self.end: Optional[Zone] = None
+        self.nb_drones: int = 0
 
     def add_zone(self, zone: Zone) -> None:
         self.zones[zone.name] = zone
@@ -51,4 +57,8 @@ class DroneMap:
         self.connections.append(connection)
 
     def neighbors(self, zone: Zone) -> list[Connection]:
-        return [c for c in self.connections if c.zone_a is zone or c.zone_b is zone]
+        return [
+            c
+            for c in self.connections
+            if c.zone_a is zone or c.zone_b is zone
+        ]

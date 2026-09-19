@@ -1,4 +1,5 @@
 from typing import Optional
+
 from .models import Zone
 
 
@@ -28,7 +29,10 @@ class Drone:
         self.arrival_turn = arrival_turn
 
     def complete_transit(self) -> None:
-        self.current_zone = self.transit_target
+        target = self.transit_target
+        if target is None:
+            raise ValueError("Cannot complete a transit without a target zone")
+        self.current_zone = target
         self.path_index += 1
         self.in_transit = False
         self.transit_target = None

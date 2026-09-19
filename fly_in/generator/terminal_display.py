@@ -1,19 +1,22 @@
-import sys
 try:
     from rich.console import Console
-except ImportError:
-    print(
-        "Error: The 'rich' library is not installed."
+except ImportError as exc:
+    raise SystemExit(
+        "Error: The 'rich' library is not installed. "
         "Please install it using 'pip install rich' and try again."
-    )
-    sys.exit()
+    ) from exc
+
 from .models import DroneMap
 
 console = Console()
 
 DRONE_PALETTE = [
-    "bright_cyan", "bright_magenta", "bright_yellow",
-    "bright_green", "bright_blue", "bright_red",
+    "bright_cyan",
+    "bright_magenta",
+    "bright_yellow",
+    "bright_green",
+    "bright_blue",
+    "bright_red",
 ]
 
 ZONE_COLOR_MAP = {
@@ -36,16 +39,22 @@ class TerminalDisplay:
         zone = self.drone_map.zones.get(zone_name)
         if zone is None:
             return "white"
+        if zone.color is None:
+            return "white"
         return ZONE_COLOR_MAP.get(zone.color, "white")
 
     def print_header(self) -> None:
+        start = self.drone_map.start
+        end = self.drone_map.end
+        if start is None or end is None:
+            raise ValueError("Drone map must define start and end zones")
         console.print(
             f"[bold]Loaded[/bold] {len(self.drone_map.zones)} zones, "
             f"{self.drone_map.nb_drones} drones"
         )
         console.print(
-            f"[bold green]Start[/bold green]: {self.drone_map.start.name} -> "
-            f"[bold red]End[/bold red]: {self.drone_map.end.name}\n"
+            f"[bold green]Start[/bold green]: {start.name} -> "
+            f"[bold red]End[/bold red]: {end.name}\n"
         )
 
     def print_turn(self, turn_number: int, moves: list[str]) -> None:
@@ -53,13 +62,16 @@ class TerminalDisplay:
             console.print(f"[dim]Turn {turn_number}: (waiting)[/dim]")
             return
 
-        parts = []
+        parts: list[str] = []
         for move in moves:
             drone_part, destination = move.split("-", 1)
             drone_id = int(drone_part[1:])
             d_color = self._drone_color(drone_id)
             z_color = self._zone_style(destination)
-            parts.append(f"[bold {d_color}]{drone_part}[/bold {d_color}]-[{z_color}]{destination}[/{z_color}]")
+            parts.append(
+                f"[bold {d_color}]{drone_part}[/bold {d_color}]-"
+                f"[{z_color}]{destination}[/{z_color}]"
+            )
 
         console.print(f"[bold]Turn {turn_number}:[/bold] " + " ".join(parts))
 

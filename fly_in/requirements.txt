@@ -1,0 +1,6 @@
+flake8==7.0.0
+flake8-docstrings==7.0.0
+mypy==1.9.0
+mypy-extensions==1.0.0
+pygame==2.5.2
+rich==13.7.1
