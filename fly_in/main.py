@@ -1,3 +1,5 @@
+"""Entry point for the Fly-in simulation."""
+
 import sys
 from generator import (
     Parser, ParseError, SimulationEngine, TerminalDisplay, PygameDisplay
@@ -8,6 +10,7 @@ RESET = "\033[0m"
 
 
 def main() -> None:
+    """Parse a map, run the simulation, and display the result."""
     if len(sys.argv) != 2:
         print(f"{RED}Usage: python main.py <map_file>{RESET}")
         sys.exit(1)

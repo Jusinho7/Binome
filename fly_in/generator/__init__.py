@@ -1,3 +1,5 @@
+"""Public exports for the generator package."""
+
 from .display import PygameDisplay
 from .parser import Parser, ParseError
 from .pathfinding import PathNotFoundError, Pathfinder, SpaceTimePathfinder

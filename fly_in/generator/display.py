@@ -1,3 +1,5 @@
+"""Display the drone simulation using Pygame."""
+
 import os
 import sys
 try:
@@ -70,12 +72,21 @@ ZONE_RADIUS = 25
 
 
 class PygameDisplay:
+    """Display the drone simulation and handle user interactions."""
+
     def __init__(
         self,
         drone_map: DroneMap,
         position_history: list[dict[int, Zone]],
         turn_log: list[list[str]] | None = None,
     ) -> None:
+        """Initialize the Pygame display and simulation state.
+
+        Args:
+            drone_map: Map containing zones and connections to display.
+            position_history: Drone positions for each simulation turn.
+            turn_log: Optional list of drone movements for each turn.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
 
@@ -132,6 +143,17 @@ class PygameDisplay:
         size: tuple[int, int],
         required: bool = False,
     ) -> pygame.Surface | None:
+        """Load and resize an image asset.
+
+        Args:
+            image_path: Path to the image file.
+            size: Target image dimensions as ``(width, height)``.
+            required: Whether a missing image should terminate the program.
+
+        Returns:
+            The resized image surface, or ``None`` when the image is optional
+            and does not exist.
+        """
         if not os.path.exists(image_path):
             if required:
                 print(
@@ -143,7 +165,7 @@ class PygameDisplay:
         return pygame.transform.smoothscale(image, size)
 
     def _compute_layout(self) -> None:
-        """Maps zone (x, y) coordinates to screen pixel positions."""
+        """Map zone coordinates to screen pixel positions."""
         xs = [z.x for z in self.drone_map.zones.values()]
         ys = [z.y for z in self.drone_map.zones.values()]
         min_x, max_x = min(xs), max(xs)
@@ -174,6 +196,14 @@ class PygameDisplay:
         progress: float = 0.0,
         turn_number: int = 0,
     ) -> None:
+        """Draw one frame of the drone simulation.
+
+        Args:
+            positions: Current position of each drone.
+            next_positions: Optional positions used to animate movement.
+            progress: Animation progress between 0.0 and 1.0.
+            turn_number: Current simulation turn number.
+        """
         self.screen.blit(self.background, (0, 0))
 
         overlay = pygame.Surface(WINDOW_SIZE)
@@ -230,6 +260,11 @@ class PygameDisplay:
         pygame.display.flip()
 
     def _draw_hud(self, turn_number: int = 0) -> None:
+        """Draw the simulation status, speed, and help controls.
+
+        Args:
+            turn_number: Current simulation turn number.
+        """
         status = "BREAK" if self.paused else "RUNNING"
         status_color = (255, 210, 80) if self.paused else (130, 255, 150)
         lines = [
@@ -308,6 +343,11 @@ class PygameDisplay:
                 )
 
     def _draw_movement(self, turn_number: int) -> None:
+        """Draw the movements associated with the current turn.
+
+        Args:
+            turn_number: Current simulation turn number.
+        """
         if turn_number == 0:
             movement = "Start simulation"
         elif turn_number <= len(self.turn_log):
@@ -329,6 +369,7 @@ class PygameDisplay:
         self.screen.blit(text, text_rect)
 
     def run(self) -> None:
+        """Run the Pygame event loop and animate the simulation."""
         running = True
         frame_index = 0
         elapsed = 0.0

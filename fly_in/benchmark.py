@@ -1,3 +1,5 @@
+"""Run the benchmark suite for the fly-in maps."""
+
 from pathlib import Path
 from generator import Parser, ParseError, SimulationEngine
 
@@ -21,6 +23,7 @@ TARGETS = {
 
 
 def benchmark(map_path: str, target: int) -> None:
+    """Benchmark one map against a target number of turns."""
     full_path = Path("maps") / map_path
     if not full_path.exists():
         print(f"{YELLOW}  {map_path}: file not found, skipping{RESET}")
@@ -44,6 +47,7 @@ def benchmark(map_path: str, target: int) -> None:
 
 
 def main() -> None:
+    """Execute the project benchmark matrix."""
     print(f"{BOLD}Running benchmarks...{RESET}\n")
     for map_path, target in TARGETS.items():
         benchmark(map_path, target)

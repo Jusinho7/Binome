@@ -1,3 +1,5 @@
+"""Drone simulation engine with time-based movement and capacity management."""
+
 import math
 from collections import defaultdict
 from .drone import Drone
@@ -6,7 +8,22 @@ from .pathfinding import Pathfinder
 
 
 class SimulationEngine:
+    """Manage the drone simulation and its time-based movement logic.
+
+    Attributes:
+        drone_map: The map containing zones and connections.
+        pathfinder: Pathfinder instance for computing paths.
+        drones: List of Drone instances in the simulation.
+        zone_occupancy: Tracks the number of drones in each zone.
+        future_arrivals: Tracks reserved arrivals for future turns.
+        active_transits: Tracks connections currently occupied by
+            drones in transit.
+        turn_log: Records the moves made by drones each turn.
+        position_history: Records the positions of all drones at each turn.
+    """
+
     def __init__(self, drone_map: DroneMap) -> None:
+        """Initialize the simulation engine with a drone map."""
         self.drone_map = drone_map
         start_zone = drone_map.start
         if start_zone is None:
@@ -23,9 +40,6 @@ class SimulationEngine:
         self.future_arrivals: dict[int, dict[str, int]] = defaultdict(
             lambda: defaultdict(int)
         )
-        # Tracks connections currently occupied by drones in a multi-turn
-        # (restricted) transit, so a second drone can't use the same
-        # connection on the following turn either.
         self.active_transits: dict[str, int] = defaultdict(int)
 
         self.turn_log: list[list[str]] = []
@@ -35,6 +49,7 @@ class SimulationEngine:
         self._save_positions()
 
     def _compute_initial_paths(self) -> None:
+        """Compute and reserve initial paths for all drones."""
         start = self.drone_map.start
         end = self.drone_map.end
         if start is None or end is None:
@@ -54,23 +69,26 @@ class SimulationEngine:
             )
 
     def _zone_capacity(self, zone: Zone) -> float:
+        """Return the maximum number of drones allowed in a zone."""
         if zone is self.drone_map.start or zone is self.drone_map.end:
             return math.inf
         return zone.max_drones if zone.max_drones is not None else 1
 
     @staticmethod
     def _connection_key(a: Zone, b: Zone) -> str:
+        """Return an order-independent key for a connection."""
         names = sorted([a.name, b.name])
         return f"{names[0]}-{names[1]}"
 
     def _connection_between(self, a: Zone, b: Zone) -> Connection:
+        """Return the connection between two zones."""
         for conn in self.drone_map.neighbors(a):
             if conn.other(a) is b:
                 return conn
         raise ValueError(f"No connection between {a.name} and {b.name}")
 
     def run(self, max_turns: int = 500) -> list[list[str]]:
-        """Runs the simulation until all drones are delivered."""
+        """Run the simulation until all drones are delivered."""
         turn = 0
         while not all(d.delivered for d in self.drones):
             turn += 1
@@ -83,25 +101,25 @@ class SimulationEngine:
         return self.turn_log
 
     def _save_positions(self) -> None:
+        """Save the current position of every drone."""
         self.position_history.append(
             {drone.id: drone.current_zone for drone in self.drones}
         )
 
     def _simulate_turn(self, turn: int) -> list[str]:
+        """Simulate one turn and return the resulting drone movements."""
         moves: list[str] = []
         connection_usage: dict[str, int] = defaultdict(int)
 
-        # Étape 1 : les drones en transit vers une zone restricted
-        # DOIVENT arriver ce tour.
         for drone in self._active_drones():
             if drone.in_transit and drone.arrival_turn == turn:
                 target = drone.transit_target
                 if target is None:
                     continue
 
-                origin = drone.current_zone  # toujours la zone de départ ici
+                origin = drone.current_zone
                 conn_key = self._connection_key(origin, target)
-                self.active_transits[conn_key] -= 1  # libère la connexion
+                self.active_transits[conn_key] -= 1
 
                 self.zone_occupancy[target.name] += 1
                 drone.complete_transit()
@@ -109,7 +127,6 @@ class SimulationEngine:
                 if target is self.drone_map.end:
                     drone.delivered = True
 
-        # Étape 2 : les drones au repos décident d'avancer ou d'attendre
         for drone in sorted(self._active_drones(), key=lambda d: d.id):
             if drone.in_transit or drone.delivered:
                 continue
@@ -131,7 +148,7 @@ class SimulationEngine:
                 connection_usage[conn_key] + self.active_transits[conn_key]
             )
             if total_connection_usage >= connection.max_link_capacity:
-                continue  # connexion pleine, on attend
+                continue
 
             if next_zone.zone_type == "restricted":
                 arrival_turn = turn + 1
@@ -139,7 +156,7 @@ class SimulationEngine:
                 capacity = self._zone_capacity(next_zone)
 
                 if self.zone_occupancy[next_zone.name] + reserved >= capacity:
-                    continue  # pas de place garantie à l'arrivée
+                    continue
 
                 connection_usage[conn_key] += 1
                 self.active_transits[conn_key] += 1
@@ -171,9 +188,7 @@ class SimulationEngine:
         zone_reservations: dict[tuple[str, int], int],
         connection_reservations: dict[tuple[str, int], int],
     ) -> None:
-        """
-        Marks every zone and connection slot used by this path as reserved.
-        """
+        """Mark the zones and links used by this path as reserved."""
         for zone, turn in timed_path:
             key = (zone.name, turn)
             zone_reservations[key] = zone_reservations.get(key, 0) + 1

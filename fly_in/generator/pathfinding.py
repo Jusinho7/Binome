@@ -1,29 +1,62 @@
+"""A* pathfinding helpers for drones with time-based reservations."""
+
 import heapq
 import math
 from typing import Optional
-from .models import Zone, DroneMap
+
+from .models import DroneMap, Zone
 
 
 class PathNotFoundError(Exception):
-    pass
+    """Raised when no valid path can be found."""
 
 
 class SpaceTimePathfinder:
+    """Find paths while considering time-based zone reservations."""
+
     def __init__(self, drone_map: DroneMap) -> None:
+        """Initialize the pathfinder with a drone map.
+
+        Args:
+            drone_map: Map containing zones and their connections.
+        """
         self.drone_map = drone_map
 
     def _heuristic(self, zone: Zone, goal: Zone) -> float:
+        """Calculate the Euclidean distance between two zones.
+
+        Args:
+            zone: Current zone.
+            goal: Destination zone.
+
+        Returns:
+            The Euclidean distance between the two zones.
+        """
         return math.hypot(zone.x - goal.x, zone.y - goal.y)
 
     def _zone_capacity(self, zone: Zone) -> float:
+        """Return the maximum number of drones allowed in a zone.
+
+        Args:
+            zone: Zone whose capacity should be determined.
+
+        Returns:
+            The zone capacity. Start and end zones have unlimited capacity.
+        """
         if zone is self.drone_map.start or zone is self.drone_map.end:
             return math.inf
         return zone.max_drones if zone.max_drones is not None else 1
 
     @staticmethod
     def _connection_key(zone_a: Zone, zone_b: Zone) -> str:
-        """
-        Order-independent key so a-b and b-a share the same reservation slot.
+        """Create an order-independent key for a connection.
+
+        Args:
+            zone_a: First zone of the connection.
+            zone_b: Second zone of the connection.
+
+        Returns:
+            A connection key shared by both directions.
         """
         names = sorted([zone_a.name, zone_b.name])
         return f"{names[0]}-{names[1]}"
@@ -37,89 +70,112 @@ class SpaceTimePathfinder:
         start_turn: int = 0,
         max_turn: int = 200,
     ) -> list[tuple[Zone, int]]:
-        """
-        Finds a path as a list of (Zone, turn) pairs,
-        avoiding overbooked slots.
+        """Find a path while respecting time-based reservations.
 
         Args:
-            zone_reservations:
-                maps (zone_name, turn) -> drones already booked there.
-            connection_reservations:
-                maps (connection_key, turn) -> drones already
-                booked traversing that connection during that turn.
+            start: Starting zone.
+            end: Destination zone.
+            zone_reservations: Drones already booked in each zone and turn.
+            connection_reservations: Drones already using each
+                connection during each turn.
+            start_turn: Turn at which the path search begins.
+            max_turn: Maximum turn allowed for the search.
+
+        Returns:
+            A list of ``(Zone, turn)`` pairs describing the path.
+
+        Raises:
+            PathNotFoundError: If no valid path can be found.
         """
+        if start is end:
+            return [(start, start_turn)]
+
         start_state = (start.name, start_turn)
-        g_score: dict[tuple[str, int], float] = {start_state: 0.0}
-        previous: dict[
-            tuple[str, int], Optional[tuple[str, int]]
-        ] = {start_state: None}
-        visited: set[tuple[str, int]] = set()
-
-        heap: list[tuple[float, int, tuple[str, int]]] = [
-            (self._heuristic(start, end), 0, start_state)
+        frontier: list[tuple[float, int, int, tuple[str, int]]] = [
+            (self._heuristic(start, end), 0, start_turn, start_state)
         ]
-        counter = 1
+        previous: dict[tuple[str, int], Optional[tuple[str, int]]] = {
+            start_state: None
+        }
+        best_cost: dict[tuple[str, int], int] = {start_state: 0}
 
-        while heap:
-            _, _, current_state = heapq.heappop(heap)
-            if current_state in visited:
+        while frontier:
+            _, _, _, state = heapq.heappop(frontier)
+            zone_name, turn = state
+            current_zone = self.drone_map.zones[zone_name]
+            if current_zone is end:
+                return self._reconstruct(previous, state)
+
+            arrival_turn = turn + 1
+            if arrival_turn > max_turn:
                 continue
-            visited.add(current_state)
 
-            current_name, current_turn = current_state
-            if current_name == end.name:
-                return self._reconstruct(previous, current_state)
-
-            if current_turn >= max_turn:
-                continue
-
-            current_zone = self.drone_map.zones[current_name]
-
-            wait_state = (current_name, current_turn + 1)
-            wait_cost = g_score[current_state] + 0.01
-            if wait_state not in g_score or wait_cost < g_score[wait_state]:
-                g_score[wait_state] = wait_cost
-                previous[wait_state] = current_state
-                f = wait_cost + self._heuristic(current_zone, end)
-                heapq.heappush(heap, (f, counter, wait_state))
-                counter += 1
+            wait_state = (current_zone.name, arrival_turn)
+            current_cost = best_cost.get(state)
+            if current_cost is not None:
+                wait_usage = zone_reservations.get(
+                    (current_zone.name, arrival_turn), 0
+                ) + 1
+                if wait_usage <= self._zone_capacity(current_zone):
+                    tentative_cost = current_cost + 1
+                    existing_cost = best_cost.get(wait_state)
+                    if existing_cost is None or tentative_cost < existing_cost:
+                        previous[wait_state] = state
+                        best_cost[wait_state] = tentative_cost
+                        priority = float(tentative_cost) + self._heuristic(
+                            current_zone, end
+                        )
+                        heapq.heappush(
+                            frontier,
+                            (
+                                priority,
+                                tentative_cost,
+                                arrival_turn,
+                                wait_state,
+                            ),
+                        )
 
             for connection in self.drone_map.neighbors(current_zone):
-                neighbor = connection.other(current_zone)
-                if neighbor.is_blocked():
+                next_zone = connection.other(current_zone)
+                conn_key = self._connection_key(current_zone, next_zone)
+                connection_usage = (
+                    connection_reservations.get((conn_key, arrival_turn), 0)
+                    + 1
+                )
+                if connection_usage > connection.max_link_capacity:
                     continue
 
-                cost = neighbor.movement_cost()
-                arrival_turn = current_turn + cost
-                neighbor_state = (neighbor.name, arrival_turn)
-                conn_key = self._connection_key(current_zone, neighbor)
-
-                zone_occupied = zone_reservations.get(neighbor_state, 0)
-                if zone_occupied >= self._zone_capacity(neighbor):
+                zone_usage = zone_reservations.get(
+                    (next_zone.name, arrival_turn), 0
+                ) + 1
+                if zone_usage > self._zone_capacity(next_zone):
                     continue
 
-                transit_turns = range(current_turn + 1, arrival_turn + 1)
-                if any(
-                    connection_reservations.get((conn_key, t), 0)
-                    >= connection.max_link_capacity
-                    for t in transit_turns
-                ):
+                next_state = (next_zone.name, arrival_turn)
+                current_cost = best_cost.get(state)
+                if current_cost is None:
                     continue
 
-                tentative_g = g_score[current_state] + cost
+                tentative_cost = current_cost + 1
+                existing_cost = best_cost.get(next_state)
                 if (
-                    neighbor_state not in g_score
-                    or tentative_g < g_score[neighbor_state]
+                    existing_cost is not None
+                    and tentative_cost >= existing_cost
                 ):
-                    g_score[neighbor_state] = tentative_g
-                    previous[neighbor_state] = current_state
-                    f = tentative_g + self._heuristic(neighbor, end)
-                    heapq.heappush(heap, (f, counter, neighbor_state))
-                    counter += 1
+                    continue
+
+                previous[next_state] = state
+                best_cost[next_state] = tentative_cost
+                priority = float(tentative_cost) + self._heuristic(
+                    next_zone, end
+                )
+                heapq.heappush(
+                    frontier,
+                    (priority, tentative_cost, arrival_turn, next_state),
+                )
 
         raise PathNotFoundError(
-            f"No time-respecting path found from "
-            f"'{start.name}' to '{end.name}'"
+            f"No valid path found from {start.name} to {end.name}."
         )
 
     def _reconstruct(
@@ -127,6 +183,15 @@ class SpaceTimePathfinder:
         previous: dict[tuple[str, int], Optional[tuple[str, int]]],
         end_state: tuple[str, int],
     ) -> list[tuple[Zone, int]]:
+        """Reconstruct the path from the predecessor states.
+
+        Args:
+            previous: Mapping of each state to its predecessor.
+            end_state: Final state of the path.
+
+        Returns:
+            The reconstructed path as ``(Zone, turn)`` pairs.
+        """
         path: list[tuple[str, int]] = []
         current: Optional[tuple[str, int]] = end_state
         while current is not None:
@@ -137,7 +202,18 @@ class SpaceTimePathfinder:
 
 
 class Pathfinder(SpaceTimePathfinder):
+    """Provide a simplified interface for shortest-path searches."""
+
     def shortest_path(self, start: Zone, end: Zone) -> list[Zone]:
+        """Find the shortest path between two zones.
+
+        Args:
+            start: Starting zone.
+            end: Destination zone.
+
+        Returns:
+            A list of zones forming the shortest path.
+        """
         timed_path = self.find_path(
             start,
             end,

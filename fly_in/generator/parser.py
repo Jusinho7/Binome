@@ -1,9 +1,19 @@
+"""Parse a drone map definition file and populate a DroneMap object."""
+
 from typing import Optional
 from .models import Connection, DroneMap, Zone
 
 
 class ParseError(Exception):
+    """Represent an error encountered while parsing a map file."""
+
     def __init__(self, line_number: int, message: str) -> None:
+        """Initialize a parse error with its source line number.
+
+        Args:
+            line_number: Number of the line where the error occurred.
+            message: Description of the parsing error.
+        """
         super().__init__(f"Line {line_number}: {message}")
         self.line_number = line_number
 
@@ -60,10 +70,25 @@ RESET = "\033[0m"
 
 
 class Parser:
+    """Parse a drone map definition file."""
+
     def __init__(self, filepath: str) -> None:
+        """Initialize a parser for the specified map file.
+
+        Args:
+            filepath: Path to the map definition file.
+        """
         self.filepath = filepath
 
     def parse(self) -> DroneMap:
+        """Parse the map file and return a populated drone map.
+
+        Returns:
+            A drone map containing the parsed zones and connections.
+
+        Raises:
+            ParseError: If the map file contains invalid or incomplete data.
+        """
         drone_map = DroneMap()
         nb_drones: Optional[int] = None
 
@@ -112,6 +137,18 @@ class Parser:
         return drone_map
 
     def _parse_nb_drones(self, line: str, line_no: int) -> int:
+        """Parse and validate the number of drones.
+
+        Args:
+            line: Source line containing the drone count.
+            line_no: Number of the source line.
+
+        Returns:
+            The validated number of drones.
+
+        Raises:
+            ParseError: If the value is missing, invalid, or out of range.
+        """
         try:
             value = line.split(":", 1)[1].strip()
             nb = int(value)
@@ -140,6 +177,18 @@ class Parser:
         is_start: bool = False,
         is_end: bool = False,
     ) -> None:
+        """Parse a zone declaration and add it to the drone map.
+
+        Args:
+            line: Source line containing the zone declaration.
+            line_no: Number of the source line.
+            drone_map: Map receiving the parsed zone.
+            is_start: Whether the zone is the simulation start hub.
+            is_end: Whether the zone is the simulation end hub.
+
+        Raises:
+            ParseError: If the zone declaration or metadata is invalid.
+        """
         _, rest = line.split(":", 1)
         rest = rest.strip()
 
@@ -257,6 +306,17 @@ class Parser:
         line_no: int,
         drone_map: DroneMap,
     ) -> None:
+        """Parse a connection declaration and add it to the drone map.
+
+        Args:
+            line: Source line containing the connection declaration.
+            line_no: Number of the source line.
+            drone_map: Map receiving the parsed connection.
+
+        Raises:
+            ParseError: If the connection syntax, zones, or metadata is
+            invalid.
+        """
         _, rest = line.split(":", 1)
         rest = rest.strip()
 
@@ -319,6 +379,18 @@ class Parser:
         metadata_str: str,
         line_no: int,
     ) -> dict[str, str]:
+        """Parse a metadata block into key-value pairs.
+
+        Args:
+            metadata_str: Metadata text without the surrounding brackets.
+            line_no: Number of the source line.
+
+        Returns:
+            A dictionary containing metadata keys and values.
+
+        Raises:
+            ParseError: If a metadata token does not contain ``=``.
+        """
         metadata: dict[str, str] = {}
         if not metadata_str:
             return metadata
@@ -339,6 +411,19 @@ class Parser:
         line_no: int,
         field_name: str,
     ) -> int:
+        """Parse and validate a positive integer field.
+
+        Args:
+            value: String representation of the integer.
+            line_no: Number of the source line.
+            field_name: Name of the field being validated.
+
+        Returns:
+            The validated positive integer.
+
+        Raises:
+            ParseError: If the value is not a positive integer.
+        """
         try:
             n = int(value)
         except ValueError:
