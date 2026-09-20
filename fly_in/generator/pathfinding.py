@@ -9,10 +9,6 @@ class PathNotFoundError(Exception):
 
 
 class SpaceTimePathfinder:
-    """
-    Finds time-aware paths, avoiding zone/connection slots already reserved.
-    """
-
     def __init__(self, drone_map: DroneMap) -> None:
         self.drone_map = drone_map
 

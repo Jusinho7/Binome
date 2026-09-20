@@ -6,11 +6,6 @@ from .pathfinding import Pathfinder
 
 
 class SimulationEngine:
-    """
-    Simulates drone movement turn by turn,
-    respecting all capacity and movement rules.
-    """
-
     def __init__(self, drone_map: DroneMap) -> None:
         self.drone_map = drone_map
         start_zone = drone_map.start

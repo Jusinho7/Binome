@@ -3,7 +3,7 @@
 PYTHON := python3
 PIP := pip3
 VENV := venv
-MAP ?= maps/easy/01_linear_path.txt
+MAP ?= maps/easy/03_basic_capacity.txt
 
 .PHONY: install run debug clean lint lint-strict benchmark test
 

@@ -1,5 +1,4 @@
 from typing import Optional
-
 from .models import Connection, DroneMap, Zone
 
 
@@ -125,6 +124,11 @@ class Parser:
             raise ParseError(
                 line_no,
                 f"{RED}nb_drones must be a positive integer{RESET}",
+            )
+        if nb > 100:
+            raise ParseError(
+                line_no,
+                f"{RED}nb_drones must not exceed 100{RESET}",
             )
         return nb
 
