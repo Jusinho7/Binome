@@ -1,21 +1,22 @@
-# Fly-in — Makefile
-
 PYTHON := python3
-PIP := pip3
 VENV := venv
+VENV_PYTHON := $(VENV)/bin/python
+VENV_PIP := $(VENV)/bin/pip
+
 MAP ?= maps/hard/03_ultimate_challenge.txt
 
 .PHONY: install run debug clean lint lint-strict benchmark test
 
 install:
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
+	$(PYTHON) -m venv $(VENV)
+	$(VENV_PYTHON) -m pip install --upgrade pip
+	$(VENV_PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) main.py $(MAP)
+	$(VENV_PYTHON) main.py $(MAP)
 
 debug:
-	$(PYTHON) -m pdb main.py $(MAP)
+	$(VENV_PYTHON) -m pdb main.py $(MAP)
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -24,14 +25,14 @@ clean:
 	find . -type f -name "*.pyc" -delete
 
 lint:
-	flake8 .
-	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports \
+	$(VENV_PYTHON) -m flake8 . --exclude=venv
+	$(VENV_PYTHON) -m mypy . --exclude '^venv/' \
+		--warn-return-any --warn-unused-ignores --ignore-missing-imports \
 		--disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
-	flake8 .
-	flake8-docstrings .
-	mypy . --strict
+	$(VENV_PYTHON) -m flake8 . --exclude=venv
+	$(VENV_PYTHON) -m mypy . --exclude '^venv/' --strict
 
 benchmark:
-	$(PYTHON) benchmark.py
+	$(VENV_PYTHON) benchmark.py

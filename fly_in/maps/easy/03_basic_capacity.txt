@@ -1,5 +1,5 @@
 # Easy Level 3: Basic capacity management
-nb_drones: 100
+nb_drones: 4
 
 start_hub: start 0 0 [color=green]
 hub: bottleneck 1 0 [color=orange max_drones=2]

@@ -7,6 +7,7 @@ from .simulation import SimulationEngine
 from .terminal_display import TerminalDisplay
 from .models import Zone, Connection, DroneMap
 from .drone import Drone
+from .readfile import choice_map
 
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "Connection",
     "DroneMap",
     "Drone",
+    "choice_map",
 ]

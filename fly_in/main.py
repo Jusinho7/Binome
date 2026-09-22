@@ -2,21 +2,29 @@
 
 import sys
 from generator import (
-    Parser, ParseError, SimulationEngine, TerminalDisplay, PygameDisplay
+    Parser, ParseError, SimulationEngine,
+    TerminalDisplay, PygameDisplay, choice_map
 )
 
 RED = "\033[31m"
 RESET = "\033[0m"
+ORANGE = "\033[33m"
 
 
 def main() -> None:
     """Parse a map, run the simulation, and display the result."""
-    if len(sys.argv) != 2:
-        print(f"{RED}Usage: python main.py <map_file>{RESET}")
+    try:
+        maps_file = choice_map()
+    except (KeyboardInterrupt, EOFError):
+        print(f"\n{ORANGE}Exiting, user interrupted.{RESET}")
+        sys.exit(1)
+    print(maps_file)
+    if maps_file is None:
+        print(f"{RED}No map selected. Exiting.{RESET}")
         sys.exit(1)
 
     try:
-        drone_map = Parser(sys.argv[1]).parse()
+        drone_map = Parser(str(maps_file)).parse()
     except (ParseError, FileNotFoundError) as e:
         print(f"{RED}Error: {e}{RESET}")
         sys.exit(1)
