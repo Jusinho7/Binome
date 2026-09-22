@@ -13,7 +13,7 @@ install:
 	$(VENV_PIP) install -r requirements.txt
 
 run:
-	$(VENV_PYTHON) main.py $(MAP)
+	$(VENV_PYTHON) main.py
 
 debug:
 	$(VENV_PYTHON) -m pdb main.py $(MAP)
