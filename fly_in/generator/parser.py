@@ -95,13 +95,26 @@ class Parser:
         with open(self.filepath, "r", encoding="utf-8") as handle:
             lines = handle.readlines()
 
+        first_content_line = True
         for i, raw_line in enumerate(lines, start=1):
             line = raw_line.strip()
 
             if not line or line.startswith("#"):
                 continue
 
+            if first_content_line and not line.startswith("nb_drones:"):
+                raise ParseError(
+                    i,
+                    f"{RED}'nb_drones' must be the first declaration{RESET}",
+                )
+            first_content_line = False
+
             if line.startswith("nb_drones:"):
+                if nb_drones is not None:
+                    raise ParseError(
+                        i,
+                        f"{RED}duplicate 'nb_drones' declaration{RESET}",
+                    )
                 nb_drones = self._parse_nb_drones(line, i)
             elif line.startswith("start_hub:"):
                 self._parse_zone(line, i, drone_map, is_start=True)
