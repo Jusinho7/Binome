@@ -21,6 +21,7 @@ class SpaceTimePathfinder:
             drone_map: Map containing zones and their connections.
         """
         self.drone_map = drone_map
+        self._heuristic_cache: dict[str, dict[str, int]] = {}
 
     def _heuristic(self, zone: Zone, goal: Zone) -> float:
         """Calculate the Euclidean distance between two zones.
@@ -32,7 +33,36 @@ class SpaceTimePathfinder:
         Returns:
             The Euclidean distance between the two zones.
         """
-        return math.hypot(zone.x - goal.x, zone.y - goal.y)
+        distances = self._heuristic_cache.get(goal.name)
+        if distances is None:
+            distances = self._build_heuristic_distances(goal)
+            self._heuristic_cache[goal.name] = distances
+        return float(distances.get(zone.name, math.inf))
+
+    def _build_heuristic_distances(self, goal: Zone) -> dict[str, int]:
+        """Build reverse shortest-path costs without reservations."""
+        distances: dict[str, int] = {goal.name: 0}
+        frontier: list[tuple[int, str]] = [(0, goal.name)]
+
+        while frontier:
+            distance, zone_name = heapq.heappop(frontier)
+            if distance != distances[zone_name]:
+                continue
+
+            zone = self.drone_map.zones[zone_name]
+            for connection in self.drone_map.neighbors(zone):
+                previous_zone = connection.other(zone)
+                if previous_zone.is_blocked():
+                    continue
+
+                candidate = distance + zone.movement_cost()
+                if candidate >= distances.get(previous_zone.name, math.inf):
+                    continue
+
+                distances[previous_zone.name] = candidate
+                heapq.heappush(frontier, (candidate, previous_zone.name))
+
+        return distances
 
     def _zone_capacity(self, zone: Zone) -> float:
         """Return the maximum number of drones allowed in a zone.
@@ -87,6 +117,11 @@ class SpaceTimePathfinder:
         Raises:
             PathNotFoundError: If no valid path can be found.
         """
+        if start.is_blocked() or end.is_blocked():
+            raise PathNotFoundError(
+                f"No valid path found from {start.name} to {end.name}."
+            )
+
         if start is end:
             return [(start, start_turn)]
 
@@ -100,7 +135,10 @@ class SpaceTimePathfinder:
         best_cost: dict[tuple[str, int], int] = {start_state: 0}
 
         while frontier:
-            _, _, _, state = heapq.heappop(frontier)
+            _, path_cost, _, state = heapq.heappop(frontier)
+            if path_cost != best_cost.get(state):
+                continue
+
             zone_name, turn = state
             current_zone = self.drone_map.zones[zone_name]
             if current_zone is end:
@@ -111,7 +149,7 @@ class SpaceTimePathfinder:
                 continue
 
             wait_state = (current_zone.name, arrival_turn)
-            current_cost = best_cost.get(state)
+            current_cost = best_cost[state]
             if current_cost is not None:
                 wait_usage = zone_reservations.get(
                     (current_zone.name, arrival_turn), 0
@@ -137,42 +175,49 @@ class SpaceTimePathfinder:
 
             for connection in self.drone_map.neighbors(current_zone):
                 next_zone = connection.other(current_zone)
+                if next_zone.is_blocked():
+                    continue
+
+                travel_time = next_zone.movement_cost()
+                arrival_turn = turn + travel_time
+                if arrival_turn > max_turn:
+                    continue
+
                 conn_key = self._connection_key(current_zone, next_zone)
-                connection_usage = (
-                    connection_reservations.get((conn_key, arrival_turn), 0)
-                    + 1
-                )
-                if connection_usage > connection.max_link_capacity:
-                    continue
+                for transit_turn in range(turn + 1, arrival_turn + 1):
+                    connection_usage = (
+                        connection_reservations.get(
+                            (conn_key, transit_turn), 0
+                        )
+                        + 1
+                    )
+                    if connection_usage > connection.max_link_capacity:
+                        break
+                else:
+                    zone_usage = zone_reservations.get(
+                        (next_zone.name, arrival_turn), 0
+                    ) + 1
+                    if zone_usage > self._zone_capacity(next_zone):
+                        continue
 
-                zone_usage = zone_reservations.get(
-                    (next_zone.name, arrival_turn), 0
-                ) + 1
-                if zone_usage > self._zone_capacity(next_zone):
-                    continue
+                    next_state = (next_zone.name, arrival_turn)
+                    tentative_cost = current_cost + travel_time
+                    existing_cost = best_cost.get(next_state)
+                    if (
+                        existing_cost is not None
+                        and tentative_cost >= existing_cost
+                    ):
+                        continue
 
-                next_state = (next_zone.name, arrival_turn)
-                current_cost = best_cost.get(state)
-                if current_cost is None:
-                    continue
-
-                tentative_cost = current_cost + 1
-                existing_cost = best_cost.get(next_state)
-                if (
-                    existing_cost is not None
-                    and tentative_cost >= existing_cost
-                ):
-                    continue
-
-                previous[next_state] = state
-                best_cost[next_state] = tentative_cost
-                priority = float(tentative_cost) + self._heuristic(
-                    next_zone, end
-                )
-                heapq.heappush(
-                    frontier,
-                    (priority, tentative_cost, arrival_turn, next_state),
-                )
+                    previous[next_state] = state
+                    best_cost[next_state] = tentative_cost
+                    priority = float(tentative_cost) + self._heuristic(
+                        next_zone, end
+                    )
+                    heapq.heappush(
+                        frontier,
+                        (priority, tentative_cost, arrival_turn, next_state),
+                    )
 
         raise PathNotFoundError(
             f"No valid path found from {start.name} to {end.name}."

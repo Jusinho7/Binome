@@ -44,9 +44,12 @@ class SimulationEngine:
 
         self.turn_log: list[list[str]] = []
         self.position_history: list[dict[int, Zone]] = []
+        self.transit_history: list[
+            dict[int, tuple[Zone, Zone, int]]
+        ] = []
 
         self._compute_initial_paths()
-        self._save_positions()
+        self._save_positions(0)
 
     def _compute_initial_paths(self) -> None:
         """Compute and reserve initial paths for all drones."""
@@ -97,19 +100,33 @@ class SimulationEngine:
                     "Simulation exceeded max_turns — possible deadlock"
                 )
             self.turn_log.append(self._simulate_turn(turn))
-            self._save_positions()
+            self._save_positions(turn)
         return self.turn_log
 
-    def _save_positions(self) -> None:
+    def _save_positions(self, turn: int) -> None:
         """Save the current position of every drone."""
         self.position_history.append(
             {drone.id: drone.current_zone for drone in self.drones}
+        )
+        self.transit_history.append(
+            {
+                drone.id: (
+                    drone.current_zone,
+                    drone.transit_target,
+                    drone.arrival_turn,
+                )
+                for drone in self.drones
+                if drone.in_transit
+                and drone.transit_target is not None
+                and drone.arrival_turn is not None
+            }
         )
 
     def _simulate_turn(self, turn: int) -> list[str]:
         """Simulate one turn and return the resulting drone movements."""
         moves: list[str] = []
         connection_usage: dict[str, int] = defaultdict(int)
+        moved_this_turn: set[int] = set()
 
         for drone in self._active_drones():
             if drone.in_transit and drone.arrival_turn == turn:
@@ -124,10 +141,13 @@ class SimulationEngine:
                 self.zone_occupancy[target.name] += 1
                 drone.complete_transit()
                 moves.append(f"D{drone.id}-{target.name}")
+                moved_this_turn.add(drone.id)
                 if target is self.drone_map.end:
                     drone.delivered = True
 
         for drone in sorted(self._active_drones(), key=lambda d: d.id):
+            if drone.id in moved_this_turn:
+                continue
             if drone.in_transit or drone.delivered:
                 continue
 
@@ -151,7 +171,7 @@ class SimulationEngine:
                 continue
 
             if next_zone.zone_type == "restricted":
-                arrival_turn = turn + 1
+                arrival_turn = turn + next_zone.movement_cost() - 1
                 reserved = self.future_arrivals[arrival_turn][next_zone.name]
                 capacity = self._zone_capacity(next_zone)
 
