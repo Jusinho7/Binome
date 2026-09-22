@@ -1,5 +1,6 @@
 """Parse a drone map definition file and populate a DroneMap object."""
 
+import re
 from typing import Optional
 from .models import Connection, DroneMap, Zone
 
@@ -102,27 +103,60 @@ class Parser:
             if not line or line.startswith("#"):
                 continue
 
-            if first_content_line and not line.startswith("nb_drones:"):
+            nb_drones_match = re.fullmatch(r"nb_drones\s*:\s*(.*)", line)
+            start_hub_match = re.fullmatch(r"start_hub\s*:\s*(.*)", line)
+            end_hub_match = re.fullmatch(r"end_hub\s*:\s*(.*)", line)
+            hub_match = re.fullmatch(r"hub\s*:\s*(.*)", line)
+            Connection_match = re.fullmatch(r"connection\s*:\s*(.*)", line)
+
+            if first_content_line and nb_drones_match is None:
                 raise ParseError(
                     i,
                     f"{RED}'nb_drones' must be the first declaration{RESET}",
                 )
             first_content_line = False
 
-            if line.startswith("nb_drones:"):
+            if line.startswith("nb_drones"):
+                if nb_drones_match is None:
+                    raise ParseError(
+                        i,
+                        f"{RED}invalid 'nb_drones' declaration{RESET}",
+                    )
                 if nb_drones is not None:
                     raise ParseError(
                         i,
                         f"{RED}duplicate 'nb_drones' declaration{RESET}",
                     )
-                nb_drones = self._parse_nb_drones(line, i)
-            elif line.startswith("start_hub:"):
+                nb_drones = self._parse_nb_drones(
+                    f"nb_drones: {nb_drones_match.group(1)}", i
+                )
+            elif line.startswith("start_hub"):
+                if start_hub_match is None:
+                    raise ParseError(
+                        i,
+                        f"{RED}invalid 'start_hub' declaration{RESET}",
+                    )
                 self._parse_zone(line, i, drone_map, is_start=True)
-            elif line.startswith("end_hub:"):
+            elif line.startswith("end_hub"):
+                if end_hub_match is None:
+                    raise ParseError(
+                        i,
+                        f"{RED}invalid 'end_hub' declaration{RESET}",
+                    )
                 self._parse_zone(line, i, drone_map, is_end=True)
-            elif line.startswith("hub:"):
+            elif line.startswith("hub"):
+                if hub_match is None:
+                    raise ParseError(
+                        i,
+                        f"{RED}invalid 'hub' declaration{RESET}",
+                    )
                 self._parse_zone(line, i, drone_map)
-            elif line.startswith("connection:"):
+            elif line.startswith("connection"):
+                if Connection_match is None:
+                    raise ParseError(
+                        i,
+                        f"{RED}invalid 'connection' declaration{RESET}",
+                    )
                 self._parse_connection(line, i, drone_map)
             else:
                 raise ParseError(i, f"{RED}unrecognized line: '{line}'{RESET}")
@@ -275,6 +309,14 @@ class Parser:
                 f"{RED}zone coordinates must be integers{RESET}",
             )
 
+        for existing_zone in drone_map.zones.values():
+            if existing_zone.x == x and existing_zone.y == y:
+                raise ParseError(
+                    line_no,
+                    f"{RED}coordinates ({x}, {y}) are already used by "
+                    f"zone '{existing_zone.name}'{RESET}",
+                )
+
         metadata = self._parse_metadata(metadata_str, line_no)
 
         zone_type = metadata.get("zone", "normal")
@@ -351,6 +393,13 @@ class Parser:
             )
 
         name_a, name_b = names[0].strip(), names[1].strip()
+
+        if name_a == name_b:
+            raise ParseError(
+                line_no,
+                f"{RED}a connection cannot point to the same zone: "
+                f"'{name_a}-{name_b}'{RESET}",
+            )
 
         if name_a not in drone_map.zones or name_b not in drone_map.zones:
             raise ParseError(
