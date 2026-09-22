@@ -47,7 +47,11 @@ class MapSelector:
                 )
                 continue
 
-            selected_file, go_back = self._select_item(files, "Choice file", "file")
+            selected_file, go_back = self._select_item(
+                files,
+                "Choice file",
+                "file"
+            )
             if go_back:
                 console.print("[dim]Returning to map selection.[/dim]")
                 continue
@@ -61,14 +65,21 @@ class MapSelector:
             return selected_file
 
     def _get_map_folders(self) -> list[Path]:
-        if not self.maps_directory.exists() or not self.maps_directory.is_dir():
+        if (
+            not self.maps_directory.exists()
+            or not self.maps_directory.is_dir()
+        ):
             console.print(
                 f"[bold red]Maps directory not found:[/bold red] "
                 f"[yellow]{self.maps_directory}[/yellow]"
             )
             return []
 
-        folders = sorted(path for path in self.maps_directory.iterdir() if path.is_dir())
+        folders = sorted(
+            path
+            for path in self.maps_directory.iterdir()
+            if path.is_dir()
+        )
         if not folders:
             console.print(
                 f"[bold red]No map folders found in[/bold red] "
@@ -82,12 +93,17 @@ class MapSelector:
     ) -> tuple[Optional[Path], bool]:
         console.print(f"\n[bold cyan]--- {title} ---[/bold cyan]")
         for index, item in enumerate(items, 1):
-            console.print(f"  [bold yellow]{index}.[/bold yellow] [white]{item.name}[/white]")
+            console.print(
+                f"  [bold yellow]{index}.[/bold yellow]"
+                f" [white]{item.name}[/white]"
+            )
         console.print("  [bold red]0.[/bold red] [dim]Annuler[/dim]")
         console.print("  [bold magenta]R.[/bold magenta] [dim]Retour[/dim]")
 
         while True:
-            choice = console.input("[bold green]Your choice[/bold green] : ").strip()
+            choice = console.input(
+                "[bold green]Your choice[/bold green] : "
+            ).strip()
             if choice == "0":
                 console.print("[dim]Selection cancelled.[/dim]")
                 return None, False

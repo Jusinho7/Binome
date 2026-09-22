@@ -60,4 +60,5 @@ def main() -> None:
     pygame_display.run()
 
 
-if __name__ == "__main__":main()
+if __name__ == "__main__":
+    main()
