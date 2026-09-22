@@ -5,6 +5,8 @@ from generator import (
     Parser, ParseError, SimulationEngine,
     TerminalDisplay, PygameDisplay, choice_map
 )
+from subprocess import run
+from time import sleep
 
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -21,8 +23,11 @@ def main() -> None:
     print(maps_file)
     if maps_file is None:
         print(f"{RED}No map selected. Exiting.{RESET}")
+        sleep(1)
+        run(["clear"])
         sys.exit(1)
 
+    run(["clear"])
     try:
         drone_map = Parser(str(maps_file)).parse()
     except (ParseError, FileNotFoundError) as e:
@@ -55,5 +60,4 @@ def main() -> None:
     pygame_display.run()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":main()
