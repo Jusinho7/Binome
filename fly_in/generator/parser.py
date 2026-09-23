@@ -204,7 +204,7 @@ class Parser:
             if "_" in value:
                 raise ParseError(
                     line_no,
-                    f"{RED}invalid nb_drones value{RESET}"
+                    f"{RED}invalid nb_drones value: {value}{RESET}"
                 )
             nb = int(value)
         except (IndexError, ValueError):
@@ -310,6 +310,18 @@ class Parser:
             )
 
         try:
+            if "_" in y_str:
+                raise ParseError(
+                    line_no,
+                    f"{RED}zone coordinate invalid: {y_str}{RESET}"
+                )
+
+            if "_" in x_str: 
+                raise ParseError(
+                    line_no,
+                    f"{RED}zone coordinate invalid: {x_str}{RESET}"
+                )
+
             x, y = int(x_str), int(y_str)
         except ValueError:
             raise ParseError(
@@ -495,6 +507,11 @@ class Parser:
             ParseError: If the value is not a positive integer.
         """
         try:
+            if "_" in value:
+                raise ParseError(
+                    line_no,
+                    f"{RED}value is invalid: {value}{RESET}"
+                )
             n = int(value)
         except ValueError:
             raise ParseError(
