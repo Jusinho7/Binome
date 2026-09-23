@@ -201,6 +201,11 @@ class Parser:
         """
         try:
             value = line.split(":", 1)[1].strip()
+            if "_" in value:
+                raise ParseError(
+                    line_no,
+                    f"{RED}invalid nb_drones value{RESET}"
+                )
             nb = int(value)
         except (IndexError, ValueError):
             raise ParseError(
