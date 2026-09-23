@@ -65,6 +65,9 @@ COLORS = [
     "cerulean",
     "periwinkle",
     "fuchsia",
+    "darkred",
+    "crimson",
+    "rainbow",
 ]
 RED = "\033[31m"
 RESET = "\033[0m"
