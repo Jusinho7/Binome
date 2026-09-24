@@ -283,14 +283,14 @@ Run with `make benchmark`. All provided maps meet their target turn count:
 | Map | Turns | Target | Result |
 | --- | ---: | ---: | --- |
 | easy/01_linear_path | 4 | ≤ 6 | OK |
-| easy/02_simple_fork | 5 | ≤ 6 | OK |
+| easy/02_simple_fork | 4 | ≤ 8 | OK |
 | easy/03_basic_capacity | 4 | ≤ 6 | OK |
 | medium/01_dead_end_trap | 8 | ≤ 12 | OK |
 | medium/02_circular_loop | 15 | ≤ 15 | OK |
 | medium/03_priority_puzzle | 7 | ≤ 12 | OK |
-| hard/01_maze_nightmare | 13 | ≤ 20 | OK |
-| hard/02_capacity_hell | 16 | ≤ 25 | OK |
-| hard/03_ultimate_challenge | 26 | ≤ 30 | OK |
+| hard/01_maze_nightmare | 13 | ≤ 30 | OK |
+| hard/02_capacity_hell | 16 | ≤ 35 | OK |
+| hard/03_ultimate_challenge | 26 | ≤ 45 | OK |
 
 ## Project Structure
 
