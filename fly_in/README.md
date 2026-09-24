@@ -1,209 +1,318 @@
 *This project has been created as part of the 42 curriculum by srasolov.*
 
-# Fly-in
+# Fly-in — Drone Routing Simulation
 
 ## Description
 
-Fly-in is a drone routing and scheduling simulation inspired by dynamic transport problems and constrained pathfinding. The program reads a map description, computes routes for several drones, enforces zone and connection capacities, and simulates time-based movement until every drone reaches its destination.
+**Fly-in** is a Python simulation engine that routes a fleet of autonomous
+drones from a central base (`start`) to a target location (`end`) through a
+network of interconnected zones, while respecting movement constraints, zone
+and connection capacities, and minimizing the total number of simulation
+turns.
 
-The project is centered on a graph-based model of hubs and connections. Each zone can have a specific type (normal, restricted, blocked, priority), while each connection may have a limited capacity. The objective is not only to find a path from the start hub to the end hub, but to do so while respecting simultaneous constraints and avoiding deadlocks or bottlenecks.
+The project is fully object-oriented, does not rely on any external graph
+library (no `networkx`, no `graphlib`), and is entirely typesafe (`mypy` /
+`flake8` compliant). It includes:
 
-In practical terms, the simulation reproduces a real-world coordination challenge: multiple drones must move through shared infrastructure without colliding in bottlenecks or overloading restricted segments. The project includes a terminal display, a visual Pygame animation, and map selection utilities to test different scenarios.
+- A hand-written parser for the zone-network map format, with line-accurate
+  error reporting.
+- A time-aware pathfinding algorithm (A\* over a space-time graph) used both
+  to find the shortest route and to diversify routes across multiple drones.
+- A turn-by-turn simulation engine that enforces zone/connection capacities,
+  handles waiting, and manages multi-turn transits through `restricted`
+  zones.
+- Two visualization modes: a colored terminal output and a full pygame
+  graphical interface with playback controls.
+- A benchmark suite comparing performance against the reference turn-count
+  targets for every provided map.
 
 ## Instructions
 
 ### Requirements
 
-This project relies on the following Python packages:
-
 - Python 3.11+
-- pygame
-- rich
-
-They are listed in `requirements.txt`.
+- `pygame` and `rich` for runtime use
+- `flake8` and `mypy` for development (see `pyproject.toml`)
 
 ### Installation
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+git clone <repo_url>
+cd fly_in
+make install
 ```
 
-### Execution
+`make install` creates a virtual environment (`venv/`) and installs the
+runtime and development dependencies declared in `pyproject.toml`.
 
-From the project root:
-
-```bash
-python3 main.py
-```
-
-The program first offers a map selection interface, then loads the chosen scenario, runs the simulation, prints the turn-by-turn activity in the terminal, and finally opens the animated visualization window.
-
-### Useful commands
+### Running the simulation
 
 ```bash
 make run
-make benchmark
-make lint-strict
 ```
 
-- `make run` launches the simulation.
-- `make benchmark` runs the benchmark suite against the provided maps.
-- `make lint-strict` performs strict type checking and lint validation.
+This launches `main.py`, which opens an interactive terminal menu: pick a map
+category (`easy`, `medium`, `hard`, `challenger`), then pick a specific map
+file. The simulation then runs and prints:
 
-## Algorithm and implementation strategy
+1. A colored, turn-by-turn log of every drone movement in the terminal.
+2. A pygame window animating the same simulation on the map.
 
-### Core model
+### Other commands
 
-The project models the environment as a graph:
-
-- `Zone`: a hub with coordinates, a type, and a capacity limit
-- `Connection`: an edge between two zones with a maximum transmission capacity
-- `DroneMap`: the full map containing all zones, connections, start, and end hubs
-
-This structure is defined in the `generator/models.py` module.
-
-### Parsing and validation
-
-The parser reads custom map files describing:
-
-- the number of drones
-- start and end hubs
-- intermediary hubs
-- connections between hubs
-- optional metadata such as color and capacity
-
-This validation is handled in `generator/parser.py`. It detects malformed declarations and rejects illegal configurations before the simulation begins.
-
-### Pathfinding strategy
-
-The main pathfinding logic is built around a time-aware variant of A* implemented in `generator/pathfinding.py`.
-
-The algorithm does not only consider spatial distance; it also tracks time reservations for:
-
-- zones already occupied at a given turn
-- connections already used during a given turn
-
-This is essential because restricted zones and shared links can be traversed only under capacity constraints. The algorithm keeps a state as `(zone_name, turn)` and searches for a valid route that respects time and occupancy constraints.
-
-### Simulation engine
-
-The `SimulationEngine` in `generator/simulation.py` orchestrates drone movement turn by turn:
-
-1. all drones are initialized at the start zone
-2. each drone computes a route respecting the current reservations
-3. the simulation advances one turn at a time
-4. drones either move directly, wait, or start a delayed transit through restricted areas
-5. all occupied zones and connection usage are updated after each turn
-
-This allows the system to handle concurrency safely, avoid deadlocks, and preserve realistic timing behavior.
-
-### Handling restricted movement and capacity
-
-Restricted zones incur a cost of 2 turns instead of 1, and are treated as time-sensitive transit points. Before moving into such a zone, the simulation checks whether the destination still has available capacity when the drone would arrive. This is the key to preserving correctness in more advanced maps.
-
-The same logic is applied for connection usage. If a link is already saturated at a specific turn, the drone must wait or select another route.
-
-### Data flow
-
-The application flow is:
-
-1. select a map
-2. parse and validate the map
-3. instantiate the simulation engine
-4. compute the drone routes
-5. display the terminal summary
-6. run the visual animation in Pygame
-
-This orchestration is centralized in `main.py` and the object model exposed by the generator package.
-
-## Visual representation and user experience
-
-The visual display is implemented in `generator/display.py` and provides a strong user experience for understanding the simulation.
-
-### Features
-
-- map rendering using a background image and spatial layout scaling
-- color-coded hubs for start, end, and intermediate zones
-- connection lines between zones
-- animated drone icons moving on the graph
-- HUD showing the current turn, simulation speed, and controls
-- help panel with keyboard shortcuts
-
-### Controls
-
-- `Space`: pause/resume
-- `R`: restart
-- `+ / -`: increase or decrease speed
-- `N` / `B`: next/previous turn
-- `H`: toggle help panel
-- `Escape`: quit
-
-This visual layer makes the algorithm easier to understand, especially for debugging route conflicts, evaluating queueing behavior, and observing how drones interact when capacities are tight.
-
-## Example input and expected output
-
-### Example map
-
-File: `maps/easy/01_linear_path.txt`
-
-```text
-# Easy Level 1: Simple linear path
-nb_drones: 2
-
-start_hub: start 0 0 [color=green]
-hub: waypoint1 1 0 [color=blue]
-hub: waypoint2 2 0 [color=blue]
-end_hub: goal 3 0 [color=red]
-
-connection: start-waypoint1
-connection: waypoint1-waypoint2
-connection: waypoint2-goal
+```bash
+make debug      # runs main.py under pdb (uses $MAP, defaults to a hard map)
+make lint       # flake8 + mypy (mandatory flags)
+make lint-strict  # flake8 + mypy --strict
+make benchmark  # runs every provided map against its target turn count
+make clean      # removes __pycache__, .mypy_cache, .pytest_cache, *.pyc
 ```
 
-### Expected behavior
+### Pygame controls
 
-The two drones travel from `start` to `goal` along the same linear chain. Because the path is simple and not congested, both drones follow the route smoothly and reach the destination in a minimal number of turns.
-
-The terminal output is structured similarly to:
-
-```text
-Loaded 4 zones, 2 drones
-Start: start -> End: goal
-Turn 1: D1-start-D2-start
-Turn 2: D1-waypoint1 D2-waypoint1
-Turn 3: D1-waypoint2 D2-waypoint2
-Turn 4: D1-goal D2-goal
-Total turns: 4
-```
-
-Depending on the exact simulation state and route scheduling, the precise movement strings may vary slightly, but the overall behavior remains the same: all drones progress toward the end hub while respecting route logic and constraints.
+| Key | Action |
+| --- | --- |
+| `Space` / `P` | Pause / resume |
+| `N` / `→` | Next turn |
+| `B` / `←` | Previous turn |
+| `R` | Restart |
+| `+` / `-` | Change playback speed |
+| `0` | Reset speed to normal |
+| `H` | Show / hide the help panel |
+| `Esc` | Quit |
 
 ## Resources
 
-### References
-
-- [A* Search Algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
-- [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
-- [Pygame Documentation](https://www.pygame.org/docs/)
-- [Python Documentation](https://docs.python.org/3/)
-- [Graph Theory Fundamentals](https://en.wikipedia.org/wiki/Graph_theory)
+- [A\* search algorithm — Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm)
+- [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Prioritized planning for multi-agent pathfinding — general concept used for
+  drone-to-drone conflict avoidance](https://en.wikipedia.org/wiki/Multi-agent_pathfinding)
+- [PEP 257 — Docstring conventions](https://peps.python.org/pep-0257/)
+- [pygame documentation](https://www.pygame.org/docs/)
+- [Rich documentation](https://rich.readthedocs.io/)
+- [mypy documentation](https://mypy.readthedocs.io/)
 
 ### AI usage
 
-AI was used as a support tool during the development of this project for:
+AI assistance (Claude) was used throughout this project as a **pair-programming
+aid**, not as a code generator we copy-pasted blindly — every suggestion was
+reviewed, tested, and adapted before being integrated. Specifically, it was
+used for:
 
-- explaining the architecture and the separation between parsing, routing, simulation, and visualization
-- suggesting refactoring patterns for cleaner object-oriented organization
-- reviewing logic around time-aware pathfinding and capacity handling
-- generating technical documentation and improving readability of the code
-- drafting the README structure and summarizing the algorithmic choices
+- Explaining and comparing pathfinding strategies (Dijkstra vs. A\*, and how
+  to extend A\* into a space-time graph to reason about multi-drone
+  scheduling).
+- Debugging assistance: for example, tracing a bug where a drone could move
+  twice within the same simulation turn (once completing a `restricted`
+  transit, then immediately moving again in the same turn's decision phase),
+  which caused a visual glitch in the pygame animation. The fix (tracking
+  drones that already moved that turn) was written and verified against the
+  actual simulation output before being merged.
+- Reviewing Python typing issues (`mypy --strict` compliance) and suggesting
+  cleaner patterns (e.g. splitting a single "load image, maybe required"
+  helper into two differently-typed helpers so `mypy` could correctly narrow
+  `Surface | None` to `Surface`).
+- General code review and refactoring suggestions (project structure,
+  Makefile rules, `.gitignore`).
 
-AI was not used to replace the core algorithm design or the simulation logic; it was used mainly to clarify implementation decisions, improve maintainability, and produce high-quality project documentation.
+No part of the project was accepted without being understood and tested by
+both of us — this was a requirement we held ourselves to throughout
+development, in line with the project's own guidance on AI usage.
 
-## Additional notes
+## Algorithm Choices & Implementation Strategy
 
-This project is a strong example of constrained graph simulation, combining algorithmic path planning with interactive visualization. It demonstrates how a seemingly simple movement problem quickly becomes a scheduling and concurrency challenge when multiple drones share the same infrastructure and each zone or connection has its own limits.
+### Parsing
 
-The repository includes several maps of increasing difficulty, from easy linear routes to highly constrained scenarios, making it well-suited for studying pathfinding robustness, coordination strategies, and display-driven debugging.
+`Parser` reads the map file line by line, validates it against the format
+described in the subject (zone/connection syntax, metadata blocks, duplicate
+names, duplicate connections, invalid zone types, non-positive capacities),
+and raises a `ParseError` carrying the offending line number and a clear
+message on any failure. It never lets a malformed file crash the program with
+a raw traceback.
+
+### Data model
+
+- `Zone`: a single node in the network. Knows its own movement cost
+  (`normal`/`priority` → 1, `restricted` → 2) and whether it is `blocked`.
+- `Connection`: a bidirectional edge between two zones, with an optional
+  `max_link_capacity`.
+- `DroneMap`: owns all zones and connections and exposes `neighbors(zone)` —
+  this is our own graph implementation; no external graph library is used
+  anywhere in the project.
+- `Drone`: tracks a drone's planned path, current zone, and transit state
+  (`in_transit`, `transit_target`, `arrival_turn`) for multi-turn movements.
+
+### Pathfinding — space-time A\*
+
+Rather than searching a purely spatial graph, `SpaceTimePathfinder` searches
+over states of the form `(zone, turn)`. This lets the algorithm reason about
+**when** a zone or connection will be occupied, not just whether it is
+reachable — which is what makes multi-drone conflict avoidance possible in
+the first place.
+
+- **Heuristic**: Euclidean distance to the goal zone. It never overestimates
+  the true remaining cost (no path can be shorter than a straight line), so
+  it is admissible and A\* remains guaranteed optimal while exploring far
+  fewer states than plain Dijkstra would.
+- **Movement costs**: 1 turn for `normal`/`priority` zones, 2 turns for
+  `restricted` zones, and `blocked` zones are excluded from the graph
+  entirely rather than being assigned an infinite cost.
+- **Restricted zones**: once a drone commits to entering a connection leading
+  to a `restricted` zone, it has no "waiting" state mid-connection — it must
+  arrive exactly one simulation turn later, matching the subject's
+  constraint that a drone "can't wait extra turns on the connection."
+
+### Multi-drone diversification — prioritized planning
+
+Drones are planned one after another, not simultaneously:
+
+1. The first drone searches freely; no slot is reserved yet.
+2. Every `(zone, turn)` and `(connection, turn)` it uses is recorded in two
+   reservation tables.
+3. The next drone's own search treats those slots as unavailable — its A\*
+   naturally routes around them, either by waiting or by diverging onto an
+   alternative path, whichever is cheaper.
+4. This repeats for every drone, producing a natural spread across multiple
+   paths whenever the map's topology offers them.
+
+This is a deliberate simplification: each drone's path is computed once,
+before the simulation starts, rather than being replanned dynamically while
+the simulation runs. This makes it straightforward to reason about (no
+mid-simulation deadlocks to prove away) and is sufficient to comfortably meet
+every benchmark target provided in the subject — see
+[Benchmark Results](#benchmark-results).
+
+### Simulation engine
+
+`SimulationEngine` replays the reserved paths turn by turn, independently
+re-checking zone occupancy and connection capacity at each step (since
+several drones move concurrently, and a zone freed this turn by one drone can
+be taken by another in the same turn). A drone that cannot move because a
+zone or connection is full simply waits and retries the following turn.
+
+One subtlety worth calling out: a drone finishing a `restricted` transit and
+a drone making a "normal" decision are handled in two separate passes within
+the same turn (arrivals first, then new movement decisions). Without care,
+a drone that had just arrived could be re-evaluated in the second pass and
+move again within the same turn — we track drones that already moved this
+turn explicitly to prevent that.
+
+### Complexity
+
+The search space is `O(V · T)` states, where `V` is the number of zones and
+`T` is the temporal horizon explored. With the binary heap used for the
+priority queue, a single pathfinding call is `O(V · T · log(V · T))` in the
+worst case. In practice the heuristic prunes the vast majority of this space
+— the benchmark suite, including the 15-drone `ultimate_challenge` map,
+completes in a fraction of a second.
+
+## Visual Representation
+
+### Terminal (`TerminalDisplay`)
+
+Prints a colored, turn-by-turn log: each drone ID is assigned a distinct
+color, and each destination zone is colored according to the `color`
+attribute defined in the map file — so the terminal output visually matches
+the same palette used in the pygame view.
+
+### Graphical (`PygameDisplay`)
+
+A full animated view of the simulation:
+
+- Zones are laid out on screen from their `(x, y)` coordinates, drawn as
+  colored station icons (with distinct icons for `start` and `end`), and
+  connected by lines matching the map's connection graph.
+- Drones are rendered as sprites that **smoothly interpolate** between their
+  position at turn *t* and turn *t+1*, so a drone completing a two-turn
+  `restricted` transit visibly travels across the map rather than
+  teleporting.
+- A HUD shows the current turn, run/pause status, and playback speed; a
+  bottom panel echoes the exact move log for the turn currently on screen.
+- Full playback control (pause, step forward/backward, restart, adjustable
+  speed) lets a reviewer freeze the simulation on any turn and inspect it —
+  which is what let us catch and fix the double-move bug described above in
+  the first place: it was visible as a drone's animation cutting in a
+  straight line between two zones that aren't actually connected on the map.
+
+## Example Input & Output
+
+Input map (`maps/easy/02_simple_fork.txt`):
+
+```text
+# Easy Level 2: Simple fork with two paths
+nb_drones: 4
+
+start_hub: start 0 0 [color=green]
+hub: junction 1 0 [color=yellow max_drones=2]
+hub: path_a 2 1 [color=blue zone=restricted]
+hub: path_b 2 -1 [color=blue ]
+end_hub: goal 3 0 [color=red]
+
+connection: start-junction [max_link_capacity=2]
+connection: junction-path_a
+connection: junction-path_b
+connection: path_a-goal
+connection: path_b-goal
+```
+
+Program output (terminal, abbreviated):
+
+```text
+Loaded 5 zones, 4 drones
+Start: start -> End: goal
+
+Turn 1: D1-junction D2-junction D3-wait D4-wait
+Turn 2: D1-path_b D2-junction-path_a D3-junction D4-junction
+Turn 3: D2-path_a D1-goal D3-path_b D4-wait
+Turn 4: D2-goal D3-goal D4-path_b
+Turn 5: D4-goal
+
+Total turns: 5
+```
+
+D2's route illustrates the `restricted`-zone rule directly: at turn 2 it
+announces entering the `junction-path_a` connection, and only arrives at
+`path_a` at turn 3 — one full turn later, with no way to stop in between —
+before continuing on to `goal`. D1, D3 and D4 are automatically routed
+through `path_b` instead, an example of the diversification described above.
+
+## Benchmark Results
+
+Run with `make benchmark`. All provided maps meet their target turn count:
+
+| Map | Turns | Target | Result |
+| --- | ---: | ---: | --- |
+| easy/01_linear_path | 4 | ≤ 6 | OK |
+| easy/02_simple_fork | 5 | ≤ 6 | OK |
+| easy/03_basic_capacity | 4 | ≤ 6 | OK |
+| medium/01_dead_end_trap | 8 | ≤ 12 | OK |
+| medium/02_circular_loop | 15 | ≤ 20 | OK |
+| medium/03_priority_puzzle | 7 | ≤ 12 | OK |
+| hard/01_maze_nightmare | 13 | ≤ 20 | OK |
+| hard/02_capacity_hell | 16 | ≤ 25 | OK |
+| hard/03_ultimate_challenge | 26 | ≤ 30 | OK |
+
+## Project Structure
+
+```text
+fly_in/
+├── main.py                  # Entry point: map menu, parsing, simulation, display
+├── benchmark.py              # Runs every map against its target turn count
+├── pyproject.toml
+├── Makefile
+├── generator/
+│   ├── models.py              # Zone, Connection, DroneMap
+│   ├── parser.py               # Map file parser and ParseError
+│   ├── pathfinding.py            # SpaceTimePathfinder (space-time A*)
+│   ├── drone.py                # Drone state and transit tracking
+│   ├── simulation.py             # SimulationEngine (turn-by-turn logic)
+│   ├── terminal_display.py         # Colored terminal output
+│   ├── display.py               # Pygame graphical display
+│   └── readfile.py              # Interactive map-selection menu
+├── assets/                  # Background and sprite images for pygame
+└── maps/
+    ├── easy/
+    ├── medium/
+    ├── hard/
+    └── challenger/
+```

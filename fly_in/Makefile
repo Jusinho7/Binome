@@ -10,7 +10,7 @@ MAP ?= maps/hard/03_ultimate_challenge.txt
 install:
 	$(PYTHON) -m venv $(VENV)
 	$(VENV_PYTHON) -m pip install --upgrade pip
-	$(VENV_PIP) install -r requirements.txt
+	$(VENV_PIP) install -e ".[dev]"
 
 run:
 	$(VENV_PYTHON) main.py

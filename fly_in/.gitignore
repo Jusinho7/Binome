@@ -1,2 +1,37 @@
-env
-venv
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Packaging and build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test, coverage, and type-checker caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Tool and IDE files
+.hypothesis/
+.ruff_cache/
+.idea/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
