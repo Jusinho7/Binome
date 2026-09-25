@@ -6,51 +6,6 @@ from typing import Optional
 
 from .models import DroneMap, Zone
 
-CHALLENGER_ROUTE_BIAS: dict[str, float] = {
-    "gate_hell1": 0.0,
-    "gate_hell2": 0.2,
-    "gate_hell3": 1.0,
-    "gate_hell4": 1.2,
-    "gate_hell5": 0.8,
-    "maze_trap_a1": 0.0,
-    "maze_trap_a2": 0.0,
-    "maze_trap_b1": 0.4,
-    "maze_trap_b2": 0.4,
-    "maze_loop1": 1.2,
-    "maze_loop2": 1.2,
-    "maze_loop3": 1.2,
-    "maze_loop4": 1.4,
-    "maze_loop5": 1.4,
-    "maze_loop6": 1.4,
-    "micro_gate1": 0.0,
-    "micro_gate2": 0.8,
-    "micro_gate3": 1.2,
-    "overflow_hell1": 0.0,
-    "overflow_hell2": 0.8,
-    "overflow_hell3": 1.5,
-    "overflow_hell4": 0.2,
-    "overflow_hell5": 0.8,
-    "overflow_hell6": 1.5,
-    "false_hope1": 0.0,
-    "false_hope2": 0.0,
-    "false_hope3": 0.0,
-    "conv_restricted1": 0.0,
-    "conv_restricted2": 1.0,
-    "conv_restricted3": 1.5,
-    "conv_restricted4": 0.3,
-    "conv_restricted5": 0.5,
-    "conv_restricted6": 0.7,
-    "conv_restricted7": 0.6,
-    "conv_restricted8": 0.8,
-    "conv_restricted9": 1.2,
-    "final_merge": 0.0,
-    "final_torture1": 0.0,
-    "final_torture2": 0.0,
-    "final_torture3": 0.0,
-    "final_torture4": 0.0,
-    "final_torture5": 0.0,
-}
-
 
 class PathNotFoundError(Exception):
     """Raised when no valid path can be found."""
@@ -122,16 +77,35 @@ class SpaceTimePathfinder:
             return math.inf
         return zone.max_drones if zone.max_drones is not None else 1
 
-    def _challenger_bias(self, zone: Zone) -> float:
-        """Push the solver toward balanced corridors on the challenger map."""
-        if (
-            self.drone_map.start is not None
-            and self.drone_map.end is not None
-            and self.drone_map.start.name == "start"
-            and self.drone_map.end.name == "impossible_goal"
-        ):
-            return CHALLENGER_ROUTE_BIAS.get(zone.name, 3.0)
-        return 0.0
+    def _congestion_penalty(
+        self,
+        current_zone: Zone,
+        next_zone: Zone,
+        departure_turn: int,
+        arrival_turn: int,
+        zone_reservations: dict[tuple[str, int], int],
+        connection_reservations: dict[tuple[str, int], int],
+        connection_capacity: int,
+    ) -> float:
+        """Prefer routes with less previously reserved capacity."""
+        zone_capacity = self._zone_capacity(next_zone)
+        zone_penalty = 0.0
+        if zone_capacity != math.inf:
+            zone_usage = zone_reservations.get(
+                (next_zone.name, arrival_turn), 0
+            )
+            zone_penalty = zone_usage / zone_capacity
+
+        connection_penalty = 0.0
+        if connection_capacity > 0:
+            connection_key = self._connection_key(current_zone, next_zone)
+            connection_penalty = sum(
+                connection_reservations.get((connection_key, turn), 0)
+                / connection_capacity
+                for turn in range(departure_turn + 1, arrival_turn + 1)
+            )
+
+        return zone_penalty + connection_penalty
 
     @staticmethod
     def _connection_key(zone_a: Zone, zone_b: Zone) -> str:
@@ -270,7 +244,15 @@ class SpaceTimePathfinder:
                     priority = (
                         float(tentative_cost)
                         + self._heuristic(next_zone, end)
-                        + self._challenger_bias(next_zone)
+                        + self._congestion_penalty(
+                            current_zone,
+                            next_zone,
+                            turn,
+                            arrival_turn,
+                            zone_reservations,
+                            connection_reservations,
+                            connection.max_link_capacity,
+                        )
                     )
                     heapq.heappush(
                         frontier,

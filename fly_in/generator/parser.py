@@ -316,7 +316,7 @@ class Parser:
                     f"{RED}zone coordinate invalid: {y_str}{RESET}"
                 )
 
-            if "_" in x_str: 
+            if "_" in x_str:
                 raise ParseError(
                     line_no,
                     f"{RED}zone coordinate invalid: {x_str}{RESET}"
