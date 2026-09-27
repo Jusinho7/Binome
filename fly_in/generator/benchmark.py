@@ -17,6 +17,7 @@ TARGETS = {
     "hard/01_maze_nightmare.txt": 30,
     "hard/02_capacity_hell.txt": 35,
     "hard/03_ultimate_challenge.txt": 45,
+    "challenger/01_the_impossible_dream.txt": 45,
 }
 
 

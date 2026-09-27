@@ -6,7 +6,7 @@ BENCH := generator/benchmark.py
 
 MAP ?= maps/hard/03_ultimate_challenge.txt
 
-.PHONY: install run debug clean lint lint-strict benchmark test
+.PHONY: install run debug clean lint lint-strict benchmark
 
 install:
 	$(PYTHON) -m venv $(VENV)
@@ -26,14 +26,14 @@ clean:
 	find . -type f -name "*.pyc" -delete
 
 lint:
-	$(VENV_PYTHON) -m flake8 . --exclude=venv
-	$(VENV_PYTHON) -m mypy . --exclude '^venv/' \
+	$(VENV_PYTHON) -m flake8 . --exclude=.venv,venv
+	$(VENV_PYTHON) -m mypy . --exclude '(^|/)(\.venv|venv)/' \
 		--warn-return-any --warn-unused-ignores --ignore-missing-imports \
 		--disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
-	$(VENV_PYTHON) -m flake8 . --exclude=venv
-	$(VENV_PYTHON) -m mypy . --exclude '^venv/' --strict
+	$(VENV_PYTHON) -m flake8 . --exclude=.venv,venv
+	$(VENV_PYTHON) -m mypy . --exclude '(^|/)(\.venv|venv)/' --strict
 
 benchmark:
 	$(VENV_PYTHON) $(BENCH)

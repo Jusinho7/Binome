@@ -97,8 +97,6 @@ make clean             # removes __pycache__, .mypy_cache, .pytest_cache, *.pyc
 | `H` | Show / hide the help panel |
 | `Esc` | Quit |
 
-
-
 ## Algorithm Choices & Implementation Strategy
 
 ### Parsing
@@ -322,7 +320,6 @@ Run with `make benchmark`. All provided maps meet their target turn count:
 | hard/01_maze_nightmare | 13 | ≤ 30 | OK |
 | hard/02_capacity_hell | 16 | ≤ 35 | OK |
 | hard/03_ultimate_challenge | 26 | ≤ 45 | OK |
-
 
 ## Project structure
 
