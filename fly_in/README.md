@@ -165,30 +165,38 @@ the first place.
   arrive exactly one simulation turn later, matching the subject's
   constraint that a drone "can't wait extra turns on the connection."
 
-#### Pathfinding flow
+### Pathfinding Flow Diagram
+
+The diagram below illustrates how `SpaceTimePathfinder.find_path()` selects
+and reserves a path for each drone, from priority calculation to final path
+reconstruction.
 
 ```mermaid
-flowchart TD
-  A([Start]) --> B[/Input: start, goal, zone and connection reservations/]
-  B --> C{Start and goal are valid?}
-  C -->|No| X[Report that no path was found]
-  C -->|Yes| D[Initialize the priority queue and search records]
-  D --> E[Select the state with the lowest priority]
-  E --> F{Is this the goal state?}
-  F -->|Yes| G[Follow predecessors to rebuild the path]
-  G --> H([Return timed path])
-  F -->|No| I[Consider waiting and reachable neighboring zones]
-  I --> J{Does the candidate satisfy movement,
-  time and capacity constraints?}
-  J -->|No| K[Discard this candidate]
-  J -->|Yes| L[Calculate path cost, heuristic<br/>and congestion penalty]
-  L --> M{Is this a better route to the state?}
-  M -->|Yes| N[Save cost and predecessor;<br/>add state to the priority queue]
-  M -->|No| K
-  N --> O{Are there states left to explore?}
-  K --> O
-  O -->|Yes| E
-  O -->|No| X
+graph TD
+    A["(zone, position, turn)"] --> B["Priority Calculation<br>Priority = cost of path already taken + estimation of remaining distance + congestion penalty<br>Min = priority"]
+    B --> C["Heuristic<br>Calculation = min cost (zone - goal) without reservations"]
+    C --> D{"Drone"}
+    
+    D -->|"Move to a neighbor zone"| E["Move"]
+    D -->|"Wait or recharge on site"| F["Zone or next reservation not available"]
+    
+    E --> G["Zone is reached<br>Turn = + 1<br><br>Travel_time = next_reservation_time<br>Arrival_time = turn + travel_time"]
+    F --> G
+    
+    G --> H["Path:<br><br>Penalty = 0<br>Check<br>If missing:<br>&nbsp;&nbsp;&nbsp;&nbsp;Zone_cap = zone_capacity<br>&nbsp;&nbsp;&nbsp;&nbsp;Connection_cap = connection_capacity<br>&nbsp;&nbsp;&nbsp;&nbsp;Penalty ++<br><br>While reservation exists:<br>&nbsp;&nbsp;&nbsp;&nbsp;Check movement<br>Return"]
+    
+    H --> I["Path:<br><br>While path exists:<br>&nbsp;&nbsp;&nbsp;&nbsp;Find path<br>&nbsp;&nbsp;&nbsp;&nbsp;Reservation<br>&nbsp;&nbsp;&nbsp;&nbsp;Find new path<br>&nbsp;&nbsp;&nbsp;&nbsp;Zone is reserved<br>&nbsp;&nbsp;&nbsp;&nbsp;Increment<br><br>return"]
+    
+    I --> J["Reconstruct<br><br>While a predecessor exists:<br>&nbsp;&nbsp;&nbsp;&nbsp;Get the most recent predecessor<br>&nbsp;&nbsp;&nbsp;&nbsp;Walk back through the process"]
+    
+    J --> K["Use the list to move the drones"]
+
+    subgraph Notes ["Drone movements, check"]
+        N1["• Zone capacity reached"]
+        N2["• Connection capacity"]
+        N3["• Every turn during which a connection is calculated"]
+        N4["• If zone is blocked"]
+    end
 ```
 
 ### Multi-drone diversification — prioritized planning
