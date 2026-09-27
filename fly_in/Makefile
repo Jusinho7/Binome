@@ -3,6 +3,7 @@ VENV := venv
 VENV_PYTHON := $(VENV)/bin/python
 VENV_PIP := $(VENV)/bin/pip
 BENCH := generator/benchmark.py
+ARGS ?=
 
 MAP ?= maps/hard/03_ultimate_challenge.txt
 
@@ -14,7 +15,7 @@ install:
 	$(VENV_PIP) install -e ".[dev]"
 
 run:
-	$(VENV_PYTHON) main.py
+	$(VENV_PYTHON) main.py $(ARGS)
 
 debug:
 	$(VENV_PYTHON) -m pdb main.py $(MAP)

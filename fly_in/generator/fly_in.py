@@ -22,6 +22,8 @@ ORANGE = "\033[33m"
 
 class FlyInApp:
     """Orchestrate map selection, simulation and display."""
+    def __init__(self, capacity_info: bool = False) -> None:
+        self.capacity_info = capacity_info
 
     def run(self) -> None:
         """Run the full simulation workflow."""
@@ -42,6 +44,12 @@ class FlyInApp:
 
         for i, turn_moves in enumerate(turns, start=1):
             terminal_display.print_turn(i, turn_moves)
+            if self.capacity_info:
+                terminal_display.print_capacity_info(
+                    i,
+                    engine.zone_occupancy_history[i - 1],
+                    engine.connection_usage_history[i - 1],
+                )
 
         terminal_display.print_summary(len(turns))
 

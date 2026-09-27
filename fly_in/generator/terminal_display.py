@@ -2,6 +2,7 @@
 
 try:
     from rich.console import Console
+    from rich.table import Table
 except ImportError as exc:
     raise SystemExit(
         "Error: The 'rich' library is not installed. "
@@ -84,6 +85,41 @@ class TerminalDisplay:
             )
 
         console.print(f"[bold]Turn {turn_number}:[/bold] " + " ".join(parts))
+
+# live coding
+    def print_capacity_info(
+        self,
+        turn_number: int,
+        zone_occupancy: dict[str, int],
+        connection_usage: dict[str, int],
+    ) -> None:
+        """Print zone occupancy and connection usage for one turn."""
+        table = Table(title=f"Capacity info - Turn {turn_number}")
+        table.add_column("Resource", style="cyan")
+        table.add_column("Usage", justify="right")
+        table.add_column("Capacity", justify="right", style="yellow")
+
+        for zone in self.drone_map.zones.values():
+            occupancy = zone_occupancy.get(zone.name, 0)
+            if zone is self.drone_map.start or zone is self.drone_map.end:
+                capacity = "unlimited"
+            else:
+                capacity = str(
+                    zone.max_drones if zone.max_drones is not None else 1
+                )
+            table.add_row(f"Zone {zone.name}", str(occupancy), capacity)
+
+        for connection in self.drone_map.connections:
+            names = sorted((connection.zone_a.name, connection.zone_b.name))
+            connection_key = f"{names[0]}-{names[1]}"
+            usage = connection_usage.get(connection_key, 0)
+            table.add_row(
+                f"Link {connection_key}",
+                str(usage),
+                str(connection.max_link_capacity),
+            )
+
+        console.print(table)
 
     def print_summary(self, total_turns: int) -> None:
         """Print a final summary for the completed simulation."""

@@ -44,6 +44,8 @@ class SimulationEngine:
 
         self.turn_log: list[list[str]] = []
         self.position_history: list[dict[int, Zone]] = []
+        self.zone_occupancy_history: list[dict[str, int]] = []
+        self.connection_usage_history: list[dict[str, int]] = []
         self.transit_history: list[
             dict[int, tuple[Zone, Zone, int]]
         ] = []
@@ -197,6 +199,22 @@ class SimulationEngine:
                 if next_zone is self.drone_map.end:
                     drone.delivered = True
 
+        self.zone_occupancy_history.append(
+            {
+                zone.name: self.zone_occupancy[zone.name]
+                for zone in self.drone_map.zones.values()
+            }
+        )
+        link_usage_snapshot: dict[str, int] = {}
+        for connection in self.drone_map.connections:
+            connection_key = self._connection_key(
+                connection.zone_a, connection.zone_b
+            )
+            link_usage_snapshot[connection_key] = (
+                connection_usage[connection_key]
+                + self.active_transits[connection_key]
+            )
+        self.connection_usage_history.append(link_usage_snapshot)
         return moves
 
     def _active_drones(self) -> list[Drone]:
