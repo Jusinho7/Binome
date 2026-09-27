@@ -26,6 +26,22 @@ library (no `networkx`, no `graphlib`), and is entirely typesafe (`mypy` /
 - A benchmark suite comparing performance against the reference turn-count
   targets for every provided map.
 
+## Project flow
+
+```mermaid
+flowchart TD
+    A[main.py] --> B[FlyInApp]
+    B --> C[Map selector]
+    C --> D[Parser]
+    D --> E[DroneMap]
+    E --> F[SimulationEngine]
+    F --> G[Pathfinder: Dijkstra heuristic + space-time A*]
+    G --> F
+    F --> H[Turn log and position history]
+    H --> I[TerminalDisplay]
+    H --> J[PygameDisplay]
+```
+
 ## Instructions
 
 ### Requirements
@@ -37,7 +53,7 @@ library (no `networkx`, no `graphlib`), and is entirely typesafe (`mypy` /
 ### Installation
 
 ```bash
-git clone <repo_url>
+git clone <repo_url> fly_in
 cd fly_in
 make install
 ```
@@ -61,11 +77,11 @@ file. The simulation then runs and prints:
 ### Other commands
 
 ```bash
-make debug      # runs main.py under pdb (uses $MAP, defaults to a hard map)
-make lint       # flake8 + mypy (mandatory flags)
-make lint-strict  # flake8 + mypy --strict
-make benchmark  # runs every provided map against its target turn count
-make clean      # removes __pycache__, .mypy_cache, .pytest_cache, *.pyc
+make debug             # runs main.py under pdb (uses $MAP, defaults to a hard map)
+make lint              # flake8 + mypy (mandatory flags)
+make lint-strict       # flake8 + mypy --strict
+make benchmark         # runs every provided map against its target turn count
+make clean             # removes __pycache__, .mypy_cache, .pytest_cache, *.pyc
 ```
 
 ### Pygame controls
@@ -81,43 +97,7 @@ make clean      # removes __pycache__, .mypy_cache, .pytest_cache, *.pyc
 | `H` | Show / hide the help panel |
 | `Esc` | Quit |
 
-## Resources
 
-- [A\* search algorithm — Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm)
-- [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
-- [Prioritized planning for multi-agent pathfinding — general concept used for
-  drone-to-drone conflict avoidance](https://en.wikipedia.org/wiki/Multi-agent_pathfinding)
-- [PEP 257 — Docstring conventions](https://peps.python.org/pep-0257/)
-- [pygame documentation](https://www.pygame.org/docs/)
-- [Rich documentation](https://rich.readthedocs.io/)
-- [mypy documentation](https://mypy.readthedocs.io/)
-
-### AI usage
-
-AI assistance (Claude) was used throughout this project as a **pair-programming
-aid**, not as a code generator we copy-pasted blindly — every suggestion was
-reviewed, tested, and adapted before being integrated. Specifically, it was
-used for:
-
-- Explaining and comparing pathfinding strategies (Dijkstra vs. A\*, and how
-  to extend A\* into a space-time graph to reason about multi-drone
-  scheduling).
-- Debugging assistance: for example, tracing a bug where a drone could move
-  twice within the same simulation turn (once completing a `restricted`
-  transit, then immediately moving again in the same turn's decision phase),
-  which caused a visual glitch in the pygame animation. The fix (tracking
-  drones that already moved that turn) was written and verified against the
-  actual simulation output before being merged.
-- Reviewing Python typing issues (`mypy --strict` compliance) and suggesting
-  cleaner patterns (e.g. splitting a single "load image, maybe required"
-  helper into two differently-typed helpers so `mypy` could correctly narrow
-  `Surface | None` to `Surface`).
-- General code review and refactoring suggestions (project structure,
-  Makefile rules, `.gitignore`).
-
-No part of the project was accepted without being understood and tested by
-both of us — this was a requirement we held ourselves to throughout
-development, in line with the project's own guidance on AI usage.
 
 ## Algorithm Choices & Implementation Strategy
 
@@ -142,6 +122,31 @@ a raw traceback.
 - `Drone`: tracks a drone's planned path, current zone, and transit state
   (`in_transit`, `transit_target`, `arrival_turn`) for multi-turn movements.
 
+### Data structures and algorithms (DSA)
+
+- **Graph representation**: zones are stored in a dictionary keyed by zone
+  name, while connections are stored in a list. `DroneMap.neighbors(zone)`
+  finds incident connections by scanning that list; the graph is not stored
+  as an adjacency list.
+- **Priority queue**: Python's `heapq` min-heap selects the next state with
+  the lowest search priority in both the reverse cost calculation and A*.
+- **Search bookkeeping**: dictionaries store each state's best known cost
+  and predecessor. The predecessor map is followed backwards to reconstruct
+  the final timed path.
+- **Reservation tables**: dictionaries keyed by `(zone_name, turn)` and
+  `(connection_key, turn)` count previously planned use, allowing capacity
+  checks and congestion estimates.
+- **Simulation state**: lists hold drones, paths, and turn histories;
+  dictionaries track occupancy and active transits; a set records drones
+  that already moved in the current turn.
+
+The pathfinder uses two related shortest-path algorithms. Dijkstra's
+algorithm computes reverse shortest-path costs on the map without
+reservations; those values are cached per goal and used as A*'s heuristic.
+A* then searches the space-time graph with the actual time-based reservations.
+Thus, Dijkstra supports the heuristic calculation, while A* performs the
+main route search.
+
 ### Pathfinding — space-time A\*
 
 Rather than searching a purely spatial graph, `SpaceTimePathfinder` searches
@@ -150,10 +155,10 @@ over states of the form `(zone, turn)`. This lets the algorithm reason about
 reachable — which is what makes multi-drone conflict avoidance possible in
 the first place.
 
-- **Heuristic**: Euclidean distance to the goal zone. It never overestimates
-  the true remaining cost (no path can be shorter than a straight line), so
-  it is admissible and A\* remains guaranteed optimal while exploring far
-  fewer states than plain Dijkstra would.
+- **Heuristic**: shortest-path costs precomputed by reverse Dijkstra on the
+  map without reservations. These costs are cached per goal; congestion
+  penalties additionally influence A*'s search priority to favor less-used
+  zones and connections.
 - **Movement costs**: 1 turn for `normal`/`priority` zones, 2 turns for
   `restricted` zones, and `blocked` zones are excluded from the graph
   entirely rather than being assigned an infinite cost.
@@ -161,6 +166,32 @@ the first place.
   to a `restricted` zone, it has no "waiting" state mid-connection — it must
   arrive exactly one simulation turn later, matching the subject's
   constraint that a drone "can't wait extra turns on the connection."
+
+#### Pathfinding flow
+
+```mermaid
+flowchart TD
+  A([Start]) --> B[/Input: start, goal, zone and connection reservations/]
+  B --> C{Start and goal are valid?}
+  C -->|No| X[Report that no path was found]
+  C -->|Yes| D[Initialize the priority queue and search records]
+  D --> E[Select the state with the lowest priority]
+  E --> F{Is this the goal state?}
+  F -->|Yes| G[Follow predecessors to rebuild the path]
+  G --> H([Return timed path])
+  F -->|No| I[Consider waiting and reachable neighboring zones]
+  I --> J{Does the candidate satisfy movement,
+  time and capacity constraints?}
+  J -->|No| K[Discard this candidate]
+  J -->|Yes| L[Calculate path cost, heuristic<br/>and congestion penalty]
+  L --> M{Is this a better route to the state?}
+  M -->|Yes| N[Save cost and predecessor;<br/>add state to the priority queue]
+  M -->|No| K
+  N --> O{Are there states left to explore?}
+  K --> O
+  O -->|Yes| E
+  O -->|No| X
+```
 
 ### Multi-drone diversification — prioritized planning
 
@@ -292,27 +323,63 @@ Run with `make benchmark`. All provided maps meet their target turn count:
 | hard/02_capacity_hell | 16 | ≤ 35 | OK |
 | hard/03_ultimate_challenge | 26 | ≤ 45 | OK |
 
-## Project Structure
+
+## Project structure
 
 ```text
 fly_in/
-├── main.py                  # Entry point: map menu, parsing, simulation, display
-├── benchmark.py              # Runs every map against its target turn count
-├── pyproject.toml
+├── main.py
 ├── Makefile
-├── generator/
-│   ├── models.py              # Zone, Connection, DroneMap
-│   ├── parser.py               # Map file parser and ParseError
-│   ├── pathfinding.py            # SpaceTimePathfinder (space-time A*)
-│   ├── drone.py                # Drone state and transit tracking
-│   ├── simulation.py             # SimulationEngine (turn-by-turn logic)
-│   ├── terminal_display.py         # Colored terminal output
-│   ├── display.py               # Pygame graphical display
-│   └── readfile.py              # Interactive map-selection menu
-├── assets/                  # Background and sprite images for pygame
-└── maps/
-    ├── easy/
-    ├── medium/
-    ├── hard/
-    └── challenger/
+├── pyproject.toml
+├── assets/                 # Pygame background and sprites
+├── maps/                   # Example maps grouped by difficulty
+└── generator/
+    ├── models.py           # Zones, connections, and map model
+    ├── parser.py           # Map parsing and validation
+    ├── pathfinding.py      # Space-time pathfinding
+    ├── simulation.py       # Drone planning and turn-by-turn simulation
+    ├── drone.py            # Drone state and transit tracking
+    ├── terminal_display.py # Terminal output
+    ├── display.py          # Pygame visualization
+    ├── readfile.py         # Interactive map selector
+    ├── benchmark.py        # Benchmark runner
+    └── fly_in.py           # Application orchestration
 ```
+
+## Resources
+
+- [A\* search algorithm — Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm)
+- [Dijkstra's algorithm — Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Prioritized planning for multi-agent pathfinding — general concept used for
+  drone-to-drone conflict avoidance](https://en.wikipedia.org/wiki/Multi-agent_pathfinding)
+- [PEP 257 — Docstring conventions](https://peps.python.org/pep-0257/)
+- [pygame documentation](https://www.pygame.org/docs/)
+- [Rich documentation](https://rich.readthedocs.io/)
+- [mypy documentation](https://mypy.readthedocs.io/)
+
+### AI usage
+
+AI assistance was used throughout this project as a **pair-programming
+aid**, not as a code generator we copy-pasted blindly — every suggestion was
+reviewed, tested, and adapted before being integrated. Specifically, it was
+used for:
+
+- Explaining and comparing pathfinding strategies (Dijkstra vs. A\*, and how
+  to extend A\* into a space-time graph to reason about multi-drone
+  scheduling).
+- Debugging assistance: for example, tracing a bug where a drone could move
+  twice within the same simulation turn (once completing a `restricted`
+  transit, then immediately moving again in the same turn's decision phase),
+  which caused a visual glitch in the pygame animation. The fix (tracking
+  drones that already moved that turn) was written and verified against the
+  actual simulation output before being merged.
+- Reviewing Python typing issues (`mypy --strict` compliance) and suggesting
+  cleaner patterns (e.g. splitting a single "load image, maybe required"
+  helper into two differently-typed helpers so `mypy` could correctly narrow
+  `Surface | None` to `Surface`).
+- General code review and refactoring suggestions (project structure,
+  Makefile rules, `.gitignore`).
+
+No part of the project was accepted without being understood and tested by
+both of us — this was a requirement we held ourselves to throughout
+development, in line with the project's own guidance on AI usage.

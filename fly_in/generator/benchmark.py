@@ -1,12 +1,10 @@
 """Run the benchmark suite for the fly-in maps."""
 
 from pathlib import Path
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-
 from generator import Parser, ParseError, SimulationEngine
 
 TARGETS = {

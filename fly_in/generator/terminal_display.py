@@ -46,6 +46,7 @@ class TerminalDisplay:
         zone = self.drone_map.zones.get(zone_name)
         if zone is None:
             return "white"
+
         if zone.color is None:
             return "white"
         return ZONE_COLOR_MAP.get(zone.color, "white")

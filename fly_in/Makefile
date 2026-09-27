@@ -2,6 +2,7 @@ PYTHON := python3
 VENV := venv
 VENV_PYTHON := $(VENV)/bin/python
 VENV_PIP := $(VENV)/bin/pip
+BENCH := generator/benchmark.py
 
 MAP ?= maps/hard/03_ultimate_challenge.txt
 
@@ -35,4 +36,4 @@ lint-strict:
 	$(VENV_PYTHON) -m mypy . --exclude '^venv/' --strict
 
 benchmark:
-	$(VENV_PYTHON) benchmark.py
+	$(VENV_PYTHON) $(BENCH)
