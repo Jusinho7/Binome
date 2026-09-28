@@ -160,6 +160,9 @@ the first place.
 - **Movement costs**: 1 turn for `normal`/`priority` zones, 2 turns for
   `restricted` zones, and `blocked` zones are excluded from the graph
   entirely rather than being assigned an infinite cost.
+- **Priority zones**: among routes with the same arrival time, the pathfinder
+  prefers the route that visits the most `priority` zones; congestion breaks
+  ties after that. Priority zones still take exactly one turn to enter.
 - **Restricted zones**: once a drone commits to entering a connection leading
   to a `restricted` zone, it has no "waiting" state mid-connection — it must
   arrive exactly one simulation turn later, matching the subject's

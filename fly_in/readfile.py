@@ -11,7 +11,7 @@ except ImportError as exc:
     ) from exc
 
 BASE_DIR = Path(__file__).resolve().parent
-DOSSIER_MAPS = BASE_DIR / "../maps"
+DOSSIER_MAPS = BASE_DIR / "maps"
 
 console = Console()
 

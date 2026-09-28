@@ -19,5 +19,17 @@ dev = [
     "mypy-extensions==1.0.0",
 ]
 
-[tool.setuptools.packages.find]
-include = ["generator*"]
+[tool.setuptools]
+py-modules = [
+    "benchmark",
+    "display",
+    "drone",
+    "fly_in",
+    "main",
+    "models",
+    "parser",
+    "pathfinding",
+    "readfile",
+    "simulation",
+    "terminal_display",
+]

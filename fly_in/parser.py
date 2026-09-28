@@ -2,7 +2,7 @@
 
 import re
 from typing import Optional
-from .models import Connection, DroneMap, Zone
+from models import Connection, DroneMap, Zone
 
 
 class ParseError(Exception):

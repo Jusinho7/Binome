@@ -5,15 +5,12 @@ from pathlib import Path
 from subprocess import run
 from time import sleep
 
-from generator import (
-    DroneMap,
-    Parser,
-    ParseError,
-    PygameDisplay,
-    SimulationEngine,
-    TerminalDisplay,
-    choice_map,
-)
+from display import PygameDisplay
+from models import DroneMap
+from parser import ParseError, Parser
+from readfile import choice_map
+from simulation import SimulationEngine
+from terminal_display import TerminalDisplay
 
 RED = "\033[31m"
 RESET = "\033[0m"
@@ -22,8 +19,6 @@ ORANGE = "\033[33m"
 
 class FlyInApp:
     """Orchestrate map selection, simulation and display."""
-    def __init__(self, capacity_info: bool = False) -> None:
-        self.capacity_info = capacity_info
 
     def run(self) -> None:
         """Run the full simulation workflow."""
@@ -44,12 +39,6 @@ class FlyInApp:
 
         for i, turn_moves in enumerate(turns, start=1):
             terminal_display.print_turn(i, turn_moves)
-            if self.capacity_info:
-                terminal_display.print_capacity_info(
-                    i,
-                    engine.zone_occupancy_history[i - 1],
-                    engine.connection_usage_history[i - 1],
-                )
 
         terminal_display.print_summary(len(turns))
 

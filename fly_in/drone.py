@@ -1,7 +1,7 @@
 """Drone state and path-tracking logic."""
 
 from typing import Optional
-from .models import Zone
+from models import Zone
 
 
 class Drone:

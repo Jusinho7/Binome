@@ -5,7 +5,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from generator import Parser, ParseError, SimulationEngine
+from parser import ParseError, Parser
+from simulation import SimulationEngine
 
 TARGETS = {
     "easy/01_linear_path.txt": 6,

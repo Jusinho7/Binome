@@ -2,7 +2,7 @@ PYTHON := python3
 VENV := venv
 VENV_PYTHON := $(VENV)/bin/python
 VENV_PIP := $(VENV)/bin/pip
-BENCH := generator/benchmark.py
+BENCH := benchmark.py
 ARGS ?=
 
 MAP ?= maps/hard/03_ultimate_challenge.txt

@@ -2,9 +2,9 @@
 
 import math
 from collections import defaultdict
-from .drone import Drone
-from .models import Connection, DroneMap, Zone
-from .pathfinding import Pathfinder
+from drone import Drone
+from models import Connection, DroneMap, Zone
+from pathfinding import Pathfinder
 
 
 class SimulationEngine:

@@ -11,16 +11,16 @@ except ModuleNotFoundError:
         "and try again.\033[0m"
     )
     sys.exit()
-from .models import DroneMap, Zone
+from models import DroneMap, Zone
 
 RED = "\033[31m"
 RESET = "\033[0m"
 WINDOW_SIZE = (1920, 1070)
-BACKGROUND_IMAGE = "assets/bc.jpg"
-DRONE_IMAGE = "assets/drone.png"
-STATION_IMAGE = "assets/hubs/station.png"
-START_IMAGE = "assets/hubs/start_stop.png"
-END_IMAGE = "assets/hubs/start_stop.png"
+BACKGROUND_IMAGE = "bc.jpg"
+DRONE_IMAGE = "drone.png"
+STATION_IMAGE = "station.png"
+START_IMAGE = "start_stop.png"
+END_IMAGE = "start_stop.png"
 COLORS = {
     "green": (0, 200, 0),
     "red": (200, 0, 0),
