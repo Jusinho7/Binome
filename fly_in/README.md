@@ -339,19 +339,21 @@ fly_in/
 ├── main.py
 ├── Makefile
 ├── pyproject.toml
-├── assets/                 # Pygame background and sprites
+├── drone.png               # drone
+├── bc.jpg                  # background
+├── start_stop.png          # Station start and stop
+├── station.png             # Station: hubs
 ├── maps/                   # Example maps grouped by difficulty
-└── generator/
-    ├── models.py           # Zones, connections, and map model
-    ├── parser.py           # Map parsing and validation
-    ├── pathfinding.py      # Space-time pathfinding
-    ├── simulation.py       # Drone planning and turn-by-turn simulation
-    ├── drone.py            # Drone state and transit tracking
-    ├── terminal_display.py # Terminal output
-    ├── display.py          # Pygame visualization
-    ├── readfile.py         # Interactive map selector
-    ├── benchmark.py        # Benchmark runner
-    └── fly_in.py           # Application orchestration
+├── models.py               # Zones, connections, and map model
+├── parser.py               # Map parsing and validation
+├── pathfinding.py          # Space-time pathfinding
+├── simulation.py           # Drone planning and turn-by-turn simulation
+├── drone.py                # Drone state and transit tracking
+├── terminal_display.py     # Terminal output
+├── display.py              # Pygame visualization
+├── readfile.py             # Interactive map selector
+├── benchmark.py            # Benchmark runner
+└── fly_in.py               # Application orchestration
 ```
 
 ## Resources
