@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/06 05:23:13 by srasolov          #+#    #+#             */
-/*   Updated: 2026/09/06 05:41:16 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/09/30 10:34:05 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 
 # include <pthread.h>
 # include <sys/time.h>
-# include <time.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
@@ -36,8 +35,14 @@ typedef struct s_waiter
 	int					coder_id;
 	long long			arrival;
 	long long			deadline;
-	struct s_waiter		*next;
 }	t_waiter;
+
+typedef struct s_heap
+{
+	t_waiter			data[2];
+	int					size;
+	int					mode;
+}	t_heap;
 
 typedef struct s_dongle
 {
@@ -47,7 +52,7 @@ typedef struct s_dongle
 	int					in_use;
 	int					never_used;
 	long long			free_since;
-	t_waiter			*waiters;
+	t_heap				waiters;
 }	t_dongle;
 
 typedef struct s_sim	t_sim;
@@ -77,8 +82,8 @@ struct s_sim
 	long long			dongle_cooldown;
 	int					scheduler;
 	struct timeval		start_time;
-	t_coder				*coders;
 	t_dongle			*dongles;
+	t_coder				*coders;
 	pthread_mutex_t		print_lock;
 	pthread_mutex_t		stop_lock;
 	int					stop;
@@ -87,18 +92,15 @@ struct s_sim
 
 int			parse_args(int argc, char **argv, t_sim *sim);
 int			init_sim(t_sim *sim);
-long long	get_time_ms(t_sim *sim);
-void		sleep_ms(long long ms);
-void		ms_to_abs_timespec(t_sim *sim, long long ms, struct timespec *ts);
-void		log_event(t_sim *sim, int coder_id, const char *msg);
-void		dongle_init(t_dongle *d, int id);
-void		dongle_destroy(t_dongle *d);
-int			dongle_acquire(t_dongle *d, t_coder *c, t_sim *sim);
-void		dongle_release(t_dongle *d, t_sim *sim);
-void		*coder_routine(void *arg);
-void		*monitor_routine(void *arg);
-int			sim_is_stopped(t_sim *sim);
-void		sim_stop(t_sim *sim);
 void		free_sim(t_sim *sim);
+
+void		heap_push(t_heap *h, t_waiter w);
+void		heap_pop(t_heap *h);
+t_waiter	heap_peek(t_heap *h);
+int			heap_remove(t_heap *h, int coder_id);
+int			heap_is_better(t_heap *h, t_waiter *a, t_waiter *b);
+void		heap_swap(t_waiter *a, t_waiter *b);
+void		heap_sift_up(t_heap *h, int i);
+void		heap_sift_down(t_heap *h, int i);
 
 #endif

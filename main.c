@@ -1,41 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cleanup.c                                          :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/07 19:38:31 by srasolov          #+#    #+#             */
-/*   Updated: 2026/09/07 21:24:11 by srasolov         ###   ########.fr       */
+/*   Created: 2026/09/06 05:23:47 by srasolov          #+#    #+#             */
+/*   Updated: 2026/09/30 10:39:07 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	dongle_destroy(t_dongle *d)
+int	main(int argc, char **argv)
 {
-	pthread_mutex_destroy(&d->lock);
-	pthread_cond_destroy(&d->cond);
-}
+	t_sim	sim;
 
-void	free_sim(t_sim *sim)
-{
-	int	i;
-
-	i = 0;
-	while (i < sim->n_coders)
+	if (!parse_args(argc, argv, &sim))
 	{
-		pthread_mutex_destroy(&sim->coders[i].state_lock);
-		i++;
+		fprintf(stderr, "\033[31mError: invalid arguments\033[0m\n");
+		return (1);
 	}
-	i = 0;
-	while (i < sim->n_coders)
+	if (!init_sim(&sim))
 	{
-		dongle_destroy(&sim->dongles[i]);
-		i++;
+		fprintf(stderr, "\033[31mError: initialization failed\33[0n\n");
+		return (1);
 	}
-	pthread_mutex_destroy(&sim->print_lock);
-	pthread_mutex_destroy(&sim->stop_lock);
-	free(sim->coders);
-	free(sim->dongles);
+	printf("succes\n");
+	gettimeofday(&sim.start_time, NULL);
+	return (0);
 }

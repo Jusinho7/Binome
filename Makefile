@@ -1,26 +1,33 @@
-NAME = codexion
+NAME		= codexion
+CC			= cc
+CFLAGS		= -Wall -Wextra -Werror -pthread
+RM			= rm -f
+SRCS		= main.c \
+			  parsing.c \
+			  init.c \
+			  cleanup.c \
+			  heap.c \
+			  heap_utils.c
 
-CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread
-
-SRC_DIR = coders
-SRCS = main.c parsing.c init.c dongle.c coder.c monitor.c log_utils.c time_utils.c cleanup.c
-OBJS = $(addprefix $(SRC_DIR)/, $(SRCS:.c=.o))
-HEADER = $(SRC_DIR)/codexion.h
+OBJ_DIR		= obj
+OBJS		= $(addprefix $(OBJ_DIR)/, $(SRCS:.c=.o))
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER)
+$(OBJ_DIR)/%.o: %.c codexion.h | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
 clean:
-	rm -f $(OBJS)
+	$(RM) -r $(OBJ_DIR)
 
 fclean: clean
-	rm -f $(NAME)
+	$(RM) $(NAME)
 
 re: fclean all
 
