@@ -1,33 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   log.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/06 05:23:47 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/01 01:28:46 by srasolov         ###   ########.fr       */
+/*   Created: 2026/10/01 01:15:33 by srasolov          #+#    #+#             */
+/*   Updated: 2026/10/01 01:15:34 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int	main(int argc, char **argv)
+void	log_state(t_sim *sim, int coder_id, const char *msg)
 {
-	t_sim	sim;
-
-	if (!parse_args(argc, argv, &sim))
-	{
-		fprintf(stderr, "\033[31mError: invalid arguments\033[0m\n");
-		return (1);
-	}
-	if (!init_sim(&sim))
-	{
-		fprintf(stderr, "\033[31mError: initialization failed\33[0n\n");
-		return (1);
-	}
-	printf("succes\n");
-	gettimeofday(&sim.start_time, NULL);
-	free_sim(&sim);
-	return (0);
+	pthread_mutex_lock(&sim->print_lock);
+	printf("%lld %d %s\n", get_now_ms(sim), coder_id, msg);
+	pthread_mutex_unlock(&sim->print_lock);
 }

@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/06 05:23:13 by srasolov          #+#    #+#             */
-/*   Updated: 2026/09/30 10:34:05 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/01 01:24:36 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <pthread.h>
 # include <sys/time.h>
+# include <time.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
@@ -93,6 +94,16 @@ struct s_sim
 int			parse_args(int argc, char **argv, t_sim *sim);
 int			init_sim(t_sim *sim);
 void		free_sim(t_sim *sim);
+
+long long	get_now_ms(t_sim *sim);
+void		ms_to_timespec(t_sim *sim, long long target_ms, struct timespec *ts);
+void		log_state(t_sim *sim, int coder_id, const char *msg);
+int			sim_is_stopped(t_sim *sim);
+void		sim_stop(t_sim *sim);
+
+int			acquire_one(t_sim *sim, t_coder *coder, t_dongle *d);
+int			acquire_dongles(t_coder *coder);
+void		release_dongles(t_coder *coder);
 
 void		heap_push(t_heap *h, t_waiter w);
 void		heap_pop(t_heap *h);
