@@ -182,7 +182,29 @@ class Parser:
                 f"{RED}start_hub and end_hub cannot share the same "
                 f"coordinates{RESET}",
             )
+        if not drone_map.connections:
+            raise ParseError(
+                0,
+                f"{RED}no 'connection' declared while hubs exist{RESET}",
+            )
 
+        linked_names: set[str] = set()
+        for conn in drone_map.connections:
+            linked_names.add(conn.zone_a.name)
+            linked_names.add(conn.zone_b.name)
+
+        if drone_map.start.name not in linked_names:
+            raise ParseError(
+                0,
+                f"{RED}start_hub '{drone_map.start.name}' has no "
+                f"connection{RESET}",
+            )
+        if drone_map.end.name not in linked_names:
+            raise ParseError(
+                0,
+                f"{RED}end_hub '{drone_map.end.name}' has no "
+                f"connection{RESET}",
+            )
         drone_map.nb_drones = nb_drones
         return drone_map
 

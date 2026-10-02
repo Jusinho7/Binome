@@ -45,7 +45,11 @@ class FlyInApp:
         pygame_display = PygameDisplay(
             drone_map, engine.position_history, turns
         )
-        pygame_display.run()
+        try:
+            pygame_display.run()
+        except (KeyboardInterrupt, EOFError):
+            print(f"\n{ORANGE}Exiting, user interrupted.{RESET}")
+            sys.exit(1)
 
     def _choose_map(self) -> Path | None:
         """Prompt the user to choose a map file."""
