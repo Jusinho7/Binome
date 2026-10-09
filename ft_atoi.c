@@ -6,12 +6,11 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 12:42:57 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/09 12:56:41 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/09 12:59:00 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-#include <stdio.h>
 
 int	ft_atoi(const char *nptr)
 {
@@ -36,14 +35,4 @@ int	ft_atoi(const char *nptr)
 		i++;
 	}
 	return (result * sign);
-}
-
-int	main(int argc, char **argv)
-{
-	if (argc == 2)
-	{
-		printf("ft_atoi: %d\n", ft_atoi(argv[1]));
-		printf("atoi: %d\n", atoi(argv[1]));
-	}
-	return (0);
 }
