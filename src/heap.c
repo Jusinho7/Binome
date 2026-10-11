@@ -5,47 +5,54 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/30 00:05:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/09/30 10:26:01 by srasolov         ###   ########.fr       */
+/*   Created: 2026/10/10 01:23:06 by srasolov          #+#    #+#             */
+/*   Updated: 2026/10/10 01:23:41 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	heap_push(t_heap *h, t_waiter w)
+int	heap_init(t_heap *h, int cap)
 {
-	if (h->size >= 2)
-		return ;
-	h->data[h->size] = w;
+	h->data = malloc(sizeof(t_req) * cap);
+	if (h->data == NULL)
+		return (0);
+	h->size = 0;
+	h->cap = cap;
+	return (1);
+}
+
+void	heap_free(t_heap *h)
+{
+	free(h->data);
+	h->data = NULL;
+	h->size = 0;
+}
+
+int	heap_push(t_heap *h, t_req req)
+{
+	if (h->size >= h->cap)
+		return (0);
+	h->data[h->size] = req;
 	h->size++;
-	heap_sift_up(h, h->size - 1);
+	sift_up(h, h->size - 1);
+	return (1);
 }
 
-t_waiter	heap_peek(t_heap *h)
+t_req	heap_pop(t_heap *h)
 {
-	return (h->data[0]);
-}
+	t_req	top;
 
-void	heap_pop(t_heap *h)
-{
+	top = h->data[0];
 	h->size--;
 	h->data[0] = h->data[h->size];
-	if (h->size > 0)
-		heap_sift_down(h, 0);
+	sift_down(h, 0);
+	return (top);
 }
 
-int	heap_remove(t_heap *h, int coder_id)
+int	heap_peek_id(t_heap *h)
 {
-	int	i;
-
-	i = 0;
-	while (i < h->size && h->data[i].coder_id != coder_id)
-		i++;
-	if (i == h->size)
-		return (0);
-	h->size--;
-	h->data[i] = h->data[h->size];
-	heap_sift_up(h, i);
-	heap_sift_down(h, i);
-	return (1);
+	if (h->size == 0)
+		return (-1);
+	return (h->data[0].coder_id);
 }

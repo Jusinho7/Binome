@@ -5,50 +5,47 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/30 00:00:00 by srasolov          #+#    #+#             */
-/*   Updated: 2026/09/30 23:31:14 by srasolov         ###   ########.fr       */
+/*   Created: 2026/10/11 21:22:17 by srasolov          #+#    #+#             */
+/*   Updated: 2026/10/11 21:22:18 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static void	free_dongles(t_sim *sim)
+static void	destroy_dongles(t_sim *sim)
 {
 	int	i;
 
-	if (!sim->dongles)
-		return ;
 	i = 0;
-	while (i < sim->n_coders)
+	while (i < sim->dongles_ready)
 	{
-		pthread_mutex_destroy(&sim->dongles[i].lock);
+		heap_free(&sim->dongles[i].queue);
 		pthread_cond_destroy(&sim->dongles[i].cond);
+		pthread_mutex_destroy(&sim->dongles[i].mutex);
 		i++;
 	}
-	free(sim->dongles);
-	sim->dongles = NULL;
 }
 
-static void	free_coders(t_sim *sim)
+static void	destroy_coders(t_sim *sim)
 {
 	int	i;
 
-	if (!sim->coders)
-		return ;
 	i = 0;
-	while (i < sim->n_coders)
+	while (i < sim->coders_ready)
 	{
-		pthread_mutex_destroy(&sim->coders[i].state_lock);
+		pthread_mutex_destroy(&sim->coders[i].lock);
 		i++;
 	}
-	free(sim->coders);
-	sim->coders = NULL;
 }
 
-void	free_sim(t_sim *sim)
+void	destroy_sim(t_sim *sim)
 {
-	free_dongles(sim);
-	free_coders(sim);
-	pthread_mutex_destroy(&sim->print_lock);
-	pthread_mutex_destroy(&sim->stop_lock);
+	destroy_dongles(sim);
+	destroy_coders(sim);
+	free(sim->dongles);
+	free(sim->coders);
+	if (sim->locks_ready >= 1)
+		pthread_mutex_destroy(&sim->stop_mutex);
+	if (sim->locks_ready >= 2)
+		pthread_mutex_destroy(&sim->log_mutex);
 }

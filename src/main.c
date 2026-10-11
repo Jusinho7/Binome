@@ -5,29 +5,40 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/06 05:23:47 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/01 01:28:46 by srasolov         ###   ########.fr       */
+/*   Created: 2026/10/10 01:39:37 by srasolov          #+#    #+#             */
+/*   Updated: 2026/10/10 01:39:38 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
+static void	print_usage(void)
+{
+	fprintf(stderr, "\033[31mUsage: ./codexion number_of_coders "
+		"time_to_burnout "
+		"time_to_compile time_to_debug time_to_refactor "
+		"number_of_compiles_required dongle_cooldown scheduler\n"
+		"All values are positive integers (ms), "
+		"scheduler is 'fifo' or 'edf'.\033[0m\n");
+}
+
 int	main(int argc, char **argv)
 {
 	t_sim	sim;
+	int		ret;
 
+	memset(&sim, 0, sizeof(t_sim));
 	if (!parse_args(argc, argv, &sim))
 	{
-		fprintf(stderr, "\033[31mError: invalid arguments\033[0m\n");
+		print_usage();
 		return (1);
 	}
-	if (!init_sim(&sim))
+	ret = 0;
+	if (!init_sim(&sim) || !run_simulation(&sim))
 	{
-		fprintf(stderr, "\033[31mError: initialization failed\33[0n\n");
-		return (1);
+		fprintf(stderr, "\033[31mError: simulation could not start\n\033[0m");
+		ret = 1;
 	}
-	printf("succes\n");
-	gettimeofday(&sim.start_time, NULL);
-	free_sim(&sim);
-	return (0);
+	destroy_sim(&sim);
+	return (ret);
 }
