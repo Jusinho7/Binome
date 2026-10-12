@@ -144,13 +144,8 @@ communication is the `stop` flag plus the condition-variable broadcast.
   `man pthread_cond_timedwait`, `man clock_gettime`
 - *Operating Systems: Three Easy Pieces* — chapters on locks, condition
   variables and concurrency bugs (https://pages.cs.wisc.edu/~remzi/OSTEP/)
-- Dijkstra's Dining Philosophers problem and Coffman's conditions
-  (Wikipedia)
-- Binary heap / priority queue (CLRS, chapter 6)
+- [Condition de Coffman](https://cs341.cs.illinois.edu/coursebook/Deadlock#coffman-conditions)
+- [Binary heap](https://visualgo.net/en/heap)
 - Earliest Deadline First scheduling (Liu & Layland, 1973)
 
-**Use of AI:** AI (Claude) was used to produce a first version of the code
-structure and of this README from the subject. The code was then reviewed,
-tested (functional tests, ThreadSanitizer, AddressSanitizer/LeakSanitizer,
-norminette) and read line by line by the author. *(Edit this paragraph so it
-reflects what you really did.)*
+**Use of AI:** AI was used to help me understand certain concepts in the project and also allowed me to know the role of each of the functions authorized in the mandatory
