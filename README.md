@@ -140,12 +140,13 @@ communication is the `stop` flag plus the condition-variable broadcast.
 
 ## Resources
 
-- `man pthread_mutex_lock`, `man pthread_cond_wait`,
-  `man pthread_cond_timedwait`, `man clock_gettime`
-- *Operating Systems: Three Easy Pieces* — chapters on locks, condition
-  variables and concurrency bugs (https://pages.cs.wisc.edu/~remzi/OSTEP/)
+- [pthread](https://man7.org/linux/man-pages/man7/pthreads.7.html)
+- [pthread_mutex_lock, pthread_cond_wait,
+  pthread_cond_timedwait, clock_gettime](https://www.geeksforgeeks.org/c/thread-functions-in-c-c/)
 - [Condition de Coffman](https://cs341.cs.illinois.edu/coursebook/Deadlock#coffman-conditions)
 - [Binary heap](https://visualgo.net/en/heap)
-- Earliest Deadline First scheduling (Liu & Layland, 1973)
+- [FIFO](https://www.publicsofttools.com/tools/stack-queue-simulator)
+- [Priority queue](https://www.dsavisualizer.in/visualizer/queue/types/priority)
+- [Earliest Deadline First scheduling](https://www.geeksforgeeks.org/operating-systems/earliest-deadline-first-edf-cpu-scheduling-algorithm/)
 
-**Use of AI:** AI was used to help me understand certain concepts in the project and also allowed me to know the role of each of the functions authorized in the mandatory
+**Use of AI:** AI was used to help me understand certain concepts in the project and also allowed me to know the role of each of the functions authorized in the mandatory. He also helped me debug the project and bring it into compliance with Norminette standards. 

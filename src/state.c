@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:41:26 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/10 01:41:27 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/13 18:00:38 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,8 @@ void	log_burnout(t_sim *sim, int id)
 {
 	pthread_mutex_lock(&sim->log_mutex);
 	set_stop(sim);
-	printf("%ld %d \033[38;5;208mburned out\033[0m\n", now_ms() - sim->start, id);
+	printf("%ld %d \033[38;5;208mburned out\033[0m\n",
+		now_ms() - sim->start, id);
 	pthread_mutex_unlock(&sim->log_mutex);
 	wake_all(sim);
 }
