@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/11 21:24:52 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/13 17:38:50 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/14 06:24:04 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	set_request_key(t_coder *c)
 	}
 }
 
-static int	try_take(t_dongle *d, t_coder *c, long *seen, int *queued)
+static int	try_acquire_dongle(t_dongle *d, t_coder *c, long *seen, int *queued)
 {
 	t_req	mine;
 	int		ok;
@@ -82,7 +82,7 @@ int	acquire_pair(t_coder *c)
 	{
 		if (!dongle_acquire(c->first, c))
 			return (0);
-		if (try_take(c->second, c, &seen, &queued))
+		if (try_acquire_dongle(c->second, c, &seen, &queued))
 			return (1);
 		dongle_give_back(c->first);
 		wait_change(c->second, c->sim, seen);
