@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   edf_policy.c                                       :+:      :+:    :+:   */
+/*   edf_scheduler.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/15 21:21:49 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/15 21:21:50 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/15 23:47:11 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,9 @@ void	queue_set_edf_policy(t_queue *q)
 
 int	edf_queue_peek_id(t_queue *q)
 {
-	int	i;
-	int	best;
-
 	if (q->size == 0)
 		return (-1);
-	best = 0;
-	i = 1;
-	while (i < q->size)
-	{
-		if (edf_req_less(&q->requests[i], &q->requests[best]))
-			best = i;
-		i++;
-	}
-	return (q->requests[best].coder_id);
+	return (q->requests[0].coder_id);
 }
 
 int	edf_req_less(t_req *a, t_req *b)

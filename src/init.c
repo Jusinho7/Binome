@@ -24,7 +24,12 @@ static int	init_one_dongle(t_dongle *d, t_sim *sim)
 		pthread_mutex_destroy(&d->mutex);
 		return (0);
 	}
-	queue_init(&d->queue);
+	if (!queue_init(&d->queue, sim->n))
+	{
+		pthread_cond_destroy(&d->cond);
+		pthread_mutex_destroy(&d->mutex);
+		return (0);
+	}
 	if (sim->use_edf)
 		queue_set_edf_policy(&d->queue);
 	else

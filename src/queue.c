@@ -19,56 +19,36 @@ int	queue_peek_id(t_queue *q)
 	return (fifo_queue_peek_id(q));
 }
 
-void	queue_init(t_queue *q)
+int	queue_init(t_queue *q, int capacity)
 {
+	q->requests = NULL;
 	q->size = 0;
+	q->capacity = capacity;
 	q->use_edf = 0;
+	q->next_order = 0;
+	q->requests = malloc(sizeof(t_req) * (size_t)capacity);
+	return (q->requests != NULL);
+}
+
+void	queue_destroy(t_queue *q)
+{
+	free(q->requests);
+	q->requests = NULL;
 }
 
 int	queue_add(t_queue *q, t_req req)
 {
-	int	i;
-
-	i = 0;
-	while (i < q->size)
-	{
-		if (q->requests[i].coder_id == req.coder_id)
-			return (1);
-		i++;
-	}
-	if (q->size >= DONGLE_QUEUE_CAPACITY)
+	if (q->size >= q->capacity)
 		return (0);
-	q->requests[q->size] = req;
-	q->size++;
+	req.order = q->next_order++;
+	queue_heap_add(q, req);
 	return (1);
 }
 
 int	queue_remove(t_queue *q, int coder_id)
 {
-	int	i;
-
-	i = 0;
-	while (i < q->size)
-	{
-		if (q->requests[i].coder_id == coder_id)
-		{
-			while (i < q->size - 1)
-			{
-				q->requests[i] = q->requests[i + 1];
-				i++;
-			}
-			q->size--;
-			return (1);
-		}
-		i++;
-	}
-	return (0);
-}
-
-void	queue_capacity_error(t_sim *sim)
-{
-	fprintf(stderr,
-		"\033[31mcodexion: dongle queue capacity exceeded\033[0m\n");
-	set_stop(sim);
-	wake_all(sim);
+	if (q->size == 0 || q->requests[0].coder_id != coder_id)
+		return (0);
+	queue_heap_remove(q);
+	return (1);
 }

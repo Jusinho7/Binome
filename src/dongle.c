@@ -55,6 +55,7 @@ int	dongle_acquire(t_dongle *d, t_coder *c)
 			queue_remove(&d->queue, c->id);
 			d->in_use = 1;
 			pthread_mutex_unlock(&d->mutex);
+			log_event(c, "has taken a dongle");
 			return (1);
 		}
 		wait_turn(d, c);
@@ -73,10 +74,11 @@ void	dongle_release(t_dongle *d, t_sim *sim)
 	pthread_mutex_unlock(&d->mutex);
 }
 
-void	dongle_give_back(t_dongle *d)
+void	dongle_give_back(t_dongle *d, t_sim *sim)
 {
 	pthread_mutex_lock(&d->mutex);
 	d->in_use = 0;
+	d->available_at = now_ms() + sim->cooldown;
 	d->version++;
 	pthread_cond_broadcast(&d->cond);
 	pthread_mutex_unlock(&d->mutex);

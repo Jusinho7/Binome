@@ -46,11 +46,20 @@ void	wake_all(t_sim *sim)
 void	log_event(t_coder *c, const char *msg)
 {
 	t_sim	*sim;
+	char	*color;
 
 	sim = c->sim;
+	color = "\033[38;5;201m";
+	if (strcmp(msg, "has taken a dongle") == 0)
+		color = "\033[38;5;46m";
+	else if (strcmp(msg, "is compiling") == 0)
+		color = "\033[38;5;39m";
+	else if (strcmp(msg, "is debugging") == 0)
+		color = "\033[38;5;51m";
 	pthread_mutex_lock(&sim->log_mutex);
 	if (!is_stopped(sim))
-		printf("%ld %d %s\n", now_ms() - sim->start, c->id, msg);
+		printf("%ld %d %s%s\033[0m\n",
+			now_ms() - sim->start, c->id, color, msg);
 	pthread_mutex_unlock(&sim->log_mutex);
 }
 

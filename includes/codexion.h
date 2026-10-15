@@ -20,21 +20,22 @@
 # include <unistd.h>
 # include <time.h>
 
-# define DONGLE_QUEUE_CAPACITY 2
-
 typedef struct s_sim	t_sim;
 
 typedef struct s_req
 {
-	int		coder_id;
-	long	key;
+	int					coder_id;
+	long				key;
+	unsigned long long	order;
 }	t_req;
 
 typedef struct s_queue
 {
-	t_req	requests[DONGLE_QUEUE_CAPACITY];
-	int		size;
-	int		use_edf;
+	t_req				*requests;
+	int					size;
+	int					capacity;
+	int					use_edf;
+	unsigned long long	next_order;
 }	t_queue;
 
 typedef struct s_dongle
@@ -94,17 +95,21 @@ void	*monitor_routine(void *arg);
 
 int		dongle_acquire(t_dongle *d, t_coder *c);
 void	dongle_release(t_dongle *d, t_sim *sim);
-void	dongle_give_back(t_dongle *d);
+void	dongle_give_back(t_dongle *d, t_sim *sim);
 int		acquire_pair(t_coder *c);
 
-void	queue_init(t_queue *q);
+int		queue_init(t_queue *q, int capacity);
+void	queue_destroy(t_queue *q);
 int		queue_add(t_queue *q, t_req req);
 int		queue_remove(t_queue *q, int coder_id);
 int		queue_peek_id(t_queue *q);
+void	queue_heap_add(t_queue *q, t_req req);
+void	queue_heap_remove(t_queue *q);
 void	queue_capacity_error(t_sim *sim);
 void	queue_set_fifo_policy(t_queue *q);
 void	queue_set_edf_policy(t_queue *q);
 int		fifo_queue_peek_id(t_queue *q);
+int		fifo_req_less(t_req *a, t_req *b);
 int		edf_queue_peek_id(t_queue *q);
 int		edf_req_less(t_req *a, t_req *b);
 long	edf_request_key(t_coder *c);

@@ -28,8 +28,10 @@ Overview of the sources:
 | `coder.c` | Life cycle of a coder thread |
 | `monitor.c` | Burnout / end-of-simulation detection thread |
 | `dongle.c` | Acquire / release a dongle (queue + cooldown) |
-| `queue.c` | Fixed two-entry priority queue, one per dongle |
+| `queue.c` | Priority-queue operations and initialization |
+| `heap.c` | Binary min-heap used by FIFO and EDF |
 | `fifo_scheduler.c`, `edf_scheduler.c` | FIFO and EDF scheduling policies |
+| `queue_error.c` | Queue-capacity error handling |
 | `state.c` | Stop flag, serialized logging, wake-up of waiters |
 | `time_utils.c` | Clock, interruptible sleep, timeout conversion |
 
@@ -70,7 +72,7 @@ usage message and exit code 1.
   dongle with the **lowest index first**. *Hold and wait*: a coder never
   sleeps while holding a dongle. It takes the first dongle, tries the second
   one **without waiting**, and if it is not available it gives the first one
-  back (no cooldown, since it was not used) and sleeps until the second
+  back, starting its cooldown, and sleeps until the second
   dongle changes state. Mutual exclusion and no-preemption are inherent to
   the problem. Since two Coffman conditions are broken, no deadlock is possible.
 - **No "chain" serialization.** Without the give-back, on a multi-core machine
@@ -81,16 +83,18 @@ usage message and exit code 1.
 - **Single coder.** With one coder there is only one dongle. The coder takes
   it and waits; the monitor reports the burnout at `time_to_burnout`. The
   program never tries to lock the same dongle twice.
-- **Starvation prevention.** Each dongle has its own waiting queue (a fixed
-  two-entry array).
-  With `fifo`, requests are appended and the first array entry is served;
+- **Starvation prevention.** Each dongle has its own binary min-heap, sized to
+  hold one outstanding request from every coder.
+  With `fifo`, each request receives an arrival sequence and the smallest
+  sequence is served first;
   with `edf` the key is the deadline
   `last_compile_start + time_to_burnout`, so the coder closest to
   burnout is served first. Equal keys are broken by the coder id, which
   makes the order fully deterministic. A coder that backs off stays registered
   in the queue of the second dongle, so it keeps its rank and cannot be
   overtaken by a less urgent coder.
-- **Cooldown.** On release a dongle stores `available_at = now + cooldown`.
+- **Cooldown.** On release or give-back a dongle stores
+  `available_at = now + cooldown`.
   The coder at the head of the queue waits with `pthread_cond_timedwait`
   until that date, without busy-waiting.
 - **Precise burnout detection.** A dedicated monitor thread checks every
@@ -106,11 +110,11 @@ usage message and exit code 1.
 ## Thread synchronization mechanisms
 
 - **`pthread_mutex_t` per dongle** protects `in_use`, `available_at`, the
-  ticket counter and the waiting queue. Nobody reads or writes a dongle's
+  arrival counter and the heap. Nobody reads or writes a dongle's
   state without holding its mutex, so two coders can never get the same
   dongle.
 - **`pthread_cond_t` per dongle** lets waiting coders sleep instead of
-  spinning. `dongle_release` calls `pthread_cond_broadcast`; the coder at the
+  spinning. Releases call `pthread_cond_broadcast`; the coder at the
   highest-priority waiter re-checks its condition (`I am first && dongle free &&
   cooldown over`) in a `while` loop, which also protects against spurious
   wake-ups.
@@ -151,4 +155,4 @@ communication is the `stop` flag plus the condition-variable broadcast.
 - [Priority queue](https://www.dsavisualizer.in/visualizer/queue/types/priority)
 - [Earliest Deadline First scheduling](https://www.geeksforgeeks.org/operating-systems/earliest-deadline-first-edf-cpu-scheduling-algorithm/)
 
-**Use of AI:** AI was used to help me understand certain concepts in the project and also allowed me to know the role of each of the functions authorized in the mandatory. He also helped me debug the project and bring it into compliance with Norminette standards. 
+**Use of AI:** AI assisted with understanding the concurrency requirements, reviewing and debugging the queue and scheduler implementation, and checking the code against the subject and Norminette. In particular, it helped implement and verify the binary heap used for FIFO/EDF arbitration and the cooldown and log-format corrections. I am responsible for reviewing, understanding, and validating these changes.
