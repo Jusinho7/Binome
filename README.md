@@ -14,7 +14,7 @@ simulation) burns out and the simulation stops. It also stops when every
 coder has compiled at least `number_of_compiles_required` times.
 
 The goal is to share the dongles with **no deadlock**, **no starvation**,
-a mandatory **cooldown** after each release, a **fair scheduler** (`fifo` or
+a mandatory **cooldown** after each release, a fair scheduler (`fifo` or
 `edf`), precise burnout detection (< 10 ms) and **serialized logs**.
 
 Overview of the sources:
@@ -28,7 +28,8 @@ Overview of the sources:
 | `coder.c` | Life cycle of a coder thread |
 | `monitor.c` | Burnout / end-of-simulation detection thread |
 | `dongle.c` | Acquire / release a dongle (queue + cooldown) |
-| `heap.c`, `heap_utils.c` | Hand-made priority queue (min-heap) |
+| `queue.c` | Fixed two-entry priority queue, one per dongle |
+| `fifo_scheduler.c`, `edf_scheduler.c` | FIFO and EDF scheduling policies |
 | `state.c` | Stop flag, serialized logging, wake-up of waiters |
 | `time_utils.c` | Clock, interruptible sleep, timeout conversion |
 
@@ -80,9 +81,11 @@ usage message and exit code 1.
 - **Single coder.** With one coder there is only one dongle. The coder takes
   it and waits; the monitor reports the burnout at `time_to_burnout`. The
   program never tries to lock the same dongle twice.
-- **Starvation prevention.** Each dongle has its own waiting queue (a heap).
-  With `fifo` the key is the arrival ticket; with `edf` the key is the
-  deadline `last_compile_start + time_to_burnout`, so the coder closest to
+- **Starvation prevention.** Each dongle has its own waiting queue (a fixed
+  two-entry array).
+  With `fifo`, requests are appended and the first array entry is served;
+  with `edf` the key is the deadline
+  `last_compile_start + time_to_burnout`, so the coder closest to
   burnout is served first. Equal keys are broken by the coder id, which
   makes the order fully deterministic. A coder that backs off stays registered
   in the queue of the second dongle, so it keeps its rank and cannot be
@@ -103,12 +106,12 @@ usage message and exit code 1.
 ## Thread synchronization mechanisms
 
 - **`pthread_mutex_t` per dongle** protects `in_use`, `available_at`, the
-  ticket counter and the waiting heap. Nobody reads or writes a dongle's
+  ticket counter and the waiting queue. Nobody reads or writes a dongle's
   state without holding its mutex, so two coders can never get the same
   dongle.
 - **`pthread_cond_t` per dongle** lets waiting coders sleep instead of
   spinning. `dongle_release` calls `pthread_cond_broadcast`; the coder at the
-  head of the heap re-checks its condition (`I am first && dongle free &&
+  highest-priority waiter re-checks its condition (`I am first && dongle free &&
   cooldown over`) in a `while` loop, which also protects against spurious
   wake-ups.
 - **`version` counter per dongle** (protected by the dongle mutex) is
@@ -144,7 +147,6 @@ communication is the `stop` flag plus the condition-variable broadcast.
 - [pthread_mutex_lock, pthread_cond_wait,
   pthread_cond_timedwait, clock_gettime](https://www.geeksforgeeks.org/c/thread-functions-in-c-c/)
 - [Condition de Coffman](https://cs341.cs.illinois.edu/coursebook/Deadlock#coffman-conditions)
-- [Binary heap](https://visualgo.net/en/heap)
 - [FIFO](https://www.publicsofttools.com/tools/stack-queue-simulator)
 - [Priority queue](https://www.dsavisualizer.in/visualizer/queue/types/priority)
 - [Earliest Deadline First scheduling](https://www.geeksforgeeks.org/operating-systems/earliest-deadline-first-edf-cpu-scheduling-algorithm/)

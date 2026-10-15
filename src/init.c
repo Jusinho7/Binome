@@ -6,13 +6,13 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:22:45 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/10 01:22:46 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/15 23:32:40 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static int	init_one_dongle(t_dongle *d)
+static int	init_one_dongle(t_dongle *d, t_sim *sim)
 {
 	d->in_use = 0;
 	d->available_at = 0;
@@ -24,12 +24,11 @@ static int	init_one_dongle(t_dongle *d)
 		pthread_mutex_destroy(&d->mutex);
 		return (0);
 	}
-	if (!heap_init(&d->queue, 2))
-	{
-		pthread_cond_destroy(&d->cond);
-		pthread_mutex_destroy(&d->mutex);
-		return (0);
-	}
+	queue_init(&d->queue);
+	if (sim->use_edf)
+		queue_set_edf_policy(&d->queue);
+	else
+		queue_set_fifo_policy(&d->queue);
 	return (1);
 }
 
@@ -40,7 +39,7 @@ static int	init_dongles(t_sim *sim)
 		return (0);
 	while (sim->dongles_ready < sim->n)
 	{
-		if (!init_one_dongle(&sim->dongles[sim->dongles_ready]))
+		if (!init_one_dongle(&sim->dongles[sim->dongles_ready], sim))
 			return (0);
 		sim->dongles_ready++;
 	}

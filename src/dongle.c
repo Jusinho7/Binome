@@ -14,7 +14,7 @@
 
 static int	can_take(t_dongle *d, t_coder *c)
 {
-	return (heap_peek_id(&d->queue) == c->id && !d->in_use);
+	return (queue_peek_id(&d->queue) == c->id && !d->in_use);
 }
 
 static void	wait_turn(t_dongle *d, t_coder *c)
@@ -42,12 +42,17 @@ int	dongle_acquire(t_dongle *d, t_coder *c)
 	req.coder_id = c->id;
 	pthread_mutex_lock(&d->mutex);
 	req.key = c->request_key;
-	heap_push(&d->queue, req);
+	if (!queue_add(&d->queue, req))
+	{
+		pthread_mutex_unlock(&d->mutex);
+		queue_capacity_error(c->sim);
+		return (0);
+	}
 	while (!is_stopped(c->sim))
 	{
 		if (can_take(d, c) && now_ms() >= d->available_at)
 		{
-			heap_pop(&d->queue);
+			queue_remove(&d->queue, c->id);
 			d->in_use = 1;
 			pthread_mutex_unlock(&d->mutex);
 			return (1);

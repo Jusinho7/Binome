@@ -14,15 +14,20 @@
 
 static void	set_request_key(t_coder *c)
 {
-	struct timespec	ts;
-
 	if (c->sim->use_edf)
-		c->request_key = c->last_compile_start + c->sim->t_burnout;
+		c->request_key = edf_request_key(c);
 	else
-	{
-		clock_gettime(CLOCK_MONOTONIC, &ts);
-		c->request_key = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
-	}
+		c->request_key = 0;
+}
+
+static int	queue_second_request(t_dongle *d, t_req req, int *queued)
+{
+	if (*queued)
+		return (1);
+	if (!queue_add(&d->queue, req))
+		return (0);
+	*queued = 1;
+	return (1);
 }
 
 static int	try_acquire_dongle(t_dongle *d, t_coder *c, long *seen, int *queued)
@@ -33,18 +38,19 @@ static int	try_acquire_dongle(t_dongle *d, t_coder *c, long *seen, int *queued)
 	mine.coder_id = c->id;
 	mine.key = c->request_key;
 	pthread_mutex_lock(&d->mutex);
-	ok = (!d->in_use && now_ms() >= d->available_at);
-	if (ok && d->queue.size > 0 && heap_peek_id(&d->queue) != c->id
-		&& req_less(&d->queue.data[0], &mine))
-		ok = 0;
-	if (ok && *queued)
-		heap_pop(&d->queue);
-	if (ok)
-		d->in_use = 1;
-	else if (!*queued)
+	if (!queue_second_request(d, mine, queued))
 	{
-		heap_push(&d->queue, mine);
-		*queued = 1;
+		pthread_mutex_unlock(&d->mutex);
+		queue_capacity_error(c->sim);
+		return (0);
+	}
+	ok = (!d->in_use && now_ms() >= d->available_at
+			&& queue_peek_id(&d->queue) == c->id);
+	if (ok)
+	{
+		queue_remove(&d->queue, c->id);
+		*queued = 0;
+		d->in_use = 1;
 	}
 	*seen = d->version;
 	pthread_mutex_unlock(&d->mutex);

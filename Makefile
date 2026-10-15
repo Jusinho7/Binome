@@ -6,7 +6,8 @@ INC			= -Iincludes
 SRC_DIR		= src
 OBJ_DIR		= obj
 SRCS		= main.c parse.c init.c cleanup.c run.c coder.c monitor.c \
-			  dongle.c dongle_pair.c heap.c heap_utils.c state.c time_utils.c
+			  dongle.c dongle_pair.c queue.c fifo_scheduler.c \
+			  edf_scheduler.c state.c time_utils.c
 OBJS		= $(addprefix $(OBJ_DIR)/, $(SRCS:.c=.o))
 HEADER		= includes/codexion.h
 

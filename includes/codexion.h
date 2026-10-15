@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/08 18:45:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/13 17:33:38 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/15 22:28:52 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 # include <unistd.h>
 # include <time.h>
 
+# define DONGLE_QUEUE_CAPACITY 2
+
 typedef struct s_sim	t_sim;
 
 typedef struct s_req
@@ -28,12 +30,12 @@ typedef struct s_req
 	long	key;
 }	t_req;
 
-typedef struct s_heap
+typedef struct s_queue
 {
-	t_req	*data;
+	t_req	requests[DONGLE_QUEUE_CAPACITY];
 	int		size;
-	int		cap;
-}	t_heap;
+	int		use_edf;
+}	t_queue;
 
 typedef struct s_dongle
 {
@@ -42,7 +44,7 @@ typedef struct s_dongle
 	int				in_use;
 	long			available_at;
 	long			version;
-	t_heap			queue;
+	t_queue			queue;
 }	t_dongle;
 
 typedef struct s_coder
@@ -95,14 +97,17 @@ void	dongle_release(t_dongle *d, t_sim *sim);
 void	dongle_give_back(t_dongle *d);
 int		acquire_pair(t_coder *c);
 
-int		heap_init(t_heap *h, int cap);
-void	heap_free(t_heap *h);
-int		heap_push(t_heap *h, t_req req);
-t_req	heap_pop(t_heap *h);
-int		heap_peek_id(t_heap *h);
-int		req_less(t_req *a, t_req *b);
-void	sift_up(t_heap *h, int i);
-void	sift_down(t_heap *h, int i);
+void	queue_init(t_queue *q);
+int		queue_add(t_queue *q, t_req req);
+int		queue_remove(t_queue *q, int coder_id);
+int		queue_peek_id(t_queue *q);
+void	queue_capacity_error(t_sim *sim);
+void	queue_set_fifo_policy(t_queue *q);
+void	queue_set_edf_policy(t_queue *q);
+int		fifo_queue_peek_id(t_queue *q);
+int		edf_queue_peek_id(t_queue *q);
+int		edf_req_less(t_req *a, t_req *b);
+long	edf_request_key(t_coder *c);
 
 int		is_stopped(t_sim *sim);
 void	set_stop(t_sim *sim);

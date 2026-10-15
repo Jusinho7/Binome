@@ -19,7 +19,6 @@ static void	destroy_dongles(t_sim *sim)
 	i = 0;
 	while (i < sim->dongles_ready)
 	{
-		heap_free(&sim->dongles[i].queue);
 		pthread_cond_destroy(&sim->dongles[i].cond);
 		pthread_mutex_destroy(&sim->dongles[i].mutex);
 		i++;
