@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:22:45 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/15 23:32:40 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/17 22:52:30 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,32 +51,6 @@ static int	init_dongles(t_sim *sim)
 	return (1);
 }
 
-static void	set_coder(t_sim *sim, int i)
-{
-	t_coder	*c;
-	int		left;
-	int		right;
-
-	c = &sim->coders[i];
-	left = i;
-	right = (i + 1) % sim->n;
-	c->id = i + 1;
-	c->sim = sim;
-	c->compile_count = 0;
-	c->request_key = 0;
-	c->last_compile_start = 0;
-	if (left < right)
-	{
-		c->first = &sim->dongles[left];
-		c->second = &sim->dongles[right];
-	}
-	else
-	{
-		c->first = &sim->dongles[right];
-		c->second = &sim->dongles[left];
-	}
-}
-
 static int	init_coders(t_sim *sim)
 {
 	int	i;
@@ -90,7 +64,10 @@ static int	init_coders(t_sim *sim)
 		if (pthread_mutex_init(&sim->coders[i].lock, NULL) != 0)
 			return (0);
 		sim->coders_ready++;
-		set_coder(sim, i);
+		if (sim->n == 1)
+			set_single_coder(sim, i);
+		else
+			set_pair_coder(sim, i);
 		i++;
 	}
 	return (1);

@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/08 18:45:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/15 22:28:52 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/17 22:53:45 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,8 @@ int		parse_args(int argc, char **argv, t_sim *sim);
 int		init_sim(t_sim *sim);
 void	destroy_sim(t_sim *sim);
 int		run_simulation(t_sim *sim);
+void	set_single_coder(t_sim *sim, int i);
+void	set_pair_coder(t_sim *sim, int i);
 
 void	*coder_routine(void *arg);
 void	*monitor_routine(void *arg);
