@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/11 21:23:05 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/14 06:32:54 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/17 19:09:45 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ void	*coder_routine(void *arg)
 		if (!take_dongles(c))
 			break ;
 		do_compile(c);
+		if (c->compile_count >= c->sim->compiles_required)
+			return (NULL);
 		log_event(c, "is debugging");
 		smart_sleep(c->sim, c->sim->t_debug);
 		log_event(c, "is refactoring");
