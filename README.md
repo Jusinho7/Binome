@@ -34,6 +34,7 @@ Overview of the sources:
 | `queue_error.c` | Queue-capacity error handling |
 | `state.c` | Stop flag, serialized logging, wake-up of waiters |
 | `time_utils.c` | Clock, interruptible sleep, timeout conversion |
+| `utils.c` | Coder initialization and dongle-pair assignment |
 
 ## Instructions
 
