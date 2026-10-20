@@ -38,6 +38,7 @@ static void	lonely_coder(t_coder *c)
 {
 	if (!dongle_acquire(c->first, c))
 		return ;
+	log_event(c, "has taken a dongle");
 	while (!is_stopped(c->sim))
 		usleep(500);
 	dongle_release(c->first, c->sim);

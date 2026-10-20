@@ -54,8 +54,6 @@ static int	try_acquire_dongle(t_dongle *d, t_coder *c, long *seen, int *queued)
 	}
 	*seen = d->version;
 	pthread_mutex_unlock(&d->mutex);
-	if (ok)
-		log_event(c, "has taken a dongle");
 	return (ok);
 }
 
@@ -91,7 +89,11 @@ int	acquire_pair(t_coder *c)
 		if (!dongle_acquire(c->first, c))
 			return (0);
 		if (try_acquire_dongle(c->second, c, &seen, &queued))
+		{
+			log_event(c, "has taken a dongle");
+			log_event(c, "has taken a dongle");
 			return (1);
+		}
 		dongle_give_back(c->first, c->sim);
 		wait_change(c->second, c->sim, seen);
 	}

@@ -55,7 +55,6 @@ int	dongle_acquire(t_dongle *d, t_coder *c)
 			queue_remove(&d->queue, c->id);
 			d->in_use = 1;
 			pthread_mutex_unlock(&d->mutex);
-			log_event(c, "has taken a dongle");
 			return (1);
 		}
 		wait_turn(d, c);
