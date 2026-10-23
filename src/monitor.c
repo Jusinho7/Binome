@@ -40,10 +40,14 @@ static int	scan_coders(t_sim *sim, int *all_done)
 	*all_done = 1;
 	while (i < sim->n)
 	{
+		if (has_finished(&sim->coders[i]))
+		{
+			i++;
+			continue ;
+		}
+		*all_done = 0;
 		if (is_burned_out(&sim->coders[i]))
 			return (i + 1);
-		if (!has_finished(&sim->coders[i]))
-			*all_done = 0;
 		i++;
 	}
 	return (0);
