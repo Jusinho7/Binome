@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:22:45 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/17 22:52:30 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:42:14 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,8 @@ static int	init_one_dongle(t_dongle *d, t_sim *sim)
 {
 	d->in_use = 0;
 	d->available_at = 0;
-	d->version = 0;
-	if (pthread_mutex_init(&d->mutex, NULL) != 0)
-		return (0);
-	if (pthread_cond_init(&d->cond, NULL) != 0)
-	{
-		pthread_mutex_destroy(&d->mutex);
-		return (0);
-	}
 	if (!queue_init(&d->queue, sim->n))
-	{
-		pthread_cond_destroy(&d->cond);
-		pthread_mutex_destroy(&d->mutex);
 		return (0);
-	}
 	if (sim->use_edf)
 		queue_set_edf_policy(&d->queue);
 	else
@@ -88,5 +76,12 @@ int	init_sim(t_sim *sim)
 	if (pthread_mutex_init(&sim->log_mutex, NULL) != 0)
 		return (0);
 	sim->locks_ready = 2;
+	sim->next_order = 0;
+	if (pthread_mutex_init(&sim->table_mutex, NULL) != 0)
+		return (0);
+	sim->locks_ready = 3;
+	if (pthread_cond_init(&sim->table_cond, NULL) != 0)
+		return (0);
+	sim->locks_ready = 4;
 	return (init_dongles(sim) && init_coders(sim));
 }

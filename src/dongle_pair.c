@@ -6,96 +6,82 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/11 21:24:52 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/14 06:24:04 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:32:37 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static void	set_request_key(t_coder *c)
+static int	pair_ready(t_coder *c, long t)
 {
-	if (c->sim->use_edf)
-		c->request_key = edf_request_key(c);
-	else
-		c->request_key = 0;
+	return (pair_free(c, t)
+		&& !pair_outranked(c, c->first, t)
+		&& !pair_outranked(c, c->second, t));
 }
 
-static int	queue_second_request(t_dongle *d, t_req req, int *queued)
+static void	wait_pair(t_coder *c, long t)
 {
-	if (*queued)
-		return (1);
-	if (!queue_add(&d->queue, req))
-		return (0);
-	*queued = 1;
-	return (1);
-}
-
-static int	try_acquire_dongle(t_dongle *d, t_coder *c, long *seen, int *queued)
-{
-	t_req	mine;
-	int		ok;
-
-	mine.coder_id = c->id;
-	mine.key = c->request_key;
-	pthread_mutex_lock(&d->mutex);
-	if (!queue_second_request(d, mine, queued))
-	{
-		pthread_mutex_unlock(&d->mutex);
-		queue_capacity_error(c->sim);
-		return (0);
-	}
-	ok = (!d->in_use && now_ms() >= d->available_at
-			&& queue_peek_id(&d->queue) == c->id);
-	if (ok)
-	{
-		queue_remove(&d->queue, c->id);
-		*queued = 0;
-		d->in_use = 1;
-	}
-	*seen = d->version;
-	pthread_mutex_unlock(&d->mutex);
-	return (ok);
-}
-
-static void	wait_change(t_dongle *d, t_sim *sim, long seen)
-{
-	long			remaining;
+	long			ready_at;
 	struct timespec	ts;
 
-	pthread_mutex_lock(&d->mutex);
-	while (d->version == seen && !is_stopped(sim))
+	if (!c->first->in_use && !c->second->in_use)
 	{
-		remaining = d->available_at - now_ms();
-		if (!d->in_use && remaining > 0)
+		ready_at = c->first->available_at;
+		if (c->second->available_at > ready_at)
+			ready_at = c->second->available_at;
+		if (ready_at > t)
 		{
-			make_abs_timeout(&ts, remaining);
-			pthread_cond_timedwait(&d->cond, &d->mutex, &ts);
-			break ;
+			make_abs_timeout(&ts, ready_at - t);
+			pthread_cond_timedwait(&c->sim->table_cond,
+				&c->sim->table_mutex, &ts);
+			return ;
 		}
-		pthread_cond_wait(&d->cond, &d->mutex);
 	}
-	pthread_mutex_unlock(&d->mutex);
+	pthread_cond_wait(&c->sim->table_cond, &c->sim->table_mutex);
+}
+
+static int	enqueue_pair(t_coder *c)
+{
+	c->pending.coder_id = c->id;
+	c->pending.key = c->request_key;
+	c->pending.order = c->sim->next_order++;
+	return (queue_add(&c->first->queue, c->pending)
+		&& queue_add(&c->second->queue, c->pending));
+}
+
+static void	take_pair(t_coder *c)
+{
+	queue_remove(&c->first->queue, c->id);
+	queue_remove(&c->second->queue, c->id);
+	c->first->in_use = 1;
+	c->second->in_use = 1;
 }
 
 int	acquire_pair(t_coder *c)
 {
-	long	seen;
-	int		queued;
+	t_sim	*sim;
+	long	t;
 
-	queued = 0;
-	set_request_key(c);
-	while (!is_stopped(c->sim))
+	sim = c->sim;
+	c->request_key = 0;
+	if (sim->use_edf)
+		c->request_key = edf_request_key(c);
+	pthread_mutex_lock(&sim->table_mutex);
+	if (!enqueue_pair(c))
 	{
-		if (!dongle_acquire(c->first, c))
-			return (0);
-		if (try_acquire_dongle(c->second, c, &seen, &queued))
-		{
-			log_event(c, "has taken a dongle");
-			log_event(c, "has taken a dongle");
-			return (1);
-		}
-		dongle_give_back(c->first, c->sim);
-		wait_change(c->second, c->sim, seen);
+		pthread_mutex_unlock(&sim->table_mutex);
+		return (queue_capacity_error(sim), 0);
 	}
-	return (0);
+	t = now_ms();
+	while (!is_stopped(sim) && !pair_ready(c, t))
+	{
+		wait_pair(c, t);
+		t = now_ms();
+	}
+	if (is_stopped(sim))
+		return (pthread_mutex_unlock(&sim->table_mutex), 0);
+	take_pair(c);
+	pthread_mutex_unlock(&sim->table_mutex);
+	log_event(c, "has taken a dongle");
+	return (log_event(c, "has taken a dongle"), 1);
 }

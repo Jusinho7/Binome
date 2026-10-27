@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/08 18:45:12 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/17 22:53:45 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/27 19:09:08 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,14 @@
 # include <string.h>
 # include <unistd.h>
 # include <time.h>
+
+# define RED   "\033[31m"
+# define MAGENTA "\033[38;5;201m"
+# define GREEN "\033[38;5;46m"
+# define BLUE  "\033[38;5;39m"
+# define CYAN  "\033[38;5;51m"
+# define ORANGE "\033[38;5;208m"
+# define RESET "\033[0m"
 
 typedef struct s_sim	t_sim;
 
@@ -35,16 +43,12 @@ typedef struct s_queue
 	int					size;
 	int					capacity;
 	int					use_edf;
-	unsigned long long	next_order;
 }	t_queue;
 
 typedef struct s_dongle
 {
-	pthread_mutex_t	mutex;
-	pthread_cond_t	cond;
 	int				in_use;
 	long			available_at;
-	long			version;
 	t_queue			queue;
 }	t_dongle;
 
@@ -56,6 +60,7 @@ typedef struct s_coder
 	long			last_compile_start;
 	int				compile_count;
 	long			request_key;
+	t_req			pending;
 	t_dongle		*first;
 	t_dongle		*second;
 	t_sim			*sim;
@@ -63,25 +68,28 @@ typedef struct s_coder
 
 struct s_sim
 {
-	int				n;
-	long			t_burnout;
-	long			t_compile;
-	long			t_debug;
-	long			t_refactor;
-	int				compiles_required;
-	long			cooldown;
-	int				use_edf;
-	long			start;
-	int				stop;
-	pthread_mutex_t	stop_mutex;
-	pthread_mutex_t	log_mutex;
-	t_dongle		*dongles;
-	t_coder			*coders;
-	pthread_t		monitor;
-	int				dongles_ready;
-	int				coders_ready;
-	int				locks_ready;
-	int				coders_started;
+	int					n;
+	long				t_burnout;
+	long				t_compile;
+	long				t_debug;
+	long				t_refactor;
+	int					compiles_required;
+	long				cooldown;
+	int					use_edf;
+	long				start;
+	int					stop;
+	pthread_mutex_t		stop_mutex;
+	pthread_mutex_t		log_mutex;
+	pthread_mutex_t		table_mutex;
+	pthread_cond_t		table_cond;
+	unsigned long long	next_order;
+	t_dongle			*dongles;
+	t_coder				*coders;
+	pthread_t			monitor;
+	int					dongles_ready;
+	int					coders_ready;
+	int					locks_ready;
+	int					coders_started;
 };
 
 int		parse_args(int argc, char **argv, t_sim *sim);
@@ -95,9 +103,9 @@ void	set_pair_coder(t_sim *sim, int i);
 void	*coder_routine(void *arg);
 void	*monitor_routine(void *arg);
 
-int		dongle_acquire(t_dongle *d, t_coder *c);
 void	dongle_release(t_dongle *d, t_sim *sim);
-void	dongle_give_back(t_dongle *d, t_sim *sim);
+int		pair_free(t_coder *c, long t);
+int		pair_outranked(t_coder *c, t_dongle *d, long t);
 int		acquire_pair(t_coder *c);
 
 int		queue_init(t_queue *q, int capacity);
@@ -106,7 +114,8 @@ int		queue_add(t_queue *q, t_req req);
 int		queue_remove(t_queue *q, int coder_id);
 int		queue_peek_id(t_queue *q);
 void	queue_heap_add(t_queue *q, t_req req);
-void	queue_heap_remove(t_queue *q);
+void	queue_heap_remove_at(t_queue *q, int index);
+int		queue_req_less(t_queue *q, t_req *a, t_req *b);
 void	queue_capacity_error(t_sim *sim);
 void	queue_set_fifo_policy(t_queue *q);
 void	queue_set_edf_policy(t_queue *q);

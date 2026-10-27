@@ -15,7 +15,7 @@
 void	queue_capacity_error(t_sim *sim)
 {
 	fprintf(stderr,
-		"\033[31mcodexion: dongle queue capacity exceeded\033[0m\n");
+		RED "codexion: dongle queue capacity exceeded" RESET "\n");
 	set_stop(sim);
 	wake_all(sim);
 }

@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:41:26 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/13 18:00:38 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:43:21 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,35 +31,28 @@ void	set_stop(t_sim *sim)
 
 void	wake_all(t_sim *sim)
 {
-	int	i;
-
-	i = 0;
-	while (i < sim->n)
-	{
-		pthread_mutex_lock(&sim->dongles[i].mutex);
-		pthread_cond_broadcast(&sim->dongles[i].cond);
-		pthread_mutex_unlock(&sim->dongles[i].mutex);
-		i++;
-	}
+	pthread_mutex_lock(&sim->table_mutex);
+	pthread_cond_broadcast(&sim->table_cond);
+	pthread_mutex_unlock(&sim->table_mutex);
 }
 
 void	log_event(t_coder *c, const char *msg)
 {
-	t_sim	*sim;
-	char	*color;
+	t_sim		*sim;
+	const char	*color;
 
 	sim = c->sim;
-	color = "\033[38;5;201m";
+	color = MAGENTA;
 	if (strcmp(msg, "has taken a dongle") == 0)
-		color = "\033[38;5;46m";
+		color = GREEN;
 	else if (strcmp(msg, "is compiling") == 0)
-		color = "\033[38;5;39m";
+		color = BLUE;
 	else if (strcmp(msg, "is debugging") == 0)
-		color = "\033[38;5;51m";
+		color = CYAN;
 	pthread_mutex_lock(&sim->log_mutex);
 	if (!is_stopped(sim))
-		printf("%ld %d %s%s\033[0m\n",
-			now_ms() - sim->start, c->id, color, msg);
+		printf("%ld %d %s%s%s\n",
+			now_ms() - sim->start, c->id, color, msg, RESET);
 	pthread_mutex_unlock(&sim->log_mutex);
 }
 
@@ -67,8 +60,8 @@ void	log_burnout(t_sim *sim, int id)
 {
 	pthread_mutex_lock(&sim->log_mutex);
 	set_stop(sim);
-	printf("%ld %d \033[38;5;208mburned out\033[0m\n",
-		now_ms() - sim->start, id);
+	printf("%ld %d %sburned out%s\n",
+		now_ms() - sim->start, id, ORANGE, RESET);
 	pthread_mutex_unlock(&sim->log_mutex);
 	wake_all(sim);
 }

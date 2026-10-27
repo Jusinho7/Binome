@@ -14,12 +14,12 @@
 
 static void	print_usage(void)
 {
-	fprintf(stderr, "\033[31mUsage: ./codexion number_of_coders "
+	fprintf(stderr, RED "Usage: ./codexion number_of_coders "
 		"time_to_burnout "
 		"time_to_compile time_to_debug time_to_refactor "
 		"number_of_compiles_required dongle_cooldown scheduler\n"
 		"All values are positive integers (ms), "
-		"scheduler is 'fifo' or 'edf'.\033[0m\n");
+		"scheduler is 'fifo' or 'edf'." RESET "\n");
 }
 
 static int	parse_input(int argc, char **argv, t_sim *sim)
@@ -36,7 +36,7 @@ static int	start_simulation(t_sim *sim)
 {
 	if (!init_sim(sim) || !run_simulation(sim))
 	{
-		fprintf(stderr, "\033[31mError: simulation could not start\n\033[0m");
+		fprintf(stderr, RED "Error: simulation could not start\n" RESET);
 		return (0);
 	}
 	return (1);
