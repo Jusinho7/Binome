@@ -6,7 +6,7 @@
 /*   By: srasolov <srasolov@student.42antananari    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/10 01:39:50 by srasolov          #+#    #+#             */
-/*   Updated: 2026/10/27 19:12:14 by srasolov         ###   ########.fr       */
+/*   Updated: 2026/10/27 19:28:10 by srasolov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,17 @@ static void	cheick_value(long *v)
 	}
 	if (v[1] < 1)
 	{
-		fprintf(stderr, RED "Error: time_to_burnout must be > 0\n" RESET);
+		fprintf(stderr, RED "Error: time_to_burnout must be > 1\n" RESET);
 		exit(1);
 	}
 	if (v[2] < 1)
 	{
-		fprintf(stderr, RED "Error: time_to_compile must be > 0\n" RESET);
+		fprintf(stderr, RED "Error: time_to_compile must be > 1\n" RESET);
 		exit(1);
 	}
 	if (v[5] < 1)
 	{
-		fprintf(stderr, RED "Error: number_of_compiles must be > 0\n" RESET);
+		fprintf(stderr, RED "Error: number_of_compiles must be > 1\n" RESET);
 		exit(1);
 	}
 }
