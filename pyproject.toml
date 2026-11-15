@@ -1,0 +1,32 @@
+[project]
+name = "call_me_maybe"
+version = "0.1.0"
+description = "Function calling in LLMs with constrained decoding"
+authors = [
+    { name = "srasolov" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface-hub>=2.4.0",
+    "numpy>=2.5.4",
+    "pydantic>=2.14.1",
+    "torch>=2.15.0",
+    "transformers>=5.23.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "flake8>=7.5.0",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+]
+
+[tool.mypy]
+exclude = ["^\\.venv/", "^llm_sdk/", "^build/"]
+
+[[tool.mypy.overrides]]
+module = ["llm_sdk", "llm_sdk.*"]
+ignore_errors = true

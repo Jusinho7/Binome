@@ -1,34 +1,27 @@
+"""JSON file reading helper."""
 import json
 from pathlib import Path
-import os
-
-LINK = "data/input/function_calling_tests.json"
-FILE = Path(__file__).resolve().parent.parent / LINK
-
-LINK_2 = "data/input/function_definition.json"
-FILE_2 = Path(__file__).resolve().parent.parent / LINK_2
-
-RED = "\033[91m"
-RESET = "\033[0m"
+from typing import Any
 
 
-class ReadFile:
-    def __init__(self, file_path: Path) -> None:
-        self.file_path = file_path
+def read_json(path: str | Path) -> Any:
+    """Read and parse a JSON file.
 
-    def read(self) -> dict[str, any] | None:
-        try:
-            if not os.path.exists(self.file_path):
-                print(f"{RED}File does not exist: {self.file_path} {RESET}")
-                return None
-            with open(self.file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-            return data
-        except FileNotFoundError:
-            print(f"{RED}File not found: {self.file_path} {RESET}")
-            return None
-        except json.JSONDecodeError:
-            print(
-                f"{RED}Error decoding JSON from file: {self.file_path} {RESET}"
-            )
-            return None
+    Args:
+        path: path of the JSON file.
+
+    Returns:
+        The parsed JSON content.
+
+    Raises:
+        ValueError: if the file is missing, unreadable or invalid JSON.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError as error:
+        raise ValueError(f"File not found: {path}") from error
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid JSON in {path}: {error}") from error
+    except OSError as error:
+        raise ValueError(f"Cannot read {path}: {error}") from error
