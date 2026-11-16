@@ -94,6 +94,10 @@ class Cam:
             report(str(error))
             return 1
 
+        if not prompts:
+            report("no valid prompt to process")
+            return 1
+
         try:
             model = Small_LLM_Model()
             vocab = Vocabulary.load(model.get_path_to_vocab_file())
@@ -108,7 +112,7 @@ class Cam:
             print(f"[{number}/{len(prompts)}] {prompt.prompt}")
             try:
                 calls.append(generator.generate(prompt))
-            except (ValueError, KeyError) as error:
+            except Exception as error:
                 report(f"prompt skipped ({error})")
 
         try:

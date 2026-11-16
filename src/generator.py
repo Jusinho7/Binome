@@ -182,7 +182,6 @@ class CallGenerator:
             elif param.type not in ("number", "integer"):
                 opening += " "
             self._append(ids, opening)
-            self._append(ids, opening)
             params[pname] = self._value(ids, param.type)
         return FunctionCall(
             prompt=prompt.prompt, name=name, parameters=params

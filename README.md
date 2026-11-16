@@ -242,24 +242,30 @@ prompts provided in the subject:
 - **Escapes.** The model writes JSON-escaped text (`\\s`); unescaping it with
   `json.loads` avoids writing it twice.
 - **Lost minus sign.** `Is -7 even?` first produced `7`. The program forced a
-  space before numbers, and the tokenizer merges a space with the following
-  punctuation, so a bare `-` after a lone space looked abnormal to the model.
-  Fixed by not forcing the space and allowing the first number token to carry
-  a leading space (which is then stripped from the value).
+  space before numbers. Our explanation is that the tokenizer merges a space
+  with the following punctuation, so a bare `-` after a lone space is an
+  unusual sequence for the model. Not forcing the space and letting the first
+  number token carry its own leading space (stripped from the value) fixed it
+  for `-7` and `-2.5`.
 
 ## Testing strategy
 
 - **Manual runs on the provided examples**, checking the function chosen, the
   types (`2.0` for a number) and the arguments extracted.
 - **Error cases**: missing input file, invalid JSON, entries with a wrong type
-  (`{"prompt": 5}`), entries with no `prompt` key, empty list of prompts.
-  Each one must print a clear message and never raise a traceback.
-- **Output validation**: the result file is loaded with `python3 -m json.tool`
-  and compared with the definitions (names, keys, types).
-- **Other function sets**: running with a different `functions_definition.json`
-  (including `integer` and `boolean` parameters) to make sure nothing depends
-  on the provided examples.
-- **Static checks**: `make lint` (flake8 and mypy) must pass.
+  (`{"prompt": 5}`) and entries without a `prompt` key. Each one prints a
+  clear message and never raises a traceback. When no valid prompt remains,
+  the program stops before loading the model.
+- **Output validation**: the result file is checked with
+  `python3 -m json.tool`, and keys, function names and value types are
+  compared by hand with the definitions.
+- **Other function sets**: a second definition file with `integer`, `boolean`,
+  `number` and multi-parameter functions, run on prompts including negative
+  numbers (`-7`, `-2.5`), to make sure nothing depends on the provided
+  examples.
+- **Static checks**: `make lint` (flake8 and mypy) passes.
+- **Clean install**: `rm -rf .venv && uv sync && make run`, as the reviewer
+  will do.
 
 ## Resources
 
