@@ -70,7 +70,10 @@ class CallGenerator:
         texts = vocab.texts
         self.number_tokens = {
             i: t for i, t in enumerate(texts)
-            if t and set(t) <= NUMBER_CHARS
+            if t
+            and t.lstrip(" ")
+            and len(t) - len(t.lstrip(" ")) <= 1
+            and set(t.lstrip(" ")) <= NUMBER_CHARS
         }
         self.number_stop = {
             i for i, t in enumerate(texts) if t and t[0] in ",}"
@@ -95,7 +98,8 @@ class CallGenerator:
         while len(value) < MAX_NUMBER_CHARS:
             allowed = [
                 i for i, t in self.number_tokens.items()
-                if is_number_prefix(value + t, integer)
+                if (not value or t[0] != " ")
+                and is_number_prefix(value + t.lstrip(" "), integer)
             ]
             if is_number_complete(value, integer):
                 allowed += list(self.number_stop)
@@ -106,7 +110,7 @@ class CallGenerator:
             if token in self.number_stop:
                 break
             ids.append(token)
-            value += self.number_tokens[token]
+            value += self.number_tokens[token].lstrip(" ")
         if not is_number_complete(value, integer):
             raise ValueError(f"Could not generate a number: {value!r}")
         return int(value) if integer else float(value)
@@ -172,9 +176,12 @@ class CallGenerator:
         for index, (pname, param) in enumerate(
             self.functions[name].parameters.items()
         ):
-            opening = (", " if index else "") + f'"{pname}": '
+            opening = (", " if index else "") + f'"{pname}":'
             if param.type == "string":
-                opening += '"'
+                opening += ' "'
+            elif param.type not in ("number", "integer"):
+                opening += " "
+            self._append(ids, opening)
             self._append(ids, opening)
             params[pname] = self._value(ids, param.type)
         return FunctionCall(

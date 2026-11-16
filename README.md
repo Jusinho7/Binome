@@ -241,6 +241,11 @@ prompts provided in the subject:
 - **Wrong function after forcing a prefix.** See design decisions.
 - **Escapes.** The model writes JSON-escaped text (`\\s`); unescaping it with
   `json.loads` avoids writing it twice.
+- **Lost minus sign.** `Is -7 even?` first produced `7`. The program forced a
+  space before numbers, and the tokenizer merges a space with the following
+  punctuation, so a bare `-` after a lone space looked abnormal to the model.
+  Fixed by not forcing the space and allowing the first number token to carry
+  a leading space (which is then stripped from the value).
 
 ## Testing strategy
 
