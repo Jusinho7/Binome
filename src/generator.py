@@ -1,8 +1,16 @@
 """Function call generation with constrained decoding."""
 import json
+import sys
 from typing import Any
 
-from pydantic import BaseModel
+try:
+    from pydantic import BaseModel
+except ImportError:
+    print(
+        "Pydantic is not installed. "
+        "Please install it using 'pip install pydantic'."
+    )
+    sys.exit(1)
 
 from llm_sdk import Small_LLM_Model
 from src.constraints import (

@@ -1,9 +1,16 @@
 """Vocabulary loading with byte-level BPE decoding."""
 import json
 from typing import Optional
+import sys
 
-from pydantic import BaseModel
-
+try:
+    from pydantic import BaseModel
+except ImportError:
+    print(
+        "Pydantic is not installed. "
+        "Please install it using 'pip install pydantic'."
+    )
+    sys.exit(1)
 
 def bytes_to_unicode() -> dict[int, str]:
     """Return the GPT-2 byte -> printable unicode character mapping.

@@ -4,7 +4,14 @@ import os
 import sys
 import time
 
-from pydantic import ValidationError
+try:
+    from pydantic import ValidationError
+except ImportError:
+    print(
+        "Pydantic is not installed. "
+        "Please install it using 'pip install pydantic'."
+    )
+    sys.exit(1)
 
 from llm_sdk import Small_LLM_Model
 from src.generator import CallGenerator, FunctionCall
