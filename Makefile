@@ -1,5 +1,12 @@
 .PHONY: install run debug clean lint lint-strict
 
+SGOINFRE := $(HOME)/sgoinfre
+ifneq ($(wildcard $(SGOINFRE)),)
+export UV_CACHE_DIR ?= $(SGOINFRE)/.cache/uv
+export HF_HOME ?= $(SGOINFRE)/.cache/hf
+endif
+
+
 install:
 	uv sync
 
