@@ -2,8 +2,6 @@
 import argparse
 import sys
 
-from src.motor import Cam
-
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -28,12 +26,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     """Run the program and return its exit code."""
-    args = parse_args()
     try:
+        args = parse_args()
+        from src.motor import Cam
         return Cam(args.functions_definition, args.input, args.output).run()
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
-        return 130
+        sys.exit(1)
 
 
 if __name__ == "__main__":
